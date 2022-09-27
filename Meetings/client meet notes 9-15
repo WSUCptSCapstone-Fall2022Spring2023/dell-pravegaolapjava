@@ -1,0 +1,16 @@
+- First client meeting with Dell for Pravega OLAP project
+  - Met Dell engineers and gave introductions
+  
+- Zoom issues occured -> Zoom meeting was cut short so alot was kept at high level due to short time limit
+  - Discussed general capabilities of Pravega and OLAP databases
+- Tasked with learning about the following: 
+  -	OLAP: pino, druid 
+    - What is OLAP, pino and druid? 
+    - Decide on pino or druid to use for this proj
+  -	OLAP vs transactional databases (row vs col oriented databases) 
+  -	Read about Kafka and Pulsar
+  -	Read about Pravega
+  -	Learn the basics of SQL & Practice Java  
+
+- We are building a connector/funnel/pathway from Pravega to an OLAP database
+  - Pravega ingests lots of events -> stored within the data segments which comprise data streams in Pravega
