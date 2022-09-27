@@ -1,0 +1,32 @@
+Seccond Client meeting: 
+Objective: Address questions from our slack channel and to go over our rough draft of our project description assignment
+
+- Each team member spoke of their sections and received feedback from the Dell engineers: 
+
+- Introduction: 
+  - Emphasize less about the events stored in Pravega's data streams, and talk more about how Pravega is column oriented
+  - We want to enable big data anlytics queries to be made against the events in pravega. To do this, a processing engine is required -> OLAP
+    - But OLAPs are row oriented. Talk about this in the intro! 
+    
+- Background: 
+  - Nothing major here, the content here was liked by the Dell engineers
+  
+- Project Overview: 
+  -	Talk about deliverables, what exactly are we delivering 
+    -	This is a plugin for (Pravega or druid?)
+    -	Why do we need this plugin
+    -	How do we deliver it (dev for a year, agile, testing, use cases) 
+      -	We’ll do this 1st, then 2nd, we are highlighting the proj plan, timeline 
+  -	How do we deploy it
+  -	How will we write it (java)
+  -	What is the end goal
+
+- Stakeholders
+  - Pretty straightforward. Who is involved in the project/has stake in Pravega's data streams
+  
+- Objective Milestones
+  -	Final outcome: ingestion plugin is merged with the apache druid or pino source coude – Derek
+    -	Being able to read from Pravega
+  -	Milestones
+    -	Testing - We can use debezium as a way to demo our proj, but it isn't necessary to mention it in our context/background
+    -	“I have this data and I know it’s structure, and I have a source (OLAP) and I wanna merge them together” 
