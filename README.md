@@ -6,8 +6,11 @@ Pravega stores data in a row-oriented manner - allows for all data points relati
 
 ## Technologies
 Pravega
+
 OLAP Database (Apache Druid or Apache Pino) 
+
 Java
+
 SQL
 
 ## How to use the project
