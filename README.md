@@ -4,6 +4,12 @@ Dell Technologies takes charge of the open-source project Pravega. This is an in
 
 Pravega stores data in a row-oriented manner - allows for all data points relating to one object to be stored in the same data block. This is beneficial for queries needing to read/manipulate an entire object, but it is slow to analyze large amounts of data. When we want to process events via big data analytics queries, efficiency is poor due to the row-oriented structure of Pravega. A column-oriented processing engine in which columns store similar data points for distinct objects withina block would allow for a quicker analysis of data points, as well as the compression of columns. Without ingesting Pravega events into a proper big data analytics engine, queries against the events are very slow.
 
+## Technologies
+Pravega
+OLAP Database (Apache Druid or Apache Pino) 
+Java
+SQL
+
 ## How to use the project
 Installation guide: 
 
