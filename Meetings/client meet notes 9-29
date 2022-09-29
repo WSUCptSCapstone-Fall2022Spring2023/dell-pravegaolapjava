@@ -1,0 +1,42 @@
+Objective: Discuss the sections of the requiremnts and specification meeting
+
+Use cases: 
+  -	“I have lots of data in a legacy database, and I want to move it into an OLAP DB” 
+  -	https://druid.apache.org/use-cases Druid Use cases! We can modify these for Pravega
+  -	“as a user im able to do x” 
+    o	As a user im able to ingest incoming telemetry data into a col oriented OLAP DB! 
+    o	Describe what the queries are that the user will be making against the OLAP DB 
+    o	“Enrichment” -> mult. Sources of data. We wanna gain info about the intersection of these sources. So we are looking at an input stream intersected from multiple diff sources- Tom
+    o	“A soccer team is looking to move from brand x to y  for sponsors” -> behavioral type big data analytics
+    o	“Replinishment and y” – Sachin (another use case) think of amazon shopping, data can be used for recommendation systems -> retail use cases for the Pravega data 
+    o	Add to cart, buy -> event gets ingested into Pravega -> sent to OLAP, can make queries for 
+
+Functional requirements: 
+  -	SEARCH
+    o	U type the product name and it comes back. And then u can do an advanced search for specific properties. 
+  -	Use cases can be similar to requirements
+  -	Functional reqs are the ability to do x and y
+  -	“Ability to connect with Pravega” 
+  -	Ability to ingest data 
+  -	Ability to enable for big data analytics queries against OLAP DB 
+  -	Ability to deploy in Kubernetes (functional or non functional?) ability to ingest data at this certain rate (non fuinctional) 
+  -	Ability to import data from existing stream (functional) 
+  -	Ability to configure to allow for 
+  -	Where to read from and where to put the data into (function
+  
+Non functional reqq -  things that ought to be “our system ought to have this” 
+  o	“if there’s no API assoc. with it then it’s non functional” 
+  o	Storage req: we need more than 1 TB of data. The non funct req is that we need at least this much storage data 
+  o	“Abilities” -> security, maintainability, performance, scalability 
+  o	We are building a tool for users to use (instead of a final integration that uses a tool) 
+    -	So some non functional reqs are up to the users themselves since they’ll be using it! 
+    -	Data range, 
+  o	Don’t just think of app reqs (where will the proj be hosted, what libraries, licenses?) (depencies on code?) 
+
+System Evolution: 
+  -	How will you make ur system expandible, scalabile, 
+  -	You can make an optimized sys for one use case, for it can be bad performance for others
+    o	Changing reqs -> user may want it deployed in Kubernetes and then they now want it deployed on azure. 
+    o	We are building it using java8, then user now wants it in java7 
+    o	If the reqs change, how will we be agile and change it up so that we don’t have to rebuild from scratch 
+  -	This can also talk about our agile development roadmap! 
