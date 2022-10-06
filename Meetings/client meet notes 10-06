@@ -1,0 +1,66 @@
+Objective: Go over the solution approach WA3. Discuss technical details about system architecture and subsystems. 
+
+Architecture Design: 
+  -	3 Components: Pravega, druid, and another for our proj
+  -	Data comes into Pravega as input, then there’s our component that WRITES it to druid. 
+  -	Deployment: “what does plugin look like? Is it push pull? Deployed on Pravega side, druid side or?” 
+  -	In our box of code we need to store the state of our processing somewhere. Is this a single component? (Stateful or stateless? Does it save stuff if so where Pravega druid? ) 
+    o	Pull model or push model for the plugin: Pravega is a pull model
+    o	This plugin will make a call to…
+    o	How many instances of our plugin are….
+    o	If it’s a plugin that’s triggered or called by? 
+    o	What’s the interaction btwn druid and the plugin?? – Sachin 
+    o	Druid architecture: https://druid.apache.org/docs/latest/design/architecture.html
+      - https://druid.apache.org/docs/latest/ingestion/index.html
+    o	Also search for Pravega architecture
+      -	https://cncf.pravega.io/docs/nightly/pravega-concepts/#architecture
+    o	We need a layered architecture diagram (we need 5 components says sachin) 
+      -	Where is it deployed? Druid? External? This deployment will dictacte if the other components play a role or not. Ex: if there was a way to have DLL distributed as apart of druid => “hey druid every time u load ur service, load your plugin!” Here druid will store everything. Druid has a supervisor feature concerned with pausing, resetting 
+  
+-	Level 1 and Level 0 -> Sachin
+  o	Our component: what are the subsystems? 
+  o	Is it a monolith? Does it have multiple features? 
+  o	Monolith: Think of amazon.com it’s not a single code base, there’s multiple components and services that were decomposed into micro services -> these services OWN their data, can be deployed independently, and scaled up or down. 
+  o	 What are the subcomponents? -> There’s a component that’s READING the data from Pravega(using Pravega…) . There’s a comp that transforms the data(using the schema info) , another that writes the data(pushes it into druid for processing). Then there’s some sort of metadata that serves as telemetry. How much data we read/wrote. Lastly, okay this whole thing works based on our own metadata, this component will manage the state to see if the proj is working? 
+  o	Maybe a diagram or table showing what each component is doing: what’s it’s responsibility, who’s it collaborating with? Also threading? -> This is a plugin so druid is managing it and all the threads but it’s still worth calling out. TOM SAID THIS 
+  o	UML: activity diagram -> show interactions, decisions, data returned, components interacted with, shows the flow. Talks more about use cases around the 8 30am mark 
+
+-	Nate: asking about schema registry: 
+  o	so the schema registry contains the data type definition for events within the stream right? Is that the metadata or am I misunderstanding both concepts?
+    -	Sachin: how do u specify which Pravega to connect to, which stream to read, and what is the schema of that stream (type). Now on the output side, which druid instance do we call? (Maybe we don’t need to worry about this if druid is the one instantiating things). How to transform the schema in pravega to druid? 
+    -	“add to cart event” what do we need here? Item id, date n time, num of items. So this is the kinda info coming in, when we put it into druid, how does it look like? Will we flatten it out? Which data types will be stored with others? How does the schema of data in Pravega get translated into data in druid? This is a big question. Maybe it’s one to one or some sort of transformation. 
+    -	Or iterative approach. For now manually create tables and later it’ll be more automated?  - Derek
+    -	Once this has happened, “how do I know where to start reading from in the stream” And where does the data get sent. Last time I was at this offset -> where (reader group, Pravega does it for us. Thanks tom). Our plugin has to say which reader group to subscsribe to. What is the state that our plugin needs to maintain in order to be able to function properly. 
+    -	Essentially, what stream to read from, what data type, what offset. This is all Pravega stuff regarding the READ component of the project. (what api to be used) 
+
+-	To recap, level 0: is five big boxes, produces, consumer, Pravega, druid, our component
+  o	In our component we need the read from Pravega, transform read data, write to druid, and metadata to keep track of stats. Read from schema registry, druid side. Maybe a logging component for errors/status
+  o	Maybe a state diagram to show the data moving 
+  o	The transforming component needs to take in data from read component, and then call the write component
+
+
+Data Design: 
+  -	How are we transforming data from Pravega into druid
+    o	If User input is x, it will be transformed into y to be read into druid 
+  -	“State” what is the state of our plugin that it needs to be functioning? Do we store it in Pravega, a database, zookeeper? 
+
+User interface: 
+  -	Will be the command line, how will a user interact with our component? 
+    o	What druid, Pravega component to connect with? Pravega has a cmd UI 
+    o	Dependent upon what druid lets u do – Tom 
+    o	How to demo druid -> if we get druid up and running on our pc and use it, we can have an understanding of how our UI will look 
+
+Useful Resources: 
+https://www.youtube.com/channel/UCiEkLCWdnjSpub76ZEZcdqw
+https://cncf.pravega.io/blog/2020/09/22/pravega-client-api-101/ -> Pravega api, reader groups, 
+https://cncf.pravega.io/blog/2021/03/23/data-flow-from-sensors-to-the-edge-and-the-cloud-using-pravega/ -> data flow from sensors to Pravega. This is a source of data that is ingested in Pravega. Captuiring data in Pravega and processing in FLINK, this can be helpful to see how we’ll do things in druid 
+
+
+Nate: 
+-	so we are getting row orientated data form the source data and we are writing it to the destination OLAP in this case Druid which column oriented.  Is that part of the data transformation we need to keep in mind?
+-	Derek: event == row. Druid has an api: hey druid here’s the row we want to write, and it will take the event/row and make it a column oriented manner. This api is highlevel, black box. We’ll get an event from a sensor and give it to druid to transform. 
+-	“You’re on word typing, not worrying about the behind the scenes details -> this is what druid is handlng. 
+-	Reading using Pravega api, writing using druid api
+  o	We don’t have to design the actual row to col transformation 
+
+
