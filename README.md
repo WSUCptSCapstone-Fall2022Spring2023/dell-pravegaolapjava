@@ -9,7 +9,8 @@ Pravega stores data in a row-oriented manner - allows for all data points relati
 ### One-sentence description of the project
 Utilization of Java to create a plugin to enable the automatic ingestion of Pravega's data streams to be processed by Apache Druid. 
 
-TODO: A 20-second elevator pitch of your project - its core idea summarized in one sentence.
+TODO: 
+
 Pravega's data streams need to be read and transformed from a row oriented manner in order to be written into Apache Druid in a column oriented manner. 
 
 ## Technologies
