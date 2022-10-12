@@ -1,0 +1,7 @@
+10/10/2022 scrum notes: 
+- Discussed the designed architecture
+  - Walked through the data/program flow and asked questions
+  - Discussed the kafka repos as well as druid and pravega apis
+- Discussed sprint1 assignment
+  - Created shared docs for readme and sprint report md files
+  - Discussed demo video - showcase the github (client notes, sprint notes, assignments, issues, PM board) showcase the kakfa repos and talk about how we're using it to learn how to write our plugin. Need to discuss this further because we should all be talking in the demo 
