@@ -28,6 +28,8 @@ Pravega is a new storage a new abstraction – a stream for continuously generat
 
 ## Installation
 
+We will develop the ingestion plugin mostly using the client APIs from Prevega and Apache Druid. Note that theres are distributive mode for both Prevega and Apache Druid but we will only develop the plugin in our local environment and tested it with standalone mode of Prevega and Apache Druid. Please see below the prequisites and installation steps for detail.
+
 ### Prerequisites
 - **Prevega Distributed Mode Prerequisites** 
   - HDFS 
