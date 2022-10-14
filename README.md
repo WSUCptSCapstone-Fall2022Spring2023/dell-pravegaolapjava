@@ -29,7 +29,47 @@ Pravega is a new storage a new abstraction – a stream for continuously generat
 ## Installation
 
 ### Prerequisites
-To successfully utilize the plugin users must install the latest version of Pravega and Druid. 
+- **Prevega Distributed Mode Prerequisites** 
+  - HDFS 
+    - Setup an HDFS storage cluster running HDFS version 2.7+. HDFS is used as Tier 2 storage and must have sufficient capacity to store contents of all streams. The storage cluster is recommended to be run alongside Pravega on separate nodes. 
+  - Java 
+    - Install the latest Java 8 from java.oracle.com. Packages are available for all major operating systems. 
+  - Zookeeper 
+    - Pravega requires Zookeeper 3.5.1-alpha+. At least 3 Zookeeper nodes are recommended for a quorum. No special configuration is required for Zookeeper but it is recommended to use a dedicated cluster for Pravega. 
+    - This specific version of Zookeeper can be downloaded from Apache at zookeeper-3.5.1-alpha.tar.gz. 
+    - For installing Zookeeper see the Getting Started Guide. 
+  - Bookkeeper 
+    - Pravega requires Bookkeeper 4.4.0+. At least 3 Bookkeeper servers are recommended for a quorum. 
+    - This specific version of Bookkeeper can be downloaded from Apache at bookkeeper-server-4.4.0-bin.tar.gz.   
+    - For installing Bookkeeper see the Getting Started Guide. Some specific Pravega instructions are shown below. All sets assuming being run from the bookkeeper-server-4.4.0 directory. 
+  ** Bookkeeper Configuration** 
+  The following configuration options should be changed in the `conf/bk_server.conf file`. 
+  ``` 
+  # Comma separated list of <zp-ip>:<port> for all ZK servers 
+  zkServers=localhost:2181 
+
+  # Alternatively specify a different path to the storage for /bk 
+  journalDirectory=/bk/journal 
+  ledgerDirectories=/bk/ledgers 
+  indexDirectories=/bk/index 
+
+  zkLedgersRootPath=/pravega/bookkeeper/ledgers 
+  ``` 
+  - Initializing Zookeeper paths 
+    - The following paths need to be created in Zookeeper. From the `zookeeper-3.5.1-alpha` directory on the Zookeeper servers run: 
+    - ` bin/zkCli.sh -server $ZK_URL create /pravega` 
+    - ` bin/zkCli.sh -server $ZK_URL create /pravega/bookkeeper` 
+  - Running Bookkeeper 
+    - `bin/bookkeeper shell metaformat –nonInteractive` 
+    - ` bin/bookkeeper bookie` for start the bookie 
+ 
+- **Prevega Standalone Mode Prerequisites (Testing & Demo Purpose)** 
+  - Java 8 or later for client-only applications 
+  - Java 11 or later for standalone demo and server-side applications 
+ 
+- **Apache Druid Standalone Mode Prerequisites** 
+  - Linux, Mac OS X, or other Unix-like OS. (Windows is not supported.) 
+  - Java 8u92+ or Java 11. 
 
 ### Add-ons
 
@@ -37,79 +77,16 @@ No Add-ons yet that we know of.
 
 ### Installation Steps
 
-**Prevega Distributed Mode Prerequisites** 
-
-HDFS 
-
-Setup an HDFS storage cluster running HDFS version 2.7+. HDFS is used as Tier 2 storage and must have sufficient capacity to store contents of all streams. The storage cluster is recommended to be run alongside Pravega on separate nodes. 
-
-Java 
-
-Install the latest Java 8 from java.oracle.com. Packages are available for all major operating systems. 
-
-Zookeeper 
-
-Pravega requires Zookeeper 3.5.1-alpha+. At least 3 Zookeeper nodes are recommended for a quorum. No special configuration is required for Zookeeper but it is recommended to use a dedicated cluster for Pravega. 
-
-This specific version of Zookeeper can be downloaded from Apache at zookeeper-3.5.1-alpha.tar.gz. 
-
-For installing Zookeeper see the Getting Started Guide. 
-
-Bookkeeper 
-
-Pravega requires Bookkeeper 4.4.0+. At least 3 Bookkeeper servers are recommended for a quorum. 
-
-This specific version of Bookkeeper can be downloaded from Apache at bookkeeper-server-4.4.0-bin.tar.gz. 
-
-For installing Bookkeeper see the Getting Started Guide. Some specific Pravega instructions are shown below. All sets assuming being run from the bookkeeper-server-4.4.0 directory. 
-
-** Bookkeeper Configuration** 
-
-The following configuration options should be changed in the `conf/bk_server.conf file`. 
-
-``` 
-
-# Comma separated list of <zp-ip>:<port> for all ZK servers 
-zkServers=localhost:2181 
+- **Installation of Pravega** 
+  - Download from here: https://github.com/pravega/pravega/releases 
+  - `tar <name>.tgz` 
+  - `cd bin` 
+  - `./pravega-standalone` 
  
-# Alternatively specify a different path to the storage for /bk 
-journalDirectory=/bk/journal 
-ledgerDirectories=/bk/ledgers 
-indexDirectories=/bk/index 
- 
-zkLedgersRootPath=/pravega/bookkeeper/ledgers 
-
-``` 
-
-Initializing Zookeeper paths 
-
-The following paths need to be created in Zookeeper. From the `zookeeper-3.5.1-alpha` directory on the Zookeeper servers run: 
-
-` bin/zkCli.sh -server $ZK_URL create /pravega` 
-
-` bin/zkCli.sh -server $ZK_URL create /pravega/bookkeeper` 
-
-Running Bookkeeper 
-
-`bin/bookkeeper shell metaformat –nonInteractive` 
-
-` bin/bookkeeper bookie` for start the bookie 
-
- 
-
-**Prevega Standalone Mode Prerequisites (Testing & Demo Purpose)** 
-
-Java 8 or later for client-only applications 
-
-Java 11 or later for standalone demo and server-side applications 
-
- 
-
-**Apache Druid Standalone Mode Prerequisites** 
-
-Linux, Mac OS X, or other Unix-like OS. (Windows is not supported.) 
-
-Java 8u92+ or Java 11. 
+- **Installation of Apache Druid** 
+  - Download from here: https://www.apache.org/dyn/closer.cgi?path=/druid/24.0.0/apache-druid-24.0.0-bin.tar.gz 
+  - ` tar -xzf apache-druid-24.0.0-bin.tar.gz` 
+  - ` cd apache-druid-24.0.0` 
 
 
 ## Functionality
