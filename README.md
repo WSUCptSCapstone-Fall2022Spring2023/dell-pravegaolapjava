@@ -102,13 +102,19 @@ Currently there isn’t any known problem.
 
 ## Contributing
 
-TODO: Leave the steps below if you want others to contribute to your project.
+- **Non-Collaborator Contribution** 
+    1. Fork it!
+    2. Create your feature branch: `git checkout -b my-new-feature`
+    3. Commit your changes: `git commit -am 'Add some feature'`
+    4. Push to the branch: `git push origin my-new-feature`
+    5. Submit a pull request :D
 
-1. Fork it!
-2. Create your feature branch: `git checkout -b my-new-feature`
-3. Commit your changes: `git commit -am 'Add some feature'`
-4. Push to the branch: `git push origin my-new-feature`
-5. Submit a pull request :D
+- **Collaborator Contribution** 
+    1. `git pull` at master branch 
+    2. `git checkout –b my-new-feature` 
+    3. `git add some new features` 
+    4. `git push origin my-new-feature` 
+    5. Submit a pull request 
 
 ## Additional Documentation
 
