@@ -24,35 +24,104 @@ SQL
 
 ### Additional information about the project
 
-TODO: Write a compelling/creative/informative project description / summary
+Pravega is a new storage a new abstraction – a stream for continuously generated and unbounded data. In comparison to a distributed messaging system such as Kafka and Pulsar, Pravega provides a multitude of futures that are useful for modern-day data-intensive applications. While Kafka and Pulsar support transactions, long-term retention, and event stream they luck the necessary futures like durable by default, auto-scaling, ingestion of large data, and many other futures. Pravega offers all the essential futures. However, Pravega is not an analytic engine hence it cannot process the data it ingests. Our plugin will integrate Pravega with Druid and enable the automatic ingestion of data streams into an OLAP database, such that a user can perform log-based analytics against the events in their streams. 
 
 ## Installation
 
 ### Prerequisites
-
-TODO: List what a user needs to have installed before running the installation instructions below (e.g., git, which versions of Ruby/Rails)
+To successfully utilize the plugin users must install the latest version of Pravega and Druid. 
 
 ### Add-ons
 
-TODO: List which add-ons are included in the project, and the purpose each add-on serves in your app.
+No Add-ons yet that we know of.
 
 ### Installation Steps
 
-TODO: Describe the installation process (making sure you mention `bundle install`).
-Instructions need to be such that a user can just copy/paste the commands to get things set up and running. 
+**Prevega Distributed Mode Prerequisites** 
+
+HDFS 
+
+Setup an HDFS storage cluster running HDFS version 2.7+. HDFS is used as Tier 2 storage and must have sufficient capacity to store contents of all streams. The storage cluster is recommended to be run alongside Pravega on separate nodes. 
+
+Java 
+
+Install the latest Java 8 from java.oracle.com. Packages are available for all major operating systems. 
+
+Zookeeper 
+
+Pravega requires Zookeeper 3.5.1-alpha+. At least 3 Zookeeper nodes are recommended for a quorum. No special configuration is required for Zookeeper but it is recommended to use a dedicated cluster for Pravega. 
+
+This specific version of Zookeeper can be downloaded from Apache at zookeeper-3.5.1-alpha.tar.gz. 
+
+For installing Zookeeper see the Getting Started Guide. 
+
+Bookkeeper 
+
+Pravega requires Bookkeeper 4.4.0+. At least 3 Bookkeeper servers are recommended for a quorum. 
+
+This specific version of Bookkeeper can be downloaded from Apache at bookkeeper-server-4.4.0-bin.tar.gz. 
+
+For installing Bookkeeper see the Getting Started Guide. Some specific Pravega instructions are shown below. All sets assuming being run from the bookkeeper-server-4.4.0 directory. 
+
+** Bookkeeper Configuration** 
+
+The following configuration options should be changed in the `conf/bk_server.conf file`. 
+
+``` 
+
+# Comma separated list of <zp-ip>:<port> for all ZK servers 
+zkServers=localhost:2181 
+ 
+# Alternatively specify a different path to the storage for /bk 
+journalDirectory=/bk/journal 
+ledgerDirectories=/bk/ledgers 
+indexDirectories=/bk/index 
+ 
+zkLedgersRootPath=/pravega/bookkeeper/ledgers 
+
+``` 
+
+Initializing Zookeeper paths 
+
+The following paths need to be created in Zookeeper. From the `zookeeper-3.5.1-alpha` directory on the Zookeeper servers run: 
+
+` bin/zkCli.sh -server $ZK_URL create /pravega` 
+
+` bin/zkCli.sh -server $ZK_URL create /pravega/bookkeeper` 
+
+Running Bookkeeper 
+
+`bin/bookkeeper shell metaformat –nonInteractive` 
+
+` bin/bookkeeper bookie` for start the bookie 
+
+ 
+
+**Prevega Standalone Mode Prerequisites (Testing & Demo Purpose)** 
+
+Java 8 or later for client-only applications 
+
+Java 11 or later for standalone demo and server-side applications 
+
+ 
+
+**Apache Druid Standalone Mode Prerequisites** 
+
+Linux, Mac OS X, or other Unix-like OS. (Windows is not supported.) 
+
+Java 8u92+ or Java 11. 
 
 
 ## Functionality
 
-TODO: Write usage instructions. Structuring it as a walkthrough can help structure this section,
-and showcase your features.
+After successfully installing Pravega and Druid.  Users should start up Druid services using the micro-quickstart single-machine configuration.    
 
+Once Druid services finish startup user should lunch the Druid web console at http://localhost:8888.  
+
+Ater Druid’s web console successfully lunched user should navigate to the load page and select Pravega.  In the Pravega plugin user users can pass the desired specification and submit.   
 
 ## Known Problems
-
-TODO: Describe any known issues, bugs, odd behaviors or code smells. 
-Provide steps to reproduce the problem and/or name a file or a function where the problem lives.
-
+Currently there isn’t any known problem.  
 
 ## Contributing
 
@@ -66,11 +135,22 @@ TODO: Leave the steps below if you want others to contribute to your project.
 
 ## Additional Documentation
 
-TODO: Provide links to additional documentation that may exist in the repo, e.g.,
-  * Sprint reports
-  * User links
+Pravega readings:  
+
+https://cncf.pravega.io/docs/nightly/pravega-concepts/#introduction 
+
+https://cncf.pravega.io/docs/v0.11.0/ 
+
+https://cncf.pravega.io/ 
+
+Apache Druid readings:  
+
+https://druid.apache.org/druid 
+
+https://druid.apache.org/docs/latest/design/index.html 
+
+https://druid.apache.org/use-cases 
 
 ## License
 
-If you haven't already, add a file called `LICENSE.txt` with the text of the appropriate license.
-We recommend using the MIT license: <https://choosealicense.com/licenses/mit/>
+License URL: https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/blob/master/Document/License.txt
