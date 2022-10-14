@@ -14,13 +14,12 @@ Although we didn’t have user-facing in the current sprint, we have gained subs
 
 ## Unfinished Work 
 
-All user stories in Sprint 1 are completed. Since there are many client APIs from Pravega and Apache Druid to learn before starting with any code, we expect to have some code for Sprint 2. 
+All user stories in Sprint 1 are completed. Since there are many client APIs from Pravega and Apache Druid need to learn before starting with any code, we expect to have some code for Sprint 2. 
 
 **Progress of Sprint 1** 
 - [x] Team Inventory Docs 
 - [x] Project Description Docs 
 - [x] Requirement and Specification Docs 
-
 - [x] Solution Approach Docs 
 
  
