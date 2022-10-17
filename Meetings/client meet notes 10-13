@@ -1,0 +1,39 @@
+Objective: Showcase/present architecture to Dell clients
+
+-	Standup a Druid cluster: Derek is wondering if we need a test cluster -> local machines should be okay, but an actual server demo would be better -> would require AWS resources from dell client (which they have)
+-	Running it in a distributed mode will make it faster (the queries) 
+
+-	Derek: “Ingestion” tab in druid.apache.org read and understand this section. Ingestion/indexing, we read and store data in a format called segments (contain rows)
+  o	“Streaming” 
+-	“kafka and kineseis plugins are similar” -> “Pravega plugin will also be similar” 
+  o	So study kafka and kinesis repos 
+  o	Similar in the sense of reading data, parsing 
+  o	Instead import Pravega and connect to Pravega instead of…
+
+-	Olivier joined our chat. He had 4 years exp with Druid, so we can use him as a resource. Derek also said that he could invite Druid developers to our meetings too. 
+-	Architecture: Matches derek’s expectations based on his knowledge level 
+  o	Derek: thought that a druid api would take care of more stuff 
+  o	Wonders if the GUI will be what we're implementing
+    -	Wonders if we have to be the segment loader ourselves, 2:23pm mark 
+    -	Research Pravega and druid apis to see what is being abstracted away from us -> we want to make sure we don’t end up doing work that the api is gonna do for us anyway 
+    - “plugin is deployed in the druid cluster”
+  o	Metabase & Server Storage: 
+-	Jose: Asked about repository: 2:26pm
+  o	We’ll have a fork of druid that we’ll work out of 
+  o	Don’t want druid source code to be in our private PR. More at 2:28pm mark 
+  o	“Contributed to a major open source project” 
+  o	“Most of our work will be at this URL in this repo”: look at recording 
+-	Derek: aws tokens for distributed Pravega and druid 
+  o	We should be eager to do this 
+  o	Encourages us to start standimg up demos and running examples
+  o	Kafka demo data
+    -	To experience ingesting data (dummy data, not a real source) and pushing into druid (don’t do kinesis, it’s not free)  
+  o	Stand up local kafka local druid 
+  o	Kafka pipeline -> if we get used to it, it can help us understand our Pravega druid pipeline
+    -	Derek recommends this kafka demo a lot, will be helpful 
+
+-	Apache Superset: 
+  o	Something else we can stand up on alongside our demos
+  o	Used to help visualize the result of our data queries
+  o	Once we are standing up druid, we should also stand up superset so that we can analyze our queries 
+  o	Not super complex, we’re not modifying it, just set it up w/ druid 
