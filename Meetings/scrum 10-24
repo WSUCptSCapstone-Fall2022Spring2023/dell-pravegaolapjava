@@ -1,0 +1,5 @@
+10/24/2022 scrum notes: 
+- Discussed WA4
+- Plan is to have a unit test for each component/subsystem. Refer to the solution approach doc to see what the input/output should be for that unit test
+- For integration tests i propose having an integration test for the entire central scheduler segment, another for the stream processor, and maybe another for the stream processor to buffer storage unit
+- Then for the system testing section we would just test the entire pipeline/plugin
