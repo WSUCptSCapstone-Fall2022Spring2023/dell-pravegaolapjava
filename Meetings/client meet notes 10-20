@@ -1,0 +1,26 @@
+Objective: Speak to Sachin for feedback for architecture 
+
+
+-	Waiting for Sachin to join so talk about testing: 
+  o	Take some known data and feed it into druid and querying 
+  o	“Format conversion” here’s this structure coming from Pravega, here’s what it should look like coming into druid 
+  o	Unit tests: test specific components
+  o	Integration tests: 
+  o	Tom advice: 
+    	Don’t ever use java statics (static constants are okay tho). But never have a java static when it comes to testing 
+    	Tests that depend upon time like a “sleep” is BAD -> not good practice
+    	Shared/parallel tests can be risky
+-	Showing Sachin the Architecture: 
+  o	Should be another box for scheme registry
+    	There’s a customizer for scheme but where is it coming from? So we should add a box. Is it coming from config file or other things?
+    	Might be here next to Pravega, will influence stream parser or scheme customizer? (so it goes before?) 
+    	Schema registry: 
+      •	In SQL u define tables with diff tables and fields. SO it’s a schema of this kinda info? We can go and read this info and make sense of it? 
+      •	Streams have events written using that schema. To make sense of the data we need to make sense of it with the schema registry
+      •	Pravega and Schema registry are RELATED but we need to show them as diff components in our architecture -> so will we do Pravega to schema registry and then stream reader? Or??
+      •	Derek put links to schema registry code in slack 
+      •	https://github.com/pravega/schema-registry
+      o	The main repo, getting started guide, etc. 
+    	Sachin likes the diagram, good level of detail, only comment is to add the schema registry  
+    	Schema reg. is alongside Pravega. We have a box for Pravega so we’ll need a Pravega schema reg box. The stream reader needs to take in the info from the PSR 
+    	The stream reader reads a shit ton of bytes but doesn’t make sense of it, so the schema registry needs to take the returned Pravega data and transform it to make it understandable for the stream reader? 
