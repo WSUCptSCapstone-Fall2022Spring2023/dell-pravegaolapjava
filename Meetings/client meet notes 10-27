@@ -1,0 +1,29 @@
+Objective: Discuss testing plans with sachin 
+
+-	“mock ito” when we have a whole system with diff components, we can setup mock objects. “when I call this method u return this” useful to test interactions within components. 
+  o	We can define an interface, and it’s being implanted by soemting. We can also have a MOCK implementation that can be used for testing (without using the real objects) (for unit tests?) 
+-	Integration testing: “behavior driven testing” and test driven development research both. 
+  o	In behavior: u test a scenario end to end: if this happens, then we expect this to result -> integration tests for large scenarios “is it working end to end?”
+-	System testing
+  o	Functional: is it working with right input and output
+    	Functional requirements (the abilities, scalability, maintainability, etc.) 
+  o	Performance: (latency, runtime, big O, etc.) 
+  o	User acceptance: think of agile user stories (as a user I want to do x) these tests test to see if we completed the user stories or not 
+-	Environment requirements: 
+  o	Ex: ur making shopping cart, u need a DB to hold cust. Info. The env. Here will be “oh we need a SQL database or an S3 DB” 
+  o	Or we want to deploy Pravega, how will we do it? Deploy with linux, docker, Kubernetes, or is it AWS? 
+  o	How many machines needed to deploy/run/test? 
+  o	Go to Pravega, what’s the env reqs? Java, linux, Kubernetes
+    	What about druid’s requirements? Linux, space reqs 
+  o	Software supplies, what do u need for test/deploy?
+ 
+-	Sachin: difference between test plan and test spec
+  o	Test plan: 
+    	This is our plan and what we’re planning not the ACTUAL TESTS. Don’t go into super specific technical details
+    	“how many fields do we want to support, how many different schemas?”
+      •	Will give us an idea for test cases/scenarios
+  o	Test spec: 
+    	LISTING ALL TESTS with detail, input and output, pass and failing case, dive into the technical details
+-	Sachin advice: “when is your software ready” -> bugs never end, there’s never a final bug. So what’s your criteria that makes ur software ready to deploy/release
+  o	“all scenarios are working, everything is as expected so we shall deploy”
+    	Call this out in our doc somewhere “release criteria” 
