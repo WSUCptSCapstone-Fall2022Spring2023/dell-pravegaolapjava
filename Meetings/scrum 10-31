@@ -1,0 +1,6 @@
+10/31/2022 scrum notes: 
+-	sprint2: have some code ready
+-	bo: remote container vscode setup, if this is setup then we can develop within this environment (add the apache druid and pravega dependencies into the container)
+-	nate: studying the kafka and kinesis repos. also checked out the vscode container
+-	bo: we can start with trying to connect the pravega api 
+-	dell meeting: ask them about actually starting "where to start" connecting to pravega api
