@@ -1,0 +1,24 @@
+11/4/2022 scrum notes: 
+-	Team sync to go over the status/progress on the project
+  o	We all understand the high level problem space and solution approach
+  o	But we are struggling to “actually start” on the project 
+  o	We feel we aren’t getting as much technical progress as we’d like 
+-	Bo: We know the high level stuff, and the dell engineers know about Pravega, but not that much about apache druid. So we gotta try experimenting -> running some code, play with some APIs	
+  o	For sprint2 we can write some code that can READ stuff from Pravega just to start off things
+  o	From there we can discover new questions 
+  o	We don’t really know the details until we actually begin 
+  o	Pravega blog 101 has some sample code we gotta investigate. 
+-	“how to write to druid, then indexing” “parsing from Pravega to druid” 
+-	First we can work on HOW to read from Pravega
+  o	Print something that we grabbed from Pravega
+  o	Then we can investigate kafka plugin cause they use Pravega plugins
+-	“reading from Pravega should be easy” 
+  o	Transformations need to be done so it can be understood by druid (harder) 
+-	IntelliJ
+  o	Pom.xml file: dependencies are auto added 
+  o	Clone repo that is in the develop branch in our repo 
+-	We don’t need the vscode container anymore
+  o	IntelliJ imports the libraries easily so that’s good 
+-	This weekend: 
+  o	We have the project set up in the develop branch 
+    	Make separate branches off the develop branch
