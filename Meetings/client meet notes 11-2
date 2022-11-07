@@ -1,0 +1,33 @@
+Objective: Speak about building druid from source code as well as development environment and pravega api
+
+-	May need a true linux environment to be able to build druid from source code 
+-	Virtual box VM for linux -> we should try that 
+-	VMs in AWS 
+  o	Point of AWS is… (I asked this) similar to a virtual box, but it will be running on the cloud instead. 
+  o	But be cautious (Sachin) he says it’s better to locally test in VM because AWS tokens run out
+  o	AWS tokens will be used for distributed druid tests to see if it works on cloud (better to do this once we can actually build locally) 
+-	We don’t necessarily need to build from the code (isn’t a requirement, but it’s still good to be able to do) (so don’t feel like we have to do it in case we get blocked and can’t progress) (we’’ll likely need to build next sem Tho) 
+-	Our plugin must be in the same repo as the druid one 
+
+-	Docker container: 
+  o	Bo: will be very convenient, we can store our dependencies inside the container 
+  o	Derek: not sure, would be something to research and see if it works to store Pravega and druid? 
+  o	A container just for development, not for deployment, 
+  o	Derek: what about shell server instead? 
+  o	UPDATE: Not needed due to the team electing to use IntelliJIDE (integrates things for us)
+-	Pravega api: 
+  o	Pravega samples, sachin: Pravega standalone: runs locally 
+  o	Can run Pravega using docker 
+  o	Derek: https://cncf.pravega.io/blog/2020/09/22/pravega-client-api-101/ Pravega api 
+  o	Sachin: Pravega samples https://cncf.pravega.io/samples/
+  o	Samples repo: https://github.com/pravega/pravega-samples
+    	Samples -> Diff scenarios 
+    	“Pravega Client Examples”
+    	Packages: import these packages? Pravega Jars. Link your client to Pravega client jars 
+    	Pravega Jars
+    	Maven – useful for downloading dependencies
+    	Vscode – should we use it? – Bo 
+      •	IDIJ, IntelliJ, eclipse or 
+      •	sachin: vscode should be good enough 
+      •	but they recommend IntelliJ since all of Pravega uses it 
+        o	in vscode they think that u end up doing a lot more stuff manually. For more longer term dev. They recommend IntelliJ or eclipse 
