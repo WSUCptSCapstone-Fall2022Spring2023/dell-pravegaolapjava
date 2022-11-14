@@ -58,107 +58,106 @@ We want to write some event information gathered from the Pravega API into druid
  
 
  
-
 ## Completed Issues/User Stories 
 
 Here are links to the issues that we completed in this sprint: 
 
-#41 
+#41 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/41
 
 Write Introduction – Test Plans 
 
-#42 
+#42 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/42
 
 Write Testing Strategy - Test Plans 
 
-#43 
+#43 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/43
 
 Test Plans - Unit Testing - Test Plans 
 
-#44 
+#44 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/44
 
 Test Plans - Integration Testing – Test Plans 
 
-#45 
+#45 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/45
 
 Test Plans - System Testing – Test Plans 
 
-#46 
+#46 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/46
 
 Environment Requirements – Test Plans 
 
-#47 
+#47 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/47
 
 Explore the Kafka plugin repo. 
 
-#48 
+#48 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/48
 
 Research on Maven and add pravega client API dependencies – Reasearch 
 
-#49 
+#49 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/49
 
 Research test driven development and JUnit – Research  
 
-#50  
+#50 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/50
 
 Research Kafka plugin repo - Research 
 
-#51 
+#51 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/51
 
 Setup Development environment – intelliIJDEA – Research  
 
-#52 
+#52 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/52
 
 Research Pravega Client API Blog - Research 
 
-#53 
+#53 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/53
 
 Setup Development Environment - Research 
 
-#54 
+#54 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/54
 
 Demo Pravega Standalone - Research 
 
-#55 
+#55 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/55
 
 Include Forked Druid repo within the dell-pravegaolapjava repo - Research 
 
-#56 
+#56 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/56
 
 Create a branch for local development - Research 
 
-#57 
+#57 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/57
 
 Create a branch for local development - Research 
 
-#58  
+#58  https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/58
 
 Research helloworld reader and writer java files - Research 
 
-#59 
+#59 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/59
 
 Setup Workspace for Pravega Indexing Service – Code Implementation 
 
-#62 
+#62 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/62
 
 Look over ReadME (update if needed) - Sprint Report 
 
-#63 
+#63 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/63
 
 Write "What's New" - Sprint Report 
 
-#65 
+#65 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/65
 
 Write "Unfinished Work" - Sprint Report 
 
-#67 
+#67 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/67
 
 Write "Incomplete Issues/User Stories" - Sprint Report 
 
 #68 
 Write "Code Files for review" - Sprint Report 
 
- 
+#68 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/68
 
  Reminders (Remove this section when you save the file): 
 
