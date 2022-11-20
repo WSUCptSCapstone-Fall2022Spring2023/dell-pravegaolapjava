@@ -21,8 +21,17 @@ public class PravegaWriter {
         this.controllerURI = URI.create(uriString);
     }
 
+
     /**
-     * Write en event
+     * Write event without routing key
+     * @param message
+     */
+    public void writeEvent(String message){
+        this.writeEvent("", message);
+    }
+
+    /**
+     * Write en event with routing key
      * @param routingKey
      * @param message
      */
@@ -42,7 +51,15 @@ public class PravegaWriter {
 
             System.out.format("Writing message: '%s' with routing-key: '%s' to stream '%s / %s'%n",
                     message, routingKey, scope, streamName);
-            final CompletableFuture writeFuture = writer.writeEvent(routingKey, message);
+
+            // writes
+            CompletableFuture writeFuture = null;
+            if (routingKey.length() > 0){
+                writeFuture = writer.writeEvent(routingKey, message);
+            }else{
+                writeFuture = writer.writeEvent(message);
+            }
+
         }
     }
 }

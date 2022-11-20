@@ -58,7 +58,8 @@ public class PravegaReader {
                     if (event.getEvent() != null) {
                         System.out.format("Read event '%s'%n", event.getEvent());
                         prEntityList.add(
-                                new PravegaRecordEntity(event.getEvent().getBytes())
+                                new PravegaRecordEntity(
+                                        event.getEvent().getBytes())
                         );
                     }
                 } catch (ReinitializationRequiredException e) {
