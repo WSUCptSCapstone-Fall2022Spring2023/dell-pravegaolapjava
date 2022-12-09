@@ -1,0 +1,12 @@
+11/28/2022
+421 presentation powerpoint due this Friday -> create shared powerpoint
+Bo talking about kafka discovery
+Kakfa supervisor spec -> similar to our architecture we specified! This creates the kafka supervisor
+“Create index task” this is inside the supervisor spec. This task starts running in “incremental publishing kafka index task runner” -> each index task will have one runner? 
+Return new incremental…runner() an instance
+Seekable stream index task runner: provided by druid. We should have our runner inherit from this class
+Investigate test cases! There will be some stuff for ingestion 
+Nate: ask derek about his friend from imply to ask questions in druid
+Bo: ask druid channel for the location of the ingestion of streams into deep storage from kafka to druid
+Seekablestreamsupervisor -> lots of classes inherit from this
+Bo: supervisor, can we show the diagram for class? -> nate says the show diagram doesn’t really work for really complex code 

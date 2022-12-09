@@ -1,0 +1,15 @@
+11/15/2022
+Meeting to come up with questions to ask the Dell client on Thursday
+We can read a single Pravega stream, and we want to use druid api to convert the stream to make it compatible with druid to be written (focus on multiple segments later, we don’t wanna do that now and break a lot of things)
+Pravega entity class (maybe store the routing key inside this class too) 
+For each event accompany it with its routing key 
+We can ask “how do we make the reading generic, because currently our code reads string or integers -> specific serializers too” (I think in last meeting we talked about reading the information and putting it into JSON and then serializing the JSON?)  
+Is there a way to just read BYTES to keep it generic 
+Schema registry: JSON schema, the way we use this is: we need to specify the class type (the structure that is represented in the bytes of info we read from Pravega). Then we have a serializer so that we can serialize a specific object is in the stream
+When we deserialize it, do we have to specify what kind of object/class it is? 
+When we serialize it and then desterilize it, we need to have the class file? Not sure. But is there a way to make it so that we don’t have to specify the specific object
+Essentially, when we deserialize it, we need to know the object/class definition, but what if we don’t have the object/class defined within our code?? How will we go about this? Ask this 
+Also we can ask how to begin with Apache Druid APIs
+Ask in apache druid, we are trying to index information read from Pravega streams, is there a way we can get started, examples, documentation/blog that covers the Druid API
+Also, question about the connection: when Pravega is running, and we are reading a lot of streams, what would happen if Pravega shuts down / crashes while we are still reading the streams. (maybe a try catch). Ask: do we need an additional thread that sends a ping to Pravega, and once the connection is lost, then we can break the program. 
+Nate was looking for: if Pravega stops reading the stream, what would happen to the stream that we are processing

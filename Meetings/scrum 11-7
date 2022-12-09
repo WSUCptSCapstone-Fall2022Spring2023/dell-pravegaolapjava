@@ -1,0 +1,9 @@
+11/7/2022
+Discussed sprint2
+Need to update readME, create sprint report, and demo video
+Add github issues
+We want to present the read and write code in the video to show that technical progress is beginning 
+Plans: connect to and read from Pravega
+In Pravega client api, we see how we can connect to Pravega standalone and create a streamReader. 
+For local testing we can use Pravega standalone to write some random data, then read it, then transform that data to be written into druid 
+About this approach though… we need to know how to write into druid. Is there an existing pipeline that writes into druid so we can see how they format their data before writing? 

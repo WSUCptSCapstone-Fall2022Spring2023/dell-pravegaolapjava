@@ -1,0 +1,8 @@
+11/5/2022
+quick sync w/ bo about his screenshots of the pravega example
+https://cncf.pravega.io/docs/nightly/getting-started/  how to run Pravega samples repo (lets us read and write to Pravega using Pravega apis) 
+Run helloworldwriter.java to write some events to prevega 
+Run helloworldreader.jave to read those same events from Pravega 
+pravega samples repo 
+helloworld reader and writer.java files 
+  - pravega api's are being used here
