@@ -19,104 +19,83 @@ Although the team has still made progress in researching and becoming familiar w
 ## Completed Issues/User Stories
 Here are links to the issues that we completed in this sprint:
 
-#60 
+- #60 
 Create a reader and writer within pravega-indexing-jose - Research
-#61
+- #61
 Modify reader and writer templates to support multiple segments within a stream - Sprint Report
-#64
+- #64
 Write “work Summary” - Sprint Report 
-#66
+- #66
 Write "Completed Issues/User Stories" - Sprint report 
-#67
+- #67
 Write "Incomplete Issues/User Stories" - Sprint Report 
-#68
+- #68
 Write "Code Files for review" - Sprint Report
-#69
+- #69
 Write "Retrospective Summary" - Sprint report 
-#70
+- #70
 Set up a virtual machine - environment Setup
-#71
+- #71
 Install and Research Maven - Research
-#72
+- #72
 Research Druid indexing documentation - Research
-#73
+- #73
 Start researching Junit - Research
-#74
+- #74
 added demo video - Sprint Report 
-#75
+- #75
 Write Introduction - Prototype Report
-#76
+- #76
 Add Bios and Project Roles Section - Prototype Report
-#77
+- #77
 Write Project Requirements - Prototype Report
-#78
+- #78
 Write Solution Approach -  Prototype Report
-#79
+- #79
 Write Alpha Prototype Description - -Prototype Report
-#80
+- #80
 Write Alpha Prototype Demonstration - Prototype Report
-#81
+- #81
 Write Future Work - Prototype Report
-#82
+- #82
 Add more keywords to glossary - -Prototype Report
-#83
+- #83
 Project Overview and Requirements Slide - Presentation
-#84
+- #84
 Project Solution Approach Slide - Presentation
-#85
+- #85
 Project's Current Status Slide - Presentation
-#86
+- #86
 Project's Future Work Slide - Presentation
-#87
+- #87
 Update Scrum Note Entries - Documentation 
-#88
+- #88
 Update Client Note entries - Documentation 
-#89
+- #89
 Submit Client Presentation - -Presentation
-#90
+- #90
 Peer Review Prototype Project Report
-
-#91
+- #91
 Sprint 3 Demo video - Sprint Report
-#92
+- #92
 Update README - Sprint Report
-#93
+- #93
 add all scrum notes - Sprint Report
-#94
+- #94
 What's New - Sprint Report
-#95
+- #95
 Work Summary -  Sprint Report
-#96
+- #96
 Completed Issues/User Stories - Sprint Report
-#97
+- #97
 Incomplete Issues/User Stories - Sprint Report
-#98
+- #98
 Code Files for Review - Sprint Report
-#99
+- #99
 Retrospective Summary -  Sprint Report
 
 
-
- Reminders (Remove this section when you save the file):
-  * Each issue should be assigned to a milestone
-  * Each completed issue should be assigned to a pull request
-  * Each completed pull request should include a link to a "Before and After" video
-  * All team members who contributed to the issue should be assigned to it on GitHub
-  * Each issue should be assigned story points using a label
-  * Story points contribution of each team member should be indicated in a comment
- 
- ## Incomplete Issues/User Stories
- Here are links to issues we worked on but did not complete in this sprint:
- 
- * URL of issue 1 <<One sentence explanation of why issue was not completed>>
- * URL of issue 2 <<One sentence explanation of why issue was not completed>>
- * URL of issue n <<One sentence explanation of why issue was not completed>>
- 
- Examples of explanations (Remove this section when you save the file):
-  * "We ran into a complication we did not anticipate (explain briefly)." 
-  * "We decided that the feature did not add sufficient value for us to work on it in this sprint (explain briefly)."
-  * "We could not reproduce the bug" (explain briefly).
-  * "We did not get to this issue because..." (explain briefly)
+## Incomplete Issues/User Stories
 N/A
 
 ## Code Files for Review
