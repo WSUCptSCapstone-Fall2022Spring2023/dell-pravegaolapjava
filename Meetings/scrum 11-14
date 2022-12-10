@@ -1,0 +1,16 @@
+11/14/2022
+Prototype
+Currently done: Reading from Pravega and then write to druid
+First connect to the tcp port in Pravega (reading complete) 
+We read an instance by listening to a port (build the standalone first) 
+We haven’t have anything to deploy, no CI/CD yet so we’ve tested by printing stuff out 
+Processing and indexing would be next (for druid) using that Pravega info 
+Dell mentor recommendations: 
+They recommended the schema registry 
+They recommended copy and pasting the kafka plugin
+Future work 
+Multiple segments (multiple readers) 
+Indexing and druid & schema registry 
+Command line interface 
+We need to be more aggressive in the way we ask the mentors the questions 
+Pravega: reading multiple segments 
