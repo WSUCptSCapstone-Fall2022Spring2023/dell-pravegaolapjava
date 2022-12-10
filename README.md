@@ -22,6 +22,18 @@ Java
 
 SQL
 
+Guice
+
+IntellJ
+
+CI/CD
+
+JUnit
+
+Driud 
+
+Mavin
+
 ### Additional information about the project
 
 Pravega is a new storage a new abstraction – a stream for continuously generated and unbounded data. In comparison to a distributed messaging system such as Kafka and Pulsar, Pravega provides a multitude of futures that are useful for modern-day data-intensive applications. While Kafka and Pulsar support transactions, long-term retention, and event stream they luck the necessary futures like durable by default, auto-scaling, ingestion of large data, and many other futures. Pravega offers all the essential futures. However, Pravega is not an analytic engine hence it cannot process the data it ingests. Our plugin will integrate Pravega with Druid and enable the automatic ingestion of data streams into an OLAP database, such that a user can perform log-based analytics against the events in their streams. 
