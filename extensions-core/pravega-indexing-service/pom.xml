@@ -22,9 +22,9 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.apache.druid.extensions</groupId>
-  <artifactId>druid-kafka-indexing-service</artifactId>
-  <name>druid-kafka-indexing-service</name>
-  <description>druid-kafka-indexing-service</description>
+  <artifactId>druid-pravega-indexing-service</artifactId>
+  <name>druid-pravega-indexing-service</name>
+  <description>druid-pravega-indexing-service</description>
 
   <parent>
     <groupId>org.apache.druid</groupId>
@@ -63,6 +63,12 @@
       <artifactId>netty</artifactId>
       <version>3.10.6.Final</version>
       <scope>provided</scope>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/io.pravega/pravega-client -->
+    <dependency>
+      <groupId>io.pravega</groupId>
+      <artifactId>pravega-client</artifactId>
+      <version>0.12.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.kafka</groupId>
@@ -207,18 +213,6 @@
       <artifactId>equalsverifier</artifactId>
       <scope>test</scope>
     </dependency>
-      <dependency>
-          <groupId>io.pravega</groupId>
-          <artifactId>pravega-client</artifactId>
-          <version>0.12.0</version>
-          <scope>compile</scope>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.druid.extensions</groupId>
-          <artifactId>druid-pravega-indexing-service</artifactId>
-          <version>26.0.0-SNAPSHOT</version>
-          <scope>compile</scope>
-      </dependency>
   </dependencies>
 
 </project>

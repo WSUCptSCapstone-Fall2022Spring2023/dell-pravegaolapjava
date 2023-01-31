@@ -24,7 +24,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.druid.common.utils.IdUtils;
-import org.apache.druid.data.input.kafka.KafkaRecordEntity;
+import org.apache.druid.data.input.pravega.PravegaEventEntity;
 import org.apache.druid.indexing.common.task.Task;
 import org.apache.druid.indexing.common.task.TaskResource;
 import org.apache.druid.indexing.kafka.KafkaDataSourceMetadata;
@@ -79,7 +79,7 @@ import java.util.stream.Collectors;
  * tasks to satisfy the desired number of replicas. As tasks complete, new tasks are queued to process the next range of
  * Kafka offsets.
  */
-public class KafkaSupervisor extends SeekableStreamSupervisor<Integer, Long, KafkaRecordEntity>
+public class KafkaSupervisor extends SeekableStreamSupervisor<Integer, Long, PravegaEventEntity>
 {
   public static final TypeReference<TreeMap<Integer, Map<Integer, Long>>> CHECKPOINTS_TYPE_REF =
       new TypeReference<TreeMap<Integer, Map<Integer, Long>>>()
@@ -126,7 +126,7 @@ public class KafkaSupervisor extends SeekableStreamSupervisor<Integer, Long, Kaf
 
 
   @Override
-  protected RecordSupplier<Integer, Long, KafkaRecordEntity> setupRecordSupplier()
+  protected RecordSupplier<Integer, Long, PravegaEventEntity> setupRecordSupplier()
   {
     return new PravegaEventSupplier(
         spec.getIoConfig().getConsumerProperties(),
@@ -209,7 +209,7 @@ public class KafkaSupervisor extends SeekableStreamSupervisor<Integer, Long, Kaf
   }
 
   @Override
-  protected List<SeekableStreamIndexTask<Integer, Long, KafkaRecordEntity>> createIndexTasks(
+  protected List<SeekableStreamIndexTask<Integer, Long, PravegaEventEntity>> createIndexTasks(
       int replicas,
       String baseSequenceName,
       ObjectMapper sortingMapper,
@@ -227,7 +227,7 @@ public class KafkaSupervisor extends SeekableStreamSupervisor<Integer, Long, Kaf
     // Kafka index task will pick up LegacyKafkaIndexTaskRunner without the below configuration.
     context.put("IS_INCREMENTAL_HANDOFF_SUPPORTED", true);
 
-    List<SeekableStreamIndexTask<Integer, Long, KafkaRecordEntity>> taskList = new ArrayList<>();
+    List<SeekableStreamIndexTask<Integer, Long, PravegaEventEntity>> taskList = new ArrayList<>();
     for (int i = 0; i < replicas; i++) {
       String taskId = IdUtils.getRandomIdWithPrefix(baseSequenceName);
       taskList.add(new KafkaIndexTask(

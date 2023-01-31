@@ -24,7 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.apache.curator.test.TestingCluster;
-import org.apache.druid.data.input.kafka.KafkaRecordEntity;
+import org.apache.druid.data.input.pravega.PravegaEventEntity;
 import org.apache.druid.indexing.kafka.supervisor.PravegaSupervisorIOConfig;
 import org.apache.druid.indexing.kafka.test.TestBroker;
 import org.apache.druid.indexing.seekablestream.common.OrderedPartitionableRecord;
@@ -117,7 +117,7 @@ public class KafkaRecordSupplierTest
     return "topic-" + topicPosFix++;
   }
 
-  private List<OrderedPartitionableRecord<Integer, Long, KafkaRecordEntity>> createOrderedPartitionableRecords()
+  private List<OrderedPartitionableRecord<Integer, Long, PravegaEventEntity>> createOrderedPartitionableRecords()
   {
     Map<Integer, Long> partitionToOffset = new HashMap<>();
     return records.stream().map(r -> {
@@ -132,7 +132,7 @@ public class KafkaRecordSupplierTest
           topic,
           r.partition(),
           offset,
-          r.value() == null ? null : Collections.singletonList(new KafkaRecordEntity(
+          r.value() == null ? null : Collections.singletonList(new PravegaEventEntity(
               new ConsumerRecord<>(r.topic(), r.partition(), offset, r.key(), r.value())
           ))
       );
@@ -337,9 +337,9 @@ public class KafkaRecordSupplierTest
     recordSupplier.assign(partitions);
     recordSupplier.seekToEarliest(partitions);
 
-    List<OrderedPartitionableRecord<Integer, Long, KafkaRecordEntity>> initialRecords = new ArrayList<>(createOrderedPartitionableRecords());
+    List<OrderedPartitionableRecord<Integer, Long, PravegaEventEntity>> initialRecords = new ArrayList<>(createOrderedPartitionableRecords());
 
-    List<OrderedPartitionableRecord<Integer, Long, KafkaRecordEntity>> polledRecords = recordSupplier.poll(poll_timeout_millis);
+    List<OrderedPartitionableRecord<Integer, Long, PravegaEventEntity>> polledRecords = recordSupplier.poll(poll_timeout_millis);
     for (int i = 0; polledRecords.size() != initialRecords.size() && i < pollRetry; i++) {
       polledRecords.addAll(recordSupplier.poll(poll_timeout_millis));
       Thread.sleep(200);
@@ -373,9 +373,9 @@ public class KafkaRecordSupplierTest
     recordSupplier.assign(partitions);
     recordSupplier.seekToEarliest(partitions);
 
-    List<OrderedPartitionableRecord<Integer, Long, KafkaRecordEntity>> initialRecords = new ArrayList<>(createOrderedPartitionableRecords());
+    List<OrderedPartitionableRecord<Integer, Long, PravegaEventEntity>> initialRecords = new ArrayList<>(createOrderedPartitionableRecords());
 
-    List<OrderedPartitionableRecord<Integer, Long, KafkaRecordEntity>> polledRecords = recordSupplier.poll(poll_timeout_millis);
+    List<OrderedPartitionableRecord<Integer, Long, PravegaEventEntity>> polledRecords = recordSupplier.poll(poll_timeout_millis);
     for (int i = 0; polledRecords.size() != initialRecords.size() && i < pollRetry; i++) {
       polledRecords.addAll(recordSupplier.poll(poll_timeout_millis));
       Thread.sleep(200);
@@ -414,7 +414,7 @@ public class KafkaRecordSupplierTest
     recordSupplier.assign(partitions);
     recordSupplier.seekToEarliest(partitions);
 
-    List<OrderedPartitionableRecord<Integer, Long, KafkaRecordEntity>> polledRecords = recordSupplier.poll(poll_timeout_millis);
+    List<OrderedPartitionableRecord<Integer, Long, PravegaEventEntity>> polledRecords = recordSupplier.poll(poll_timeout_millis);
     for (int i = 0; polledRecords.size() != 13 && i < pollRetry; i++) {
       polledRecords.addAll(recordSupplier.poll(poll_timeout_millis));
       Thread.sleep(200);
@@ -436,7 +436,7 @@ public class KafkaRecordSupplierTest
       Thread.sleep(200);
     }
 
-    List<OrderedPartitionableRecord<Integer, Long, KafkaRecordEntity>> initialRecords = createOrderedPartitionableRecords();
+    List<OrderedPartitionableRecord<Integer, Long, PravegaEventEntity>> initialRecords = createOrderedPartitionableRecords();
 
     Assert.assertEquals(records.size(), polledRecords.size());
     Assert.assertEquals(partitions, recordSupplier.getAssignment());
@@ -491,9 +491,9 @@ public class KafkaRecordSupplierTest
     recordSupplier.seek(partition0, 2L);
     recordSupplier.seek(partition1, 2L);
 
-    List<OrderedPartitionableRecord<Integer, Long, KafkaRecordEntity>> initialRecords = createOrderedPartitionableRecords();
+    List<OrderedPartitionableRecord<Integer, Long, PravegaEventEntity>> initialRecords = createOrderedPartitionableRecords();
 
-    List<OrderedPartitionableRecord<Integer, Long, KafkaRecordEntity>> polledRecords = recordSupplier.poll(poll_timeout_millis);
+    List<OrderedPartitionableRecord<Integer, Long, PravegaEventEntity>> polledRecords = recordSupplier.poll(poll_timeout_millis);
     for (int i = 0; polledRecords.size() != 11 && i < pollRetry; i++) {
       polledRecords.addAll(recordSupplier.poll(poll_timeout_millis));
       Thread.sleep(200);
@@ -532,7 +532,7 @@ public class KafkaRecordSupplierTest
     Assert.assertEquals(0L, (long) recordSupplier.getEarliestSequenceNumber(partition1));
 
     recordSupplier.seekToLatest(partitions);
-    List<OrderedPartitionableRecord<Integer, Long, KafkaRecordEntity>> polledRecords = recordSupplier.poll(poll_timeout_millis);
+    List<OrderedPartitionableRecord<Integer, Long, PravegaEventEntity>> polledRecords = recordSupplier.poll(poll_timeout_millis);
 
     Assert.assertEquals(Collections.emptyList(), polledRecords);
     recordSupplier.close();

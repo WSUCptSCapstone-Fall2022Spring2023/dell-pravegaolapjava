@@ -48,7 +48,7 @@ import org.apache.druid.data.input.impl.FloatDimensionSchema;
 import org.apache.druid.data.input.impl.LongDimensionSchema;
 import org.apache.druid.data.input.impl.StringDimensionSchema;
 import org.apache.druid.data.input.impl.TimestampSpec;
-import org.apache.druid.data.input.kafka.KafkaRecordEntity;
+import org.apache.druid.data.input.pravega.PravegaEventEntity;
 import org.apache.druid.data.input.kafkainput.KafkaInputFormat;
 import org.apache.druid.data.input.kafkainput.KafkaStringHeaderFormat;
 import org.apache.druid.indexer.TaskState;
@@ -2915,14 +2915,14 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
     @Override
     public InputEntityReader createReader(InputRowSchema inputRowSchema, InputEntity source, File temporaryDirectory)
     {
-      final SettableByteEntity<KafkaRecordEntity> settableByteEntity = (SettableByteEntity<KafkaRecordEntity>) source;
+      final SettableByteEntity<PravegaEventEntity> settableByteEntity = (SettableByteEntity<PravegaEventEntity>) source;
       final InputEntityReader delegate = baseInputFormat.createReader(inputRowSchema, source, temporaryDirectory);
       return new InputEntityReader()
       {
         @Override
         public CloseableIterator<InputRow> read() throws IOException
         {
-          KafkaRecordEntity recordEntity = settableByteEntity.getEntity();
+          PravegaEventEntity recordEntity = settableByteEntity.getEntity();
           return delegate.read().map(
               r -> {
                 MapBasedInputRow row = (MapBasedInputRow) r;
