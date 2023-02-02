@@ -11,7 +11,9 @@ Utilization of Java to create a plugin to enable the automatic ingestion of Prav
 
 TODO: 
 
-Pravega's data streams need to be read and transformed from a row oriented manner in order to be written into Apache Druid in a column oriented manner. 
+Pravega's data streams need to be read and transformed from a row oriented manner in order to be written into Apache Druid in a column oriented manner.
+
+Adopt the Kafka indexing service to Druid to operate with the Pravega API, thus creating a Pravega indexing service to Druid .The goal is to examine the Kafka, Pulsar, and Kinesis-indexing-service setup then consults with the Pravega Java documentation to gain an insight into what the equivalent implementation of Pravega will be and how it can be transformed into a Pravega indexing service that facilitates automatic ignition of streams from the Pravega to Druid.
 
 ## Technologies
 Pravega
@@ -33,6 +35,12 @@ JUnit
 Driud 
 
 Mavin
+
+AWS EC2
+
+AWS S3 Strorage
+
+Zookeeper
 
 ### Additional information about the project
 
@@ -147,6 +155,10 @@ https://druid.apache.org/druid
 https://druid.apache.org/docs/latest/design/index.html 
 
 https://druid.apache.org/use-cases 
+
+https://druid.apache.org/docs/latest/tutorials/cluster.html#:~:text=Apache%20Druid%20is%20designed%20to,the%20Coordinator%20and%20Overlord%20processes
+
+https://cncf.pravega.io/docs/latest/javadoc/clients/index.html
 
 ## License
 
