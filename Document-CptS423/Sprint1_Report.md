@@ -18,9 +18,25 @@ The rest of the unfinished work is to convert the existing Kafka connector to be
 Here are links to the issues that we completed in this sprint:
 
  https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/101
- * URL of issue 1
- * URL of issue 2
- * URL of issue n
+ https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/102
+ https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/103
+ https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/104
+ https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/106
+ https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/107
+ https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/108
+ https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/109
+ https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/110
+ https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/111
+ https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/112
+ https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/113
+ https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/114
+ https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/115
+ https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/116
+ https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/117
+ https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/118
+ https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/119
+ https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/120
+ https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/122
 
  Reminders (Remove this section when you save the file):
   * Each issue should be assigned to a milestone
