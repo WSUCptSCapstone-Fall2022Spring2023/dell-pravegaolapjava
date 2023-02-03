@@ -148,6 +148,8 @@ https://cncf.pravega.io/docs/v0.11.0/
 
 https://cncf.pravega.io/ 
 
+https://cncf.pravega.io/docs/latest/javadoc/clients/index.html
+
 Apache Druid readings:  
 
 https://druid.apache.org/druid 
@@ -157,8 +159,6 @@ https://druid.apache.org/docs/latest/design/index.html
 https://druid.apache.org/use-cases 
 
 https://druid.apache.org/docs/latest/tutorials/cluster.html#:~:text=Apache%20Druid%20is%20designed%20to,the%20Coordinator%20and%20Overlord%20processes
-
-https://cncf.pravega.io/docs/latest/javadoc/clients/index.html
 
 ## License
 
