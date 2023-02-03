@@ -11,6 +11,7 @@ The Apache Kafka - Druid connector was copied and pasted into the `apache/druid/
 
 ## Unfinished Work
 If applicable, explain the work you did not finish in this sprint. For issues/user stories in the current sprint that have not been closed, (a) any progress toward completion of the issues has been clearly tracked (by checking the checkboxes of  acceptance criteria), (b) a comment has been added to the issue to explain why the issue could not be completed (e.g., "we ran out of time" or "we did not anticipate it would be so much work"), and (c) the issue is added to a subsequent sprint, so that it can be addressed later.
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/105 - Modify Pravega Writer/Reader to support JSON instead of string was not completed. This was planned because JSON is compatible with Druid, but this issue was never completed because we began working with Dell client in our Druid work sessions to scrap our original code and instead work by copying and pasting the kafka connector and renaming it as the pravega connector since they are very similar.
 
 
 ## Completed Issues/User Stories
