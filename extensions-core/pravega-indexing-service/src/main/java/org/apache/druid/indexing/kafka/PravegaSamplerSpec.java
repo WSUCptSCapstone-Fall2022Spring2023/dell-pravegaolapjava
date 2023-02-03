@@ -33,12 +33,12 @@ import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class KafkaSamplerSpec extends SeekableStreamSamplerSpec
+public class PravegaSamplerSpec extends SeekableStreamSamplerSpec
 {
   private final ObjectMapper objectMapper;
 
   @JsonCreator
-  public KafkaSamplerSpec(
+  public PravegaSamplerSpec(
       @JsonProperty("spec") final KafkaSupervisorSpec ingestionSpec,
       @JsonProperty("samplerConfig") @Nullable final SamplerConfig samplerConfig,
       @JacksonInject InputSourceSampler inputSourceSampler,
@@ -50,6 +50,7 @@ public class KafkaSamplerSpec extends SeekableStreamSamplerSpec
     this.objectMapper = objectMapper;
   }
 
+  // our pravegasamplerspec will instantiate our pravegaeventsupplier
   @Override
   protected PravegaEventSupplier createRecordSupplier()
   {

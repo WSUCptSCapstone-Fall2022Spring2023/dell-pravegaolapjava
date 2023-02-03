@@ -61,6 +61,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, ByteEntity>
@@ -74,19 +75,26 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
       KafkaConfigOverrides configOverrides
   )
   {
+    //pulsar plugin would call getClient() to setup their pulsar client
     this(getKafkaConsumer(sortingMapper, consumerProperties, configOverrides));
   }
 
   @VisibleForTesting
   public PravegaEventSupplier(
-      KafkaConsumer<byte[], byte[]> consumer
+      //KafkaConsumer<byte[], byte[]> consumer
+      EventStreamReader<byte[]> consumer
   )
   {
     this.consumer = consumer;
   }
 
+  // assign a set of stream partitions to the consumer, contains the partition IDs
+  // we'd get all the segments from a reader group
+  // also called from seekablestreamindextaskrunner.java
+  // also called from seeakablestreamsupervisor -> assignRecordSupplierToPartitionIDs()
+    // supervisor can grab latest and earliest offsets to be stored in druid metadata (as well as partitions)
   @Override
-  public void assign(Set<StreamPartition<Integer>> streamPartitions)
+  public void assign(Set<StreamPartition<String>> streamPartitions)
   {
     wrapExceptions(() -> consumer.assign(streamPartitions
                                              .stream()
@@ -94,8 +102,9 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
                                              .collect(Collectors.toSet())));
   }
 
+  // called from seekablestreamindextaskrunner.java
   @Override
-  public void seek(StreamPartition<Integer> partition, Long sequenceNumber)
+  public void seek(StreamPartition<String> partition, String sequenceNumber) //was a long, now a string
   {
     wrapExceptions(() -> consumer.seek(
         new TopicPartition(partition.getStream(), partition.getPartitionId()),
@@ -103,8 +112,10 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
     ));
   }
 
+  // called from RecordSupplierInputSource.java
+  // called from Seekablestreamsupervisor
   @Override
-  public void seekToEarliest(Set<StreamPartition<Integer>> partitions)
+  public void seekToEarliest(Set<StreamPartition<String>> partitions)
   {
     wrapExceptions(() -> consumer.seekToBeginning(partitions
                                                       .stream()
@@ -112,8 +123,9 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
                                                       .collect(Collectors.toList())));
   }
 
+  // called from RecordSupplierInputSource.java
   @Override
-  public void seekToLatest(Set<StreamPartition<Integer>> partitions)
+  public void seekToLatest(Set<StreamPartition<String>> partitions)
   {
     wrapExceptions(() -> consumer.seekToEnd(partitions
                                                 .stream()
@@ -121,8 +133,12 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
                                                 .collect(Collectors.toList())));
   }
 
+  // druid might use this function to recognize which partitions exist?
+  // for us: how do we get all segment names for a reader group OR a single stream(can be multiple)
+    // for a reader group we want to grab stream(s), then associated segments, grab events, get partition IDs
+  // called from Seekablestreamsupervisor
   @Override
-  public Set<StreamPartition<Integer>> getAssignment()
+  public Set<StreamPartition<String>> getAssignment()
   {
     return wrapExceptions(() -> consumer.assignment()
                                         .stream()
@@ -130,17 +146,22 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
                                         .collect(Collectors.toSet()));
   }
 
+  // called from recordsupplierinputsource -> return value is turned into an iterator
   @Nonnull
   @Override
   public List<OrderedPartitionableRecord<String, ByteBuffer, ByteEntity>> poll(long timeout)
   {
+    // do we need a start() or init() to initialize our EventReader to be connected to pravega?
     List<OrderedPartitionableRecord<String, ByteBuffer, ByteEntity>> polledEvents = new ArrayList<>();
 
     try {
+      // Think we need a for loop to read until no more events cuz if we call poll() outside in a for loop, we'd be returning different lists each time
+      // do while event.getEvent() != null? or loop for x amount of time?
+      // introduce a while with timeout 0 after the line below is executed so we can return a list of many
       EventRead<byte[]> event =  consumer.readNextEvent(timeout);
 
       if (event.getEvent() != null) {
-        // Make private method accessible from package
+        // Make private method accessible from package with reflection
         EventPointerImpl ptr = (EventPointerImpl) event.getEventPointer().asImpl();
         Method getSegmentMethod = EventPointerImpl.class.getDeclaredMethod("getSegment");
         getSegmentMethod.setAccessible(true);
@@ -149,8 +170,8 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
         // Calling the constructor
         polledEvents.add(new OrderedPartitionableRecord<>(
                 event.getEventPointer().getStream().getStreamName(),   //stream is our topic name
-                segment.getScopedName(),                              // partition id
-                event.getEventPointer().toBytes(),                    // serialized offset rep. as bytes that contain part id, offset , and length combinded cause we'll need length later
+                segment.getScopedName(),                              // partition id [use reader group IDs instead]
+                event.getEventPointer().toBytes(),                    // serialized offset rep. as bytes that contain partit id, offset , and length combinded cause we'll need length later
                 ImmutableList.of(new ByteEntity((event.getEvent())))
         ));
       }
@@ -158,8 +179,7 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
       //There are certain circumstances where the reader needs to be reinitialized
       //Not sure what to do yet, we dont want to ignore this
       e.printStackTrace();
-    } catch (TruncatedDataException e) {
-      //We'd want to skip to the next event for this exception
+    } catch (TruncatedDataException e) { //We'd want to skip to the next event for this exception
       e.printStackTrace();
     } catch (InvocationTargetException | IllegalAccessException e ) {
       throw new RuntimeException(e);
@@ -167,8 +187,10 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
     return polledEvents;
   }
 
+  // could be equivalent to ReaderGroup.Config -> get ending stream cuts. patitionID should be string
+  // called from Seekablestreamsupervisor
   @Override
-  public Long getLatestSequenceNumber(StreamPartition<Integer> partition)
+  public Long getLatestSequenceNumber(StreamPartition<String> partition)
   {
     Long currPos = getPosition(partition);
     seekToLatest(Collections.singleton(partition));
@@ -177,8 +199,10 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
     return nextPos;
   }
 
+  // could be equivalent to ReaderGroup.Config -> get starting stream cuts
+  // called from Seekablestreamsupervisor
   @Override
-  public Long getEarliestSequenceNumber(StreamPartition<Integer> partition)
+  public Long getEarliestSequenceNumber(StreamPartition<String> partition)
   {
     Long currPos = getPosition(partition);
     seekToEarliest(Collections.singleton(partition));
@@ -188,15 +212,16 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
   }
 
   @Override
-  public boolean isOffsetAvailable(StreamPartition<Integer> partition, OrderedSequenceNumber<Long> offset)
+  public boolean isOffsetAvailable(StreamPartition<String> partition, OrderedSequenceNumber<Long> offset)
   {
     final Long earliestOffset = getEarliestSequenceNumber(partition);
     return earliestOffset != null
            && offset.isAvailableWithEarliest(KafkaSequenceNumber.of(earliestOffset));
   }
 
+  // not called anywhere else except in the kafka/pravega indexing service
   @Override
-  public Long getPosition(StreamPartition<Integer> partition)
+  public Long getPosition(StreamPartition<String> partition)
   {
     return wrapExceptions(() -> consumer.position(new TopicPartition(
         partition.getStream(),
@@ -204,8 +229,13 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
     )));
   }
 
+  // returns set of unique stream partition ids
+  // "how do we get all segment names from a single stream"
+  // "druid calls getPartitionIDs" to create stream and partitionId key pairs to assign them to the record supplier
+  // druid does this in prep. for multi threads
+  // called from Seekablestreamsupervisor
   @Override
-  public Set<Integer> getPartitionIds(String stream)
+  public Set<String> getPartitionIds(String stream)
   {
     return wrapExceptions(() -> {
       List<PartitionInfo> partitions = consumer.partitionsFor(stream);
@@ -216,6 +246,7 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
     });
   }
 
+  // recordsupplierinputsource and seekablestreamsupervisor call close()
   @Override
   public void close()
   {

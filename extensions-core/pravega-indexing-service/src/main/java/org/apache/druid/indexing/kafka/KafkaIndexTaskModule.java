@@ -47,7 +47,7 @@ public class KafkaIndexTaskModule implements DruidModule
                 new NamedType(KafkaIndexTaskTuningConfig.class, "KafkaTuningConfig"),
                 new NamedType(KafkaSupervisorTuningConfig.class, "kafka"),
                 new NamedType(KafkaSupervisorSpec.class, "kafka"),
-                new NamedType(KafkaSamplerSpec.class, "kafka"),
+                new NamedType(PravegaSamplerSpec.class, "kafka"),
                 new NamedType(KafkaInputFormat.class, "kafka")
             )
     );
