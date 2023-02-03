@@ -39,16 +39,12 @@ https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issue
  
 ## Retrospective Summary
 Here's what went well:
-  * Item 1
-  * Item 2
-  * Item x
+Scheduling weekly Druid work sessions with the team and any of the client members that are able to make it. These work sessions allowed us all to really dive into and fully ingest the code of the Kafka connector. We were also able to host a Druid web console instance within AWS EC2 during these work sessions. They have been really productive and we plan to keep doing them as we are making good progress.
  
 Here's what we'd like to improve:
-   * Item 1
-   * Item 2
-   * Item x
+We would like to get better at creating github issues. Often we begin a task and midway through it we realize we forgot to make an issue. If we are more proactive in the creation of our github issues, we can ensure that the whole team is coordinated and knows what everyone else is working on. 
   
 Here are changes we plan to implement in the next sprint:
-   * Item 1
-   * Item 2
-   * Item x
+Within `PravegaEventSupplier.java` we'd like to modify our poll() method to include a while loop so that we can continously fetch events from Pravega and return a list of many events as opposed to a list of one. We'd also like to substitute our usage of partition IDs with ReaderGroupIDs since they can be used to identify a stream and its segments. 
+
+We'd also like to continue making changes to the `PravegaEventSupplier.java`, we want methods like seek(), seekToEarliest(), and seekToLatest() to work with our Pravega consumer object. Lastly, we want to begin making code changes within the supervisor files of our extension. 
