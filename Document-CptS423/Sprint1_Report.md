@@ -29,17 +29,9 @@ Here are links to the issues that we completed in this sprint:
   * Story points contribution of each team member should be indicated in a comment
  
  ## Incomplete Issues/User Stories
- Here are links to issues we worked on but did not complete in this sprint:
- 
- * URL of issue 1 <<One sentence explanation of why issue was not completed>>
- * URL of issue 2 <<One sentence explanation of why issue was not completed>>
- * URL of issue n <<One sentence explanation of why issue was not completed>>
- 
- Examples of explanations (Remove this section when you save the file):
-  * "We ran into a complication we did not anticipate (explain briefly)." 
-  * "We decided that the feature did not add sufficient value for us to work on it in this sprint (explain briefly)."
-  * "We could not reproduce the bug" (explain briefly).
-  * "We did not get to this issue because..." (explain briefly)
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/123 <<Issue was not completed initially becaause we were unsure if poll() would be called multiple times within a loop, or if we would be looping within poll() to grab all events.>>
+
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/124 <<Issue was not completed initially because we were under the assumption that we could use partitionIDs to identify our streams inside of poll(). When meeting with our client we found out that we could use readergroup IDs instead.>>
 
 ## Code Files for Review
  * [PravegaEventSupplier.java](https://github.com/jose-robles2/druid/blob/pravega-index-service/extensions-core/pravega-indexing-service/src/main/java/org/apache/druid/indexing/kafka/PravegaEventSupplier.java)
