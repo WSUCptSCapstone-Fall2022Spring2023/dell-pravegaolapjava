@@ -17,6 +17,7 @@ The rest of the unfinished work is to convert the existing Kafka connector to be
 ## Completed Issues/User Stories
 Here are links to the issues that we completed in this sprint:
 
+ https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/101
  * URL of issue 1
  * URL of issue 2
  * URL of issue n
