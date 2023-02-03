@@ -1,15 +1,17 @@
 # Sprint x Report (8/26/21 - 9/24/2021)
 
 ## What's New (User Facing)
- * End-to-end stream to segment ingestion from Pravega to Druid.
- * Feature 2 or Bug Fix 2
- * Feature n or Bug Fix n
+Druid Web console added that is hosted via AWS EC2 allows for anyone to access it. No added functionality though, user's cannot access the Pravega plugin becuase it is not completed and because the web console does not have access to our project yet. Link is below: 
+http://35.89.55.203:8888/unified-console.html
 
 ## Work Summary (Developer Facing)
-Provide a one paragraph synposis of what your team accomplished this sprint. Don't repeat the "What's New" list of features. Instead, help the instructor understand how you went about the work described there, any barriers you overcame, and any significant learnings for your team.
+The team met with the Dell client to set up a running Druid web console instance on a Dell owned AWS EC2 server. This was done by creating four servers: master, data1, data2, and query, which are all required for a Druid web console to be hosted and accessible to all. Zookeeper was used so that the four separate running instances could connect to a shared Zookeeper instance and recognize each other. 
+
+The Apache Kafka - Druid connector was copied and pasted into the `apache/druid/extensions-core/pravega-indexing-service` directory where the team has been working to study the Kafka connector and convert it to be compatible with Pravega. Our work began within the `KafkaRecordEntity.java` file because it contained a method named poll() which was of interest since it took charge of fetching records from Kafka. We began here and modified it to `PravegaEventEntity.java` and the poll method is now compatible to read events contained within the streams of Pravega.
 
 ## Unfinished Work
 If applicable, explain the work you did not finish in this sprint. For issues/user stories in the current sprint that have not been closed, (a) any progress toward completion of the issues has been clearly tracked (by checking the checkboxes of  acceptance criteria), (b) a comment has been added to the issue to explain why the issue could not be completed (e.g., "we ran out of time" or "we did not anticipate it would be so much work"), and (c) the issue is added to a subsequent sprint, so that it can be addressed later.
+
 
 ## Completed Issues/User Stories
 Here are links to the issues that we completed in this sprint:
