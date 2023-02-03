@@ -35,7 +35,7 @@ https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issue
 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/124 <<Issue was not completed initially because we were under the assumption that we could use partitionIDs to identify our streams inside of poll(). When meeting with our client we found out that we could use readergroup IDs instead. Will complete in sprint 2>>
 
 ## Code Files for Review
- * [PravegaEventSupplier.java](https://github.com/jose-robles2/druid/blob/pravega-index-service/extensions-core/pravega-indexing-service/src/main/java/org/apache/druid/indexing/kafka/PravegaEventSupplier.java)
+ * [PravegaEventSupplier.java](https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/blob/pravega-connector/extensions-core/pravega-indexing-service/src/main/java/org/apache/druid/indexing/kafka/PravegaEventSupplier.java)
  
 ## Retrospective Summary
 Here's what went well:
