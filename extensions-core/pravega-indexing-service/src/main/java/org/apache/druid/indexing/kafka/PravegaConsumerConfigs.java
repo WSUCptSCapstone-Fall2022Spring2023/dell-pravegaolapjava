@@ -19,30 +19,22 @@
 
 package org.apache.druid.indexing.kafka;
 
-import org.apache.druid.indexing.seekablestream.common.OrderedSequenceNumber;
+import java.util.HashMap;
+import java.util.Map;
 
-import javax.validation.constraints.NotNull;
-
-// OrderedSequenceNumber.equals() should be used instead.
-@SuppressWarnings("ComparableImplementedButEqualsNotOverridden")
-public class KafkaSequenceNumber extends OrderedSequenceNumber<Long>
+/**
+ * Common place to keep all kafka consumer configs
+ */
+public class PravegaConsumerConfigs
 {
-  private KafkaSequenceNumber(Long sequenceNumber)
-  {
-    super(sequenceNumber, false);
-  }
 
-  public static KafkaSequenceNumber of(Long sequenceNumber)
+  public static Map<String, Object> getConsumerProperties()
   {
-    return new KafkaSequenceNumber(sequenceNumber);
-  }
-
-  @Override
-  public int compareTo(
-      @NotNull OrderedSequenceNumber<Long> o
-  )
-  {
-    return this.get().compareTo(o.get());
+    final Map<String, Object> props = new HashMap<>();
+    props.put("metadata.max.age.ms", "10000");
+    props.put("auto.offset.reset", "none");
+    props.put("enable.auto.commit", "false");
+    return props;
   }
 
 }

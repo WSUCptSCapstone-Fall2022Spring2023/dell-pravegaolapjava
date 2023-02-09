@@ -37,10 +37,10 @@ public class KafkaCheckpointDataSourceMetadataSerdeTest
   @Test
   public void testCheckPointDataSourceMetadataActionSerde() throws IOException
   {
-    MAPPER.registerSubtypes(KafkaDataSourceMetadata.class);
+    MAPPER.registerSubtypes(PravegaDataSourceMetadata.class);
 
-    final KafkaDataSourceMetadata kafkaDataSourceMetadata =
-        new KafkaDataSourceMetadata(
+    final PravegaDataSourceMetadata kafkaDataSourceMetadata =
+        new PravegaDataSourceMetadata(
             new SeekableStreamStartSequenceNumbers<>(
                 "topic",
                 ImmutableMap.of(0, 10L, 1, 20L, 2, 30L),
@@ -65,7 +65,7 @@ public class KafkaCheckpointDataSourceMetadataSerdeTest
   @Test
   public void testCheckPointDataSourceMetadataActionOldJsonSerde() throws IOException
   {
-    MAPPER.registerSubtypes(KafkaDataSourceMetadata.class);
+    MAPPER.registerSubtypes(PravegaDataSourceMetadata.class);
     final String jsonStr = "{\n"
                            + "\t\"type\": \"checkPointDataSourceMetadata\",\n"
                            + "\t\"supervisorId\": \"id_1\",\n"
@@ -135,8 +135,8 @@ public class KafkaCheckpointDataSourceMetadataSerdeTest
         CheckPointDataSourceMetadataAction.class
     );
 
-    KafkaDataSourceMetadata kafkaDataSourceMetadata =
-        new KafkaDataSourceMetadata(
+    PravegaDataSourceMetadata kafkaDataSourceMetadata =
+        new PravegaDataSourceMetadata(
             new SeekableStreamStartSequenceNumbers<>(
                 "topic",
                 ImmutableMap.of(0, 10L, 1, 20L, 2, 30L),

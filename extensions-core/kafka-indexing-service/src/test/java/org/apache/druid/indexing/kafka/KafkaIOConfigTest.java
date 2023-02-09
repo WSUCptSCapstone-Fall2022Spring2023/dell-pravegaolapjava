@@ -51,7 +51,7 @@ public class KafkaIOConfigTest
   public KafkaIOConfigTest()
   {
     mapper = new DefaultObjectMapper();
-    mapper.registerModules((Iterable<Module>) new KafkaIndexTaskModule().getJacksonModules());
+    mapper.registerModules((Iterable<Module>) new PravegaIndexTaskModule().getJacksonModules());
   }
 
   @Rule
@@ -69,7 +69,7 @@ public class KafkaIOConfigTest
                      + "  \"consumerProperties\": {\"bootstrap.servers\":\"localhost:9092\"}\n"
                      + "}";
 
-    KafkaIndexTaskIOConfig config = (KafkaIndexTaskIOConfig) mapper.readValue(
+    PravegaIndexTaskIOConfig config = (PravegaIndexTaskIOConfig) mapper.readValue(
         mapper.writeValueAsString(
             mapper.readValue(
                 jsonStr,
@@ -102,7 +102,7 @@ public class KafkaIOConfigTest
                      + "  \"consumerProperties\": {\"bootstrap.servers\":\"localhost:9092\"}\n"
                      + "}";
 
-    KafkaIndexTaskIOConfig config = (KafkaIndexTaskIOConfig) mapper.readValue(
+    PravegaIndexTaskIOConfig config = (PravegaIndexTaskIOConfig) mapper.readValue(
         mapper.writeValueAsString(
             mapper.readValue(
                 jsonStr,
@@ -138,7 +138,7 @@ public class KafkaIOConfigTest
                      + "  \"maximumMessageTime\": \"2016-05-31T14:00Z\"\n"
                      + "}";
 
-    KafkaIndexTaskIOConfig config = (KafkaIndexTaskIOConfig) mapper.readValue(
+    PravegaIndexTaskIOConfig config = (PravegaIndexTaskIOConfig) mapper.readValue(
         mapper.writeValueAsString(
             mapper.readValue(
                 jsonStr,
@@ -305,7 +305,7 @@ public class KafkaIOConfigTest
   @Test
   public void testDeserializeToOldIoConfig() throws IOException
   {
-    final KafkaIndexTaskIOConfig currentConfig = new KafkaIndexTaskIOConfig(
+    final PravegaIndexTaskIOConfig currentConfig = new PravegaIndexTaskIOConfig(
         0,
         "baseSequenceNamee",
         null,
@@ -356,7 +356,7 @@ public class KafkaIOConfigTest
     );
     final byte[] json = oldMapper.writeValueAsBytes(oldConfig);
 
-    final KafkaIndexTaskIOConfig currentConfig = (KafkaIndexTaskIOConfig) mapper.readValue(json, IOConfig.class);
+    final PravegaIndexTaskIOConfig currentConfig = (PravegaIndexTaskIOConfig) mapper.readValue(json, IOConfig.class);
     Assert.assertEquals(oldConfig.getTaskGroupId(), currentConfig.getTaskGroupId().intValue());
     Assert.assertEquals(oldConfig.getBaseSequenceName(), currentConfig.getBaseSequenceName());
     Assert.assertEquals(oldConfig.getStartPartitions().asStartPartitions(true), currentConfig.getStartSequenceNumbers());

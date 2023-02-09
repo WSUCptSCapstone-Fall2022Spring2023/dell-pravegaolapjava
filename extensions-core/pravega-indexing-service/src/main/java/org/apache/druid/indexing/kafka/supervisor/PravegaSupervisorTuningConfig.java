@@ -21,7 +21,7 @@ package org.apache.druid.indexing.kafka.supervisor;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.druid.indexing.kafka.KafkaIndexTaskTuningConfig;
+import org.apache.druid.indexing.kafka.PravegaIndexTaskTuningConfig;
 import org.apache.druid.indexing.seekablestream.supervisor.SeekableStreamSupervisorTuningConfig;
 import org.apache.druid.segment.IndexSpec;
 import org.apache.druid.segment.incremental.AppendableIndexSpec;
@@ -31,7 +31,7 @@ import org.joda.time.Period;
 
 import javax.annotation.Nullable;
 
-public class KafkaSupervisorTuningConfig extends KafkaIndexTaskTuningConfig
+public class PravegaSupervisorTuningConfig extends PravegaIndexTaskTuningConfig
     implements SeekableStreamSupervisorTuningConfig
 {
   private final Integer workerThreads;
@@ -42,9 +42,9 @@ public class KafkaSupervisorTuningConfig extends KafkaIndexTaskTuningConfig
   private final Duration shutdownTimeout;
   private final Duration offsetFetchPeriod;
 
-  public static KafkaSupervisorTuningConfig defaultConfig()
+  public static PravegaSupervisorTuningConfig defaultConfig()
   {
-    return new KafkaSupervisorTuningConfig(
+    return new PravegaSupervisorTuningConfig(
         null,
         null,
         null,
@@ -73,7 +73,7 @@ public class KafkaSupervisorTuningConfig extends KafkaIndexTaskTuningConfig
     );
   }
 
-  public KafkaSupervisorTuningConfig(
+  public PravegaSupervisorTuningConfig(
       @JsonProperty("appendableIndexSpec") @Nullable AppendableIndexSpec appendableIndexSpec,
       @JsonProperty("maxRowsInMemory") Integer maxRowsInMemory,
       @JsonProperty("maxBytesInMemory") Long maxBytesInMemory,
@@ -237,9 +237,9 @@ public class KafkaSupervisorTuningConfig extends KafkaIndexTaskTuningConfig
   }
 
   @Override
-  public KafkaIndexTaskTuningConfig convertToTaskTuningConfig()
+  public PravegaIndexTaskTuningConfig convertToTaskTuningConfig()
   {
-    return new KafkaIndexTaskTuningConfig(
+    return new PravegaIndexTaskTuningConfig(
         getAppendableIndexSpec(),
         getMaxRowsInMemory(),
         getMaxBytesInMemory(),

@@ -22,7 +22,7 @@ package org.apache.druid.indexing.kafka;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.apache.druid.indexing.kafka.supervisor.KafkaSupervisorTuningConfig;
+import org.apache.druid.indexing.kafka.supervisor.PravegaSupervisorTuningConfig;
 import org.apache.druid.indexing.kafka.test.TestModifiedKafkaIndexTaskTuningConfig;
 import org.apache.druid.jackson.DefaultObjectMapper;
 import org.apache.druid.segment.IndexSpec;
@@ -43,7 +43,7 @@ public class KafkaIndexTaskTuningConfigTest
   public KafkaIndexTaskTuningConfigTest()
   {
     mapper = new DefaultObjectMapper();
-    mapper.registerModules((Iterable<Module>) new KafkaIndexTaskModule().getJacksonModules());
+    mapper.registerModules((Iterable<Module>) new PravegaIndexTaskModule().getJacksonModules());
   }
 
   @Test
@@ -51,7 +51,7 @@ public class KafkaIndexTaskTuningConfigTest
   {
     String jsonStr = "{\"type\": \"kafka\"}";
 
-    KafkaIndexTaskTuningConfig config = (KafkaIndexTaskTuningConfig) mapper.readValue(
+    PravegaIndexTaskTuningConfig config = (PravegaIndexTaskTuningConfig) mapper.readValue(
         mapper.writeValueAsString(
             mapper.readValue(
                 jsonStr,
@@ -92,7 +92,7 @@ public class KafkaIndexTaskTuningConfigTest
                      + "  \"appendableIndexSpec\": { \"type\" : \"onheap\" }\n"
                      + "}";
 
-    KafkaIndexTaskTuningConfig config = (KafkaIndexTaskTuningConfig) mapper.readValue(
+    PravegaIndexTaskTuningConfig config = (PravegaIndexTaskTuningConfig) mapper.readValue(
         mapper.writeValueAsString(
             mapper.readValue(
                 jsonStr,
@@ -119,7 +119,7 @@ public class KafkaIndexTaskTuningConfigTest
   @Test
   public void testConvert()
   {
-    KafkaSupervisorTuningConfig original = new KafkaSupervisorTuningConfig(
+    PravegaSupervisorTuningConfig original = new PravegaSupervisorTuningConfig(
         null,
         1,
         null,
@@ -146,7 +146,7 @@ public class KafkaIndexTaskTuningConfigTest
         null,
         null
     );
-    KafkaIndexTaskTuningConfig copy = original.convertToTaskTuningConfig();
+    PravegaIndexTaskTuningConfig copy = original.convertToTaskTuningConfig();
 
     Assert.assertEquals(original.getAppendableIndexSpec(), copy.getAppendableIndexSpec());
     Assert.assertEquals(1, copy.getMaxRowsInMemory());
@@ -164,7 +164,7 @@ public class KafkaIndexTaskTuningConfigTest
   @Test
   public void testSerdeWithModifiedTuningConfigAddedField() throws IOException
   {
-    KafkaIndexTaskTuningConfig base = new KafkaIndexTaskTuningConfig(
+    PravegaIndexTaskTuningConfig base = new PravegaIndexTaskTuningConfig(
         null,
         1,
         null,
@@ -236,8 +236,8 @@ public class KafkaIndexTaskTuningConfigTest
     );
 
     String serialized = mapper.writeValueAsString(base);
-    KafkaIndexTaskTuningConfig deserialized =
-        mapper.readValue(serialized, KafkaIndexTaskTuningConfig.class);
+    PravegaIndexTaskTuningConfig deserialized =
+        mapper.readValue(serialized, PravegaIndexTaskTuningConfig.class);
 
     Assert.assertEquals(base.getAppendableIndexSpec(), deserialized.getAppendableIndexSpec());
     Assert.assertEquals(base.getMaxRowsInMemory(), deserialized.getMaxRowsInMemory());
@@ -261,7 +261,7 @@ public class KafkaIndexTaskTuningConfigTest
   @Test
   public void testEqualsAndHashCode()
   {
-    EqualsVerifier.forClass(KafkaIndexTaskTuningConfig.class)
+    EqualsVerifier.forClass(PravegaIndexTaskTuningConfig.class)
         .usingGetClass()
         .verify();
   }

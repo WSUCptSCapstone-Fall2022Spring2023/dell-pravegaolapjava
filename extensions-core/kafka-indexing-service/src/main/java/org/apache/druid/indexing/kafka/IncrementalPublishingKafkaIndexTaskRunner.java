@@ -59,11 +59,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class IncrementalPublishingKafkaIndexTaskRunner extends SeekableStreamIndexTaskRunner<Integer, Long, KafkaRecordEntity>
 {
-  private static final EmittingLogger log = new EmittingLogger(IncrementalPublishingKafkaIndexTaskRunner.class);
-  private final KafkaIndexTask task;
+  private static final EmittingLogger log = new EmittingLogger(IncrementalPublishingPravegaIndexTaskRunner.class);
+  private final PravegaIndexTask task;
 
   IncrementalPublishingKafkaIndexTaskRunner(
-      KafkaIndexTask task,
+      PravegaIndexTask task,
       @Nullable InputRowParser<ByteBuffer> parser,
       AuthorizerMapper authorizerMapper,
       LockGranularity lockGranularityToUse
@@ -181,13 +181,13 @@ public class IncrementalPublishingKafkaIndexTaskRunner extends SeekableStreamInd
       SeekableStreamSequenceNumbers<Integer, Long> partitions
   )
   {
-    return new KafkaDataSourceMetadata(partitions);
+    return new PravegaDataSourceMetadata(partitions);
   }
 
   @Override
   protected OrderedSequenceNumber<Long> createSequenceNumber(Long sequenceNumber)
   {
-    return KafkaSequenceNumber.of(sequenceNumber);
+    return PravegaSequenceNumber.of(sequenceNumber);
   }
 
   @Override

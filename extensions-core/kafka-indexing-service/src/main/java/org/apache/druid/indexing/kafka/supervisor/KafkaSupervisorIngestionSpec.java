@@ -28,19 +28,19 @@ public class KafkaSupervisorIngestionSpec extends SeekableStreamSupervisorIngest
 {
   private final DataSchema dataSchema;
   private final PravegaSupervisorIOConfig ioConfig;
-  private final KafkaSupervisorTuningConfig tuningConfig;
+  private final PravegaSupervisorTuningConfig tuningConfig;
 
   @JsonCreator
   public KafkaSupervisorIngestionSpec(
       @JsonProperty("dataSchema") DataSchema dataSchema,
       @JsonProperty("ioConfig") PravegaSupervisorIOConfig ioConfig,
-      @JsonProperty("tuningConfig") KafkaSupervisorTuningConfig tuningConfig
+      @JsonProperty("tuningConfig") PravegaSupervisorTuningConfig tuningConfig
   )
   {
     super(dataSchema, ioConfig, tuningConfig);
     this.dataSchema = dataSchema;
     this.ioConfig = ioConfig;
-    this.tuningConfig = tuningConfig == null ? KafkaSupervisorTuningConfig.defaultConfig() : tuningConfig;
+    this.tuningConfig = tuningConfig == null ? PravegaSupervisorTuningConfig.defaultConfig() : tuningConfig;
   }
 
   @Override
@@ -59,7 +59,7 @@ public class KafkaSupervisorIngestionSpec extends SeekableStreamSupervisorIngest
 
   @Override
   @JsonProperty("tuningConfig")
-  public KafkaSupervisorTuningConfig getTuningConfig()
+  public PravegaSupervisorTuningConfig getTuningConfig()
   {
     return tuningConfig;
   }

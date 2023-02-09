@@ -55,6 +55,6 @@ public class KafkaDataSourceMetadata extends SeekableStreamDataSourceMetadata<In
       SeekableStreamSequenceNumbers<Integer, Long> seekableStreamSequenceNumbers
   )
   {
-    return new KafkaDataSourceMetadata(seekableStreamSequenceNumbers);
+    return new PravegaDataSourceMetadata(seekableStreamSequenceNumbers);
   }
 }

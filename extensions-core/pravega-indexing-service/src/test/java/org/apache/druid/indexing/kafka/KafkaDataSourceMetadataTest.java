@@ -30,13 +30,13 @@ import java.util.Map;
 
 public class KafkaDataSourceMetadataTest
 {
-  private static final KafkaDataSourceMetadata START0 = startMetadata(ImmutableMap.of());
-  private static final KafkaDataSourceMetadata START1 = startMetadata(ImmutableMap.of(0, 2L, 1, 3L));
-  private static final KafkaDataSourceMetadata START2 = startMetadata(ImmutableMap.of(0, 2L, 1, 4L, 2, 5L));
-  private static final KafkaDataSourceMetadata START3 = startMetadata(ImmutableMap.of(0, 2L, 2, 5L));
-  private static final KafkaDataSourceMetadata END0 = endMetadata(ImmutableMap.of());
-  private static final KafkaDataSourceMetadata END1 = endMetadata(ImmutableMap.of(0, 2L, 2, 5L));
-  private static final KafkaDataSourceMetadata END2 = endMetadata(ImmutableMap.of(0, 2L, 1, 4L));
+  private static final PravegaDataSourceMetadata START0 = startMetadata(ImmutableMap.of());
+  private static final PravegaDataSourceMetadata START1 = startMetadata(ImmutableMap.of(0, 2L, 1, 3L));
+  private static final PravegaDataSourceMetadata START2 = startMetadata(ImmutableMap.of(0, 2L, 1, 4L, 2, 5L));
+  private static final PravegaDataSourceMetadata START3 = startMetadata(ImmutableMap.of(0, 2L, 2, 5L));
+  private static final PravegaDataSourceMetadata END0 = endMetadata(ImmutableMap.of());
+  private static final PravegaDataSourceMetadata END1 = endMetadata(ImmutableMap.of(0, 2L, 2, 5L));
+  private static final PravegaDataSourceMetadata END2 = endMetadata(ImmutableMap.of(0, 2L, 1, 4L));
 
   @Test
   public void testMatches()
@@ -161,13 +161,13 @@ public class KafkaDataSourceMetadataTest
     );
   }
 
-  private static KafkaDataSourceMetadata startMetadata(Map<Integer, Long> offsets)
+  private static PravegaDataSourceMetadata startMetadata(Map<Integer, Long> offsets)
   {
-    return new KafkaDataSourceMetadata(new SeekableStreamStartSequenceNumbers<>("foo", offsets, ImmutableSet.of()));
+    return new PravegaDataSourceMetadata(new SeekableStreamStartSequenceNumbers<>("foo", offsets, ImmutableSet.of()));
   }
 
-  private static KafkaDataSourceMetadata endMetadata(Map<Integer, Long> offsets)
+  private static PravegaDataSourceMetadata endMetadata(Map<Integer, Long> offsets)
   {
-    return new KafkaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>("foo", offsets));
+    return new PravegaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>("foo", offsets));
   }
 }

@@ -22,11 +22,9 @@ package org.apache.druid.indexing.kafka;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import io.pravega.client.admin.StreamManager;
 import io.pravega.client.segment.impl.Segment;
-import io.pravega.client.stream.EventRead;
-import io.pravega.client.stream.EventStreamReader;
-import io.pravega.client.stream.ReinitializationRequiredException;
-import io.pravega.client.stream.TruncatedDataException;
+import io.pravega.client.stream.*;
 import io.pravega.client.stream.impl.EventPointerImpl;
 import org.apache.druid.common.utils.IdUtils;
 import org.apache.druid.data.input.impl.ByteEntity;
@@ -61,12 +59,16 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, ByteEntity>
 {
   private final EventStreamReader<byte[]> consumer;
+  private String streamName;
+  private String scopeName;
+  private String readerName;  //We want some sort of reader name var -> string
+  private ReaderGroup readerGroup; // do we need reader group manager? If spec provides us with reader groups, we can just have a manager and access it thru the manager
+  private StreamManager streamManager;
   private boolean closed;
 
   public PravegaEventSupplier(
@@ -81,7 +83,6 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
 
   @VisibleForTesting
   public PravegaEventSupplier(
-      //KafkaConsumer<byte[], byte[]> consumer
       EventStreamReader<byte[]> consumer
   )
   {
@@ -90,8 +91,7 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
 
   // assign a set of stream partitions to the consumer, contains the partition IDs
   // we'd get all the segments from a reader group
-  // also called from seekablestreamindextaskrunner.java
-  // also called from seeakablestreamsupervisor -> assignRecordSupplierToPartitionIDs()
+  // also called from seekablestreamindextaskrunner.java and seeakablestreamsupervisor -> assignRecordSupplierToPartitionIDs()
     // supervisor can grab latest and earliest offsets to be stored in druid metadata (as well as partitions)
   @Override
   public void assign(Set<StreamPartition<String>> streamPartitions)
@@ -114,23 +114,28 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
 
   // called from RecordSupplierInputSource.java
   // called from Seekablestreamsupervisor
+  // utilize streammanager to fetch the tail, we want to seek to tail so we'd need to modify something
   @Override
   public void seekToEarliest(Set<StreamPartition<String>> partitions)
   {
-    wrapExceptions(() -> consumer.seekToBeginning(partitions
-                                                      .stream()
-                                                      .map(e -> new TopicPartition(e.getStream(), e.getPartitionId()))
-                                                      .collect(Collectors.toList())));
+    StreamCut head = streamManager.getStreamInfo(scopeName, streamName).getHeadStreamCut();
+
+    readerGroup.resetReaderGroup(ReaderGroupConfig.builder()
+            .startFromStreamCuts(Collections.singletonMap(Stream.of(scopeName, streamName), head)) // create a map of Stream,StreamCut
+            .build());
+    // force all readers to this new pos.
   }
 
   // called from RecordSupplierInputSource.java
   @Override
   public void seekToLatest(Set<StreamPartition<String>> partitions)
   {
-    wrapExceptions(() -> consumer.seekToEnd(partitions
-                                                .stream()
-                                                .map(e -> new TopicPartition(e.getStream(), e.getPartitionId()))
-                                                .collect(Collectors.toList())));
+    //concern: if we have 5 readers, is this called 5 times? or just once and applied to all readers
+    StreamCut tail = streamManager.getStreamInfo(scopeName, streamName).getTailStreamCut();
+
+    readerGroup.resetReaderGroup(ReaderGroupConfig.builder()
+            .startFromStreamCuts(Collections.singletonMap(Stream.of(scopeName, streamName), tail)) // create a map of Stream,StreamCut
+            .build());
   }
 
   // druid might use this function to recognize which partitions exist?
@@ -155,46 +160,46 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
     List<OrderedPartitionableRecord<String, ByteBuffer, ByteEntity>> polledEvents = new ArrayList<>();
 
     try {
-      // Think we need a for loop to read until no more events cuz if we call poll() outside in a for loop, we'd be returning different lists each time
-      // do while event.getEvent() != null? or loop for x amount of time?
-      // introduce a while with timeout 0 after the line below is executed so we can return a list of many
-      EventRead<byte[]> event =  consumer.readNextEvent(timeout);
+      EventRead<byte[]> event = consumer.readNextEvent(timeout);
+      //if (event != null) we need a check for the initial event read
+      do {
 
-      if (event.getEvent() != null) {
-        // Make private method accessible from package with reflection
-        EventPointerImpl ptr = (EventPointerImpl) event.getEventPointer().asImpl();
-        Method getSegmentMethod = EventPointerImpl.class.getDeclaredMethod("getSegment");
-        getSegmentMethod.setAccessible(true);
-        Segment segment = (Segment)getSegmentMethod.invoke(ptr);
-
-        // Calling the constructor
-        polledEvents.add(new OrderedPartitionableRecord<>(
-                event.getEventPointer().getStream().getStreamName(),   //stream is our topic name
-                segment.getScopedName(),                              // partition id [use reader group IDs instead]
-                event.getEventPointer().toBytes(),                    // serialized offset rep. as bytes that contain partit id, offset , and length combinded cause we'll need length later
-                ImmutableList.of(new ByteEntity((event.getEvent())))
-        ));
-      }
-    } catch (ReinitializationRequiredException | NoSuchMethodException e) { //added exception for the getDeclaredmethod()
+        if (event.getEvent() != null) {
+          // Calling the constructor
+          polledEvents.add(new OrderedPartitionableRecord<>(
+                  event.getEventPointer().getStream().getStreamName(),   //stream is our topic name
+                  readerName,                                           // partition id [use reader group IDs instead] need a class var for reader group
+                  event.getPosition().toBytes(),                         // getting all offsets and partition IDs for the current reader, there may be a length
+                  ImmutableList.of(new ByteEntity((event.getEvent())))
+          ));
+        }
+        else if (event.isCheckpoint()){
+          // empty body, allow next event to be read to pass the checkpoint
+          // coord. checkpoints with druid maybe
+        }
+      } while ((event = consumer.readNextEvent(0)) != null) ;
+    } catch (ReinitializationRequiredException e){
       //There are certain circumstances where the reader needs to be reinitialized
-      //Not sure what to do yet, we dont want to ignore this
+      //Not sure what to do yet, we dont want to ignore this - reinstantiate our consumer or reader?
       e.printStackTrace();
+      // init consumer() -> re create the reader to overwrite our consumer
     } catch (TruncatedDataException e) { //We'd want to skip to the next event for this exception
       e.printStackTrace();
-    } catch (InvocationTargetException | IllegalAccessException e ) {
-      throw new RuntimeException(e);
     }
     return polledEvents;
   }
 
+
   // could be equivalent to ReaderGroup.Config -> get ending stream cuts. patitionID should be string
   // called from Seekablestreamsupervisor
+  // our position refers to all the offsets that a reader has, ByteBuffer for us? Might not be implementable for us
   @Override
-  public Long getLatestSequenceNumber(StreamPartition<String> partition)
+  public ByteBuffer getLatestSequenceNumber(StreamPartition<String> partition)
   {
-    Long currPos = getPosition(partition);
+    streamManager
+    ByteBuffer currPos = getPosition(partition);
     seekToLatest(Collections.singleton(partition));
-    Long nextPos = getPosition(partition);
+    ByteBuffer nextPos = getPosition(partition);
     seek(partition, currPos);
     return nextPos;
   }
@@ -202,31 +207,28 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
   // could be equivalent to ReaderGroup.Config -> get starting stream cuts
   // called from Seekablestreamsupervisor
   @Override
-  public Long getEarliestSequenceNumber(StreamPartition<String> partition)
+  public ByteBuffer getEarliestSequenceNumber(StreamPartition<String> partition)
   {
-    Long currPos = getPosition(partition);
+    ByteBuffer currPos = getPosition(partition);
     seekToEarliest(Collections.singleton(partition));
-    Long nextPos = getPosition(partition);
+    ByteBuffer nextPos = getPosition(partition);
     seek(partition, currPos);
     return nextPos;
   }
 
   @Override
-  public boolean isOffsetAvailable(StreamPartition<String> partition, OrderedSequenceNumber<Long> offset)
+  public boolean isOffsetAvailable(StreamPartition<String> partition, OrderedSequenceNumber<ByteBuffer> offset)
   {
-    final Long earliestOffset = getEarliestSequenceNumber(partition);
+    final ByteBuffer earliestOffset = getEarliestSequenceNumber(partition);
     return earliestOffset != null
-           && offset.isAvailableWithEarliest(KafkaSequenceNumber.of(earliestOffset));
+           && offset.isAvailableWithEarliest(PravegaSequenceNumber.of(earliestOffset));
   }
 
   // not called anywhere else except in the kafka/pravega indexing service
   @Override
-  public Long getPosition(StreamPartition<String> partition)
+  public ByteBuffer getPosition(StreamPartition<String> partition)
   {
-    return wrapExceptions(() -> consumer.position(new TopicPartition(
-        partition.getStream(),
-        partition.getPartitionId()
-    )));
+    throw new UnsupportedOperationException();
   }
 
   // returns set of unique stream partition ids
@@ -237,13 +239,7 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
   @Override
   public Set<String> getPartitionIds(String stream)
   {
-    return wrapExceptions(() -> {
-      List<PartitionInfo> partitions = consumer.partitionsFor(stream);
-      if (partitions == null) {
-        throw new ISE("Topic [%s] is not found in KafkaConsumer's list of topics", stream);
-      }
-      return partitions.stream().map(PartitionInfo::partition).collect(Collectors.toSet());
-    });
+    return readerGroup.getOnlineReaders();
   }
 
   // recordsupplierinputsource and seekablestreamsupervisor call close()
@@ -332,7 +328,7 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
       KafkaConfigOverrides configOverrides
   )
   {
-    final Map<String, Object> consumerConfigs = KafkaConsumerConfigs.getConsumerProperties();
+    final Map<String, Object> consumerConfigs = PravegaConsumerConfigs.getConsumerProperties();
     final Properties props = new Properties();
     Map<String, Object> effectiveConsumerProperties;
     if (configOverrides != null) {

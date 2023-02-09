@@ -25,8 +25,8 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Binder;
 import org.apache.druid.data.input.kafkainput.KafkaInputFormat;
-import org.apache.druid.indexing.kafka.supervisor.KafkaSupervisorSpec;
-import org.apache.druid.indexing.kafka.supervisor.KafkaSupervisorTuningConfig;
+import org.apache.druid.indexing.kafka.supervisor.PravegaSupervisorSpec;
+import org.apache.druid.indexing.kafka.supervisor.PravegaSupervisorTuningConfig;
 import org.apache.druid.initialization.DruidModule;
 
 import java.util.List;
@@ -39,14 +39,14 @@ public class KafkaIndexTaskModule implements DruidModule
     return ImmutableList.of(
         new SimpleModule(getClass().getSimpleName())
             .registerSubtypes(
-                new NamedType(KafkaIndexTask.class, "index_kafka"),
-                new NamedType(KafkaDataSourceMetadata.class, "kafka"),
-                new NamedType(KafkaIndexTaskIOConfig.class, "kafka"),
+                new NamedType(PravegaIndexTask.class, "index_kafka"),
+                new NamedType(PravegaDataSourceMetadata.class, "kafka"),
+                new NamedType(PravegaIndexTaskIOConfig.class, "kafka"),
                 // "KafkaTuningConfig" is not the ideal name, but is needed for backwards compatibility.
                 // (Older versions of Druid didn't specify a type name and got this one by default.)
-                new NamedType(KafkaIndexTaskTuningConfig.class, "KafkaTuningConfig"),
-                new NamedType(KafkaSupervisorTuningConfig.class, "kafka"),
-                new NamedType(KafkaSupervisorSpec.class, "kafka"),
+                new NamedType(PravegaIndexTaskTuningConfig.class, "KafkaTuningConfig"),
+                new NamedType(PravegaSupervisorTuningConfig.class, "kafka"),
+                new NamedType(PravegaSupervisorSpec.class, "kafka"),
                 new NamedType(PravegaSamplerSpec.class, "kafka"),
                 new NamedType(KafkaInputFormat.class, "kafka")
             )

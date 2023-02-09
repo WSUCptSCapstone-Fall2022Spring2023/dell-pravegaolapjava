@@ -27,15 +27,15 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 
-public class KafkaSupervisorReportPayload extends SeekableStreamSupervisorReportPayload<Integer, Long>
+public class PravegaSupervisorReportPayload extends SeekableStreamSupervisorReportPayload<Integer, Long>
 {
-  public KafkaSupervisorReportPayload(
+  public PravegaSupervisorReportPayload(
       String dataSource,
       String topic,
       int partitions,
       int replicas,
       long durationSeconds,
-      @Nullable Map<Integer, Long> latestOffsets,
+      @Nullable Map<Integer, Long> latestOffsets, //string, bytebuffer?
       @Nullable Map<Integer, Long> minimumLag,
       @Nullable Long aggregateLag,
       @Nullable DateTime offsetsLastUpdated,

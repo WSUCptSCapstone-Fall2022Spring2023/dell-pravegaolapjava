@@ -31,7 +31,7 @@ import org.apache.druid.data.input.impl.LongDimensionSchema;
 import org.apache.druid.data.input.impl.StringDimensionSchema;
 import org.apache.druid.data.input.impl.TimestampSpec;
 import org.apache.druid.indexing.kafka.supervisor.PravegaSupervisorIOConfig;
-import org.apache.druid.indexing.kafka.supervisor.KafkaSupervisorSpec;
+import org.apache.druid.indexing.kafka.supervisor.PravegaSupervisorSpec;
 import org.apache.druid.indexing.kafka.test.TestBroker;
 import org.apache.druid.indexing.overlord.sampler.InputSourceSampler;
 import org.apache.druid.indexing.overlord.sampler.SamplerConfig;
@@ -124,7 +124,7 @@ public class KafkaSamplerSpecTest extends InitializedNullHandlingTest
   {
     insertData(generateRecords(TOPIC));
 
-    KafkaSupervisorSpec supervisorSpec = new KafkaSupervisorSpec(
+    PravegaSupervisorSpec supervisorSpec = new PravegaSupervisorSpec(
         null,
         DATA_SCHEMA,
         null,
@@ -298,7 +298,7 @@ public class KafkaSamplerSpecTest extends InitializedNullHandlingTest
   @Test
   public void testInvalidKafkaConfig()
   {
-    KafkaSupervisorSpec supervisorSpec = new KafkaSupervisorSpec(
+    PravegaSupervisorSpec supervisorSpec = new PravegaSupervisorSpec(
         null,
         DATA_SCHEMA,
         null,

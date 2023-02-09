@@ -30,9 +30,9 @@ import org.joda.time.Period;
 import javax.annotation.Nullable;
 import java.io.File;
 
-public class KafkaIndexTaskTuningConfig extends SeekableStreamIndexTaskTuningConfig
+public class PravegaIndexTaskTuningConfig extends SeekableStreamIndexTaskTuningConfig
 {
-  public KafkaIndexTaskTuningConfig(
+  public PravegaIndexTaskTuningConfig(
       @Nullable AppendableIndexSpec appendableIndexSpec,
       @Nullable Integer maxRowsInMemory,
       @Nullable Long maxBytesInMemory,
@@ -79,7 +79,7 @@ public class KafkaIndexTaskTuningConfig extends SeekableStreamIndexTaskTuningCon
   }
 
   @JsonCreator
-  private KafkaIndexTaskTuningConfig(
+  private PravegaIndexTaskTuningConfig(
       @JsonProperty("appendableIndexSpec") @Nullable AppendableIndexSpec appendableIndexSpec,
       @JsonProperty("maxRowsInMemory") @Nullable Integer maxRowsInMemory,
       @JsonProperty("maxBytesInMemory") @Nullable Long maxBytesInMemory,
@@ -124,9 +124,9 @@ public class KafkaIndexTaskTuningConfig extends SeekableStreamIndexTaskTuningCon
   }
 
   @Override
-  public KafkaIndexTaskTuningConfig withBasePersistDirectory(File dir)
+  public PravegaIndexTaskTuningConfig withBasePersistDirectory(File dir)
   {
-    return new KafkaIndexTaskTuningConfig(
+    return new PravegaIndexTaskTuningConfig(
         getAppendableIndexSpec(),
         getMaxRowsInMemory(),
         getMaxBytesInMemory(),
@@ -173,5 +173,4 @@ public class KafkaIndexTaskTuningConfig extends SeekableStreamIndexTaskTuningCon
            ", maxSavedParseExceptions=" + getMaxSavedParseExceptions() +
            '}';
   }
-
 }

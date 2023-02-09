@@ -25,16 +25,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import org.apache.druid.data.input.impl.ByteEntity;
 import org.apache.druid.data.input.pravega.PravegaEventEntity;
 import org.apache.druid.indexing.common.task.TaskResource;
 import org.apache.druid.indexing.seekablestream.SeekableStreamIndexTask;
 import org.apache.druid.indexing.seekablestream.SeekableStreamIndexTaskRunner;
 import org.apache.druid.segment.indexing.DataSchema;
 
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
-public class KafkaIndexTask extends SeekableStreamIndexTask<Integer, Long, PravegaEventEntity>
+public class PravegaIndexTask extends SeekableStreamIndexTask<String, ByteBuffer, ByteEntity>
 {
   private static final String TYPE = "index_kafka";
 
@@ -44,12 +46,12 @@ public class KafkaIndexTask extends SeekableStreamIndexTask<Integer, Long, Prave
   private long pollRetryMs = 30000;
 
   @JsonCreator
-  public KafkaIndexTask(
+  public PravegaIndexTask(
       @JsonProperty("id") String id,
       @JsonProperty("resource") TaskResource taskResource,
       @JsonProperty("dataSchema") DataSchema dataSchema,
-      @JsonProperty("tuningConfig") KafkaIndexTaskTuningConfig tuningConfig,
-      @JsonProperty("ioConfig") KafkaIndexTaskIOConfig ioConfig,
+      @JsonProperty("tuningConfig") PravegaIndexTaskTuningConfig tuningConfig,
+      @JsonProperty("ioConfig") PravegaIndexTaskIOConfig ioConfig,
       @JsonProperty("context") Map<String, Object> context,
       @JacksonInject ObjectMapper configMapper
   )
@@ -76,11 +78,12 @@ public class KafkaIndexTask extends SeekableStreamIndexTask<Integer, Long, Prave
     return pollRetryMs;
   }
 
+  // creating task runner (seekablestream has task runner) and record supplier
   @Override
-  protected SeekableStreamIndexTaskRunner<Integer, Long, PravegaEventEntity> createTaskRunner()
+  protected SeekableStreamIndexTaskRunner<String, ByteBuffer, ByteEntity> createTaskRunner()
   {
     //noinspection unchecked
-    return new IncrementalPublishingKafkaIndexTaskRunner(
+    return new IncrementalPublishingPravegaIndexTaskRunner(
         this,
         dataSchema.getParser(),
         authorizerMapper,
@@ -94,7 +97,7 @@ public class KafkaIndexTask extends SeekableStreamIndexTask<Integer, Long, Prave
     ClassLoader currCtxCl = Thread.currentThread().getContextClassLoader();
     try {
       Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-      KafkaIndexTaskIOConfig kafkaIndexTaskIOConfig = (KafkaIndexTaskIOConfig) super.ioConfig;
+      PravegaIndexTaskIOConfig kafkaIndexTaskIOConfig = (PravegaIndexTaskIOConfig) super.ioConfig;
       final Map<String, Object> props = new HashMap<>(kafkaIndexTaskIOConfig.getConsumerProperties());
 
       props.put("auto.offset.reset", "none");
@@ -108,9 +111,9 @@ public class KafkaIndexTask extends SeekableStreamIndexTask<Integer, Long, Prave
 
   @Override
   @JsonProperty
-  public KafkaIndexTaskTuningConfig getTuningConfig()
+  public PravegaIndexTaskTuningConfig getTuningConfig()
   {
-    return (KafkaIndexTaskTuningConfig) super.getTuningConfig();
+    return (PravegaIndexTaskTuningConfig) super.getTuningConfig();
   }
 
   @VisibleForTesting
@@ -121,9 +124,9 @@ public class KafkaIndexTask extends SeekableStreamIndexTask<Integer, Long, Prave
 
   @Override
   @JsonProperty("ioConfig")
-  public KafkaIndexTaskIOConfig getIOConfig()
+  public PravegaIndexTaskIOConfig getIOConfig()
   {
-    return (KafkaIndexTaskIOConfig) super.getIOConfig();
+    return (PravegaIndexTaskIOConfig) super.getIOConfig();
   }
 
   @Override

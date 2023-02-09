@@ -24,8 +24,8 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
-import org.apache.druid.indexing.kafka.KafkaConsumerConfigs;
-import org.apache.druid.indexing.kafka.KafkaIndexTaskModule;
+import org.apache.druid.indexing.kafka.PravegaConsumerConfigs;
+import org.apache.druid.indexing.kafka.PravegaIndexTaskModule;
 import org.apache.druid.indexing.kafka.PravegaEventSupplier;
 import org.apache.druid.indexing.seekablestream.supervisor.IdleConfig;
 import org.apache.druid.indexing.seekablestream.supervisor.autoscaler.LagBasedAutoScalerConfig;
@@ -50,7 +50,7 @@ public class KafkaSupervisorIOConfigTest
   public KafkaSupervisorIOConfigTest()
   {
     mapper = new DefaultObjectMapper();
-    mapper.registerModules((Iterable<Module>) new KafkaIndexTaskModule().getJacksonModules());
+    mapper.registerModules((Iterable<Module>) new PravegaIndexTaskModule().getJacksonModules());
   }
 
   @Rule
@@ -287,7 +287,7 @@ public class KafkaSupervisorIOConfigTest
     autoScalerConfig.put("scaleOutStep", 2);
     autoScalerConfig.put("minTriggerScaleActionFrequencyMillis", 1200000);
 
-    final Map<String, Object> consumerProperties = KafkaConsumerConfigs.getConsumerProperties();
+    final Map<String, Object> consumerProperties = PravegaConsumerConfigs.getConsumerProperties();
     consumerProperties.put("bootstrap.servers", "localhost:8082");
 
     PravegaSupervisorIOConfig kafkaSupervisorIOConfig = new PravegaSupervisorIOConfig(
@@ -328,7 +328,7 @@ public class KafkaSupervisorIOConfigTest
     idleConfig.put("enabled", true);
     idleConfig.put("inactiveAfterMillis", 600000L);
 
-    final Map<String, Object> consumerProperties = KafkaConsumerConfigs.getConsumerProperties();
+    final Map<String, Object> consumerProperties = PravegaConsumerConfigs.getConsumerProperties();
     consumerProperties.put("bootstrap.servers", "localhost:8082");
 
     PravegaSupervisorIOConfig kafkaSupervisorIOConfig = new PravegaSupervisorIOConfig(

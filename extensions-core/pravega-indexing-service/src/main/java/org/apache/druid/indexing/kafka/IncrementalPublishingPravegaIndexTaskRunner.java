@@ -21,6 +21,7 @@ package org.apache.druid.indexing.kafka;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.druid.data.input.impl.ByteEntity;
 import org.apache.druid.data.input.impl.InputRowParser;
 import org.apache.druid.data.input.pravega.PravegaEventEntity;
 import org.apache.druid.indexing.common.LockGranularity;
@@ -57,13 +58,13 @@ import java.util.concurrent.TimeUnit;
 /**
  * Kafka indexing task runner supporting incremental segments publishing
  */
-public class IncrementalPublishingKafkaIndexTaskRunner extends SeekableStreamIndexTaskRunner<Integer, Long, PravegaEventEntity>
+public class IncrementalPublishingPravegaIndexTaskRunner extends SeekableStreamIndexTaskRunner<String, ByteBuffer, ByteEntity>
 {
-  private static final EmittingLogger log = new EmittingLogger(IncrementalPublishingKafkaIndexTaskRunner.class);
-  private final KafkaIndexTask task;
+  private static final EmittingLogger log = new EmittingLogger(IncrementalPublishingPravegaIndexTaskRunner.class);
+  private final PravegaIndexTask task;
 
-  IncrementalPublishingKafkaIndexTaskRunner(
-      KafkaIndexTask task,
+  IncrementalPublishingPravegaIndexTaskRunner(
+      PravegaIndexTask task,
       @Nullable InputRowParser<ByteBuffer> parser,
       AuthorizerMapper authorizerMapper,
       LockGranularity lockGranularityToUse
@@ -86,8 +87,8 @@ public class IncrementalPublishingKafkaIndexTaskRunner extends SeekableStreamInd
 
   @Nonnull
   @Override
-  protected List<OrderedPartitionableRecord<Integer, Long, PravegaEventEntity>> getRecords(
-      RecordSupplier<Integer, Long, PravegaEventEntity> recordSupplier,
+  protected List<OrderedPartitionableRecord<String, ByteBuffer, ByteEntity>> getRecords(
+      RecordSupplier<String, ByteBuffer, ByteEntity> recordSupplier,
       TaskToolbox toolbox
   ) throws Exception
   {
@@ -107,7 +108,7 @@ public class IncrementalPublishingKafkaIndexTaskRunner extends SeekableStreamInd
   }
 
   @Override
-  protected SeekableStreamEndSequenceNumbers<Integer, Long> deserializePartitionsFromMetadata(
+  protected SeekableStreamEndSequenceNumbers<String, ByteBuffer> deserializePartitionsFromMetadata(
       ObjectMapper mapper,
       Object object
   )
@@ -115,14 +116,14 @@ public class IncrementalPublishingKafkaIndexTaskRunner extends SeekableStreamInd
     return mapper.convertValue(object, mapper.getTypeFactory().constructParametrizedType(
         SeekableStreamEndSequenceNumbers.class,
         SeekableStreamEndSequenceNumbers.class,
-        Integer.class,
-        Long.class
+        Integer.class, //string?
+        Long.class     // bytebuffer?
     ));
   }
 
   private void possiblyResetOffsetsOrWait(
       Map<TopicPartition, Long> outOfRangePartitions,
-      RecordSupplier<Integer, Long, PravegaEventEntity> recordSupplier,
+      RecordSupplier<String, ByteBuffer, ByteEntity> recordSupplier,
       TaskToolbox taskToolbox
   ) throws InterruptedException, IOException
   {
@@ -177,24 +178,24 @@ public class IncrementalPublishingKafkaIndexTaskRunner extends SeekableStreamInd
   }
 
   @Override
-  protected SeekableStreamDataSourceMetadata<Integer, Long> createDataSourceMetadata(
-      SeekableStreamSequenceNumbers<Integer, Long> partitions
+  protected SeekableStreamDataSourceMetadata<String, ByteBuffer> createDataSourceMetadata(
+      SeekableStreamSequenceNumbers<String, ByteBuffer> partitions
   )
   {
-    return new KafkaDataSourceMetadata(partitions);
+    return new PravegaDataSourceMetadata(partitions);
   }
 
   @Override
   protected OrderedSequenceNumber<Long> createSequenceNumber(Long sequenceNumber)
   {
-    return KafkaSequenceNumber.of(sequenceNumber);
+    return PravegaSequenceNumber.of(sequenceNumber);
   }
 
   @Override
   protected void possiblyResetDataSourceMetadata(
       TaskToolbox toolbox,
-      RecordSupplier<Integer, Long, PravegaEventEntity> recordSupplier,
-      Set<StreamPartition<Integer>> assignment
+      RecordSupplier<String, ByteBuffer, ByteEntity>recordSupplier,
+      Set<StreamPartition<String>> assignment
   )
   {
     // do nothing
@@ -213,9 +214,9 @@ public class IncrementalPublishingKafkaIndexTaskRunner extends SeekableStreamInd
   }
 
   @Override
-  public TypeReference<List<SequenceMetadata<Integer, Long>>> getSequenceMetadataTypeReference()
+  public TypeReference<List<SequenceMetadata<String, ByteBuffer>>> getSequenceMetadataTypeReference()
   {
-    return new TypeReference<List<SequenceMetadata<Integer, Long>>>()
+    return new TypeReference<List<SequenceMetadata<String, ByteBuffer>>>()
     {
     };
   }

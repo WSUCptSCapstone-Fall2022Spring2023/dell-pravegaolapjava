@@ -33,14 +33,14 @@ import org.joda.time.DateTime;
 import javax.annotation.Nullable;
 import java.util.Map;
 
-public class KafkaIndexTaskIOConfig extends SeekableStreamIndexTaskIOConfig<Integer, Long>
+public class PravegaIndexTaskIOConfig extends SeekableStreamIndexTaskIOConfig<Integer, Long>
 {
   private final Map<String, Object> consumerProperties;
   private final long pollTimeout;
   private final KafkaConfigOverrides configOverrides;
 
   @JsonCreator
-  public KafkaIndexTaskIOConfig(
+  public PravegaIndexTaskIOConfig(
       @JsonProperty("taskGroupId") @Nullable Integer taskGroupId, // can be null for backward compabitility
       @JsonProperty("baseSequenceName") String baseSequenceName,
       // startPartitions and endPartitions exist to be able to read old ioConfigs in metadata store
@@ -91,7 +91,7 @@ public class KafkaIndexTaskIOConfig extends SeekableStreamIndexTaskIOConfig<Inte
     }
   }
 
-  public KafkaIndexTaskIOConfig(
+  public PravegaIndexTaskIOConfig(
       int taskGroupId,
       String baseSequenceName,
       SeekableStreamStartSequenceNumbers<Integer, Long> startSequenceNumbers,

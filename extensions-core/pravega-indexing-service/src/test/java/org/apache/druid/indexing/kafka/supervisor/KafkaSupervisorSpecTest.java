@@ -22,8 +22,8 @@ package org.apache.druid.indexing.kafka.supervisor;
 import com.fasterxml.jackson.databind.InjectableValues;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.druid.indexing.kafka.KafkaIndexTaskClientFactory;
-import org.apache.druid.indexing.kafka.KafkaIndexTaskModule;
+import org.apache.druid.indexing.kafka.PravegaIndexTaskClientFactory;
+import org.apache.druid.indexing.kafka.PravegaIndexTaskModule;
 import org.apache.druid.indexing.overlord.IndexerMetadataStorageCoordinator;
 import org.apache.druid.indexing.overlord.TaskMaster;
 import org.apache.druid.indexing.overlord.TaskStorage;
@@ -52,7 +52,7 @@ public class KafkaSupervisorSpecTest
             .addValue(TaskStorage.class, null)
             .addValue(TaskMaster.class, null)
             .addValue(IndexerMetadataStorageCoordinator.class, null)
-            .addValue(KafkaIndexTaskClientFactory.class, null)
+            .addValue(PravegaIndexTaskClientFactory.class, null)
             .addValue(ObjectMapper.class, mapper)
             .addValue(ServiceEmitter.class, new NoopServiceEmitter())
             .addValue(DruidMonitorSchedulerConfig.class, null)
@@ -60,7 +60,7 @@ public class KafkaSupervisorSpecTest
             .addValue(SupervisorStateManagerConfig.class, null)
             .addValue(ExprMacroTable.class.getName(), LookupEnabledTestExprMacroTable.INSTANCE)
     );
-    mapper.registerModules((Iterable<Module>) new KafkaIndexTaskModule().getJacksonModules());
+    mapper.registerModules((Iterable<Module>) new PravegaIndexTaskModule().getJacksonModules());
   }
 
   @Test
@@ -122,7 +122,7 @@ public class KafkaSupervisorSpecTest
                   + "    \"taskCount\": 1\n"
                   + "  }\n"
                   + "}";
-    KafkaSupervisorSpec spec = mapper.readValue(json, KafkaSupervisorSpec.class);
+    PravegaSupervisorSpec spec = mapper.readValue(json, PravegaSupervisorSpec.class);
 
     Assert.assertNotNull(spec);
     Assert.assertNotNull(spec.getDataSchema());
@@ -140,7 +140,7 @@ public class KafkaSupervisorSpecTest
     Assert.assertTrue(serialized.contains("\"suspended\":false"));
     Assert.assertTrue(serialized.contains("\"parser\":{"));
 
-    KafkaSupervisorSpec spec2 = mapper.readValue(serialized, KafkaSupervisorSpec.class);
+    PravegaSupervisorSpec spec2 = mapper.readValue(serialized, PravegaSupervisorSpec.class);
 
     String stable = mapper.writeValueAsString(spec2);
 
@@ -208,7 +208,7 @@ public class KafkaSupervisorSpecTest
                   + "    \"taskCount\": 1\n"
                   + "  }\n"
                   + "}";
-    KafkaSupervisorSpec spec = mapper.readValue(json, KafkaSupervisorSpec.class);
+    PravegaSupervisorSpec spec = mapper.readValue(json, PravegaSupervisorSpec.class);
 
     Assert.assertNotNull(spec);
     Assert.assertNotNull(spec.getDataSchema());
@@ -226,7 +226,7 @@ public class KafkaSupervisorSpecTest
     Assert.assertTrue(serialized.contains("\"suspended\":false"));
     Assert.assertTrue(serialized.contains("\"inputFormat\":{"));
 
-    KafkaSupervisorSpec spec2 = mapper.readValue(serialized, KafkaSupervisorSpec.class);
+    PravegaSupervisorSpec spec2 = mapper.readValue(serialized, PravegaSupervisorSpec.class);
 
     String stable = mapper.writeValueAsString(spec2);
 
@@ -294,7 +294,7 @@ public class KafkaSupervisorSpecTest
                   + "  }\n"
                   + "  }\n"
                   + "}";
-    KafkaSupervisorSpec spec = mapper.readValue(json, KafkaSupervisorSpec.class);
+    PravegaSupervisorSpec spec = mapper.readValue(json, PravegaSupervisorSpec.class);
 
     Assert.assertNotNull(spec);
     Assert.assertNotNull(spec.getDataSchema());
@@ -312,7 +312,7 @@ public class KafkaSupervisorSpecTest
     Assert.assertTrue(serialized.contains("\"suspended\":false"));
     Assert.assertTrue(serialized.contains("\"parser\":{"));
 
-    KafkaSupervisorSpec spec2 = mapper.readValue(serialized, KafkaSupervisorSpec.class);
+    PravegaSupervisorSpec spec2 = mapper.readValue(serialized, PravegaSupervisorSpec.class);
 
     String stable = mapper.writeValueAsString(spec2);
 
@@ -382,7 +382,7 @@ public class KafkaSupervisorSpecTest
                   + "  }\n"
                   + "  }\n"
                   + "}";
-    KafkaSupervisorSpec spec = mapper.readValue(json, KafkaSupervisorSpec.class);
+    PravegaSupervisorSpec spec = mapper.readValue(json, PravegaSupervisorSpec.class);
 
     Assert.assertNotNull(spec);
     Assert.assertNotNull(spec.getDataSchema());
@@ -400,7 +400,7 @@ public class KafkaSupervisorSpecTest
     Assert.assertTrue(serialized.contains("\"suspended\":false"));
     Assert.assertTrue(serialized.contains("\"inputFormat\":{"));
 
-    KafkaSupervisorSpec spec2 = mapper.readValue(serialized, KafkaSupervisorSpec.class);
+    PravegaSupervisorSpec spec2 = mapper.readValue(serialized, PravegaSupervisorSpec.class);
 
     String stable = mapper.writeValueAsString(spec2);
 
@@ -466,7 +466,7 @@ public class KafkaSupervisorSpecTest
                   + "    \"taskCount\": 1\n"
                   + "  }\n"
                   + "}";
-    KafkaSupervisorSpec spec = mapper.readValue(json, KafkaSupervisorSpec.class);
+    PravegaSupervisorSpec spec = mapper.readValue(json, PravegaSupervisorSpec.class);
 
     Assert.assertNotNull(spec);
     Assert.assertNotNull(spec.getDataSchema());
@@ -484,13 +484,13 @@ public class KafkaSupervisorSpecTest
     Assert.assertTrue(suspendedSerialized.contains("\"indexSpec\":{"));
     Assert.assertTrue(suspendedSerialized.contains("\"suspended\":true"));
 
-    KafkaSupervisorSpec suspendedSpec = mapper.readValue(suspendedSerialized, KafkaSupervisorSpec.class);
+    PravegaSupervisorSpec suspendedSpec = mapper.readValue(suspendedSerialized, PravegaSupervisorSpec.class);
 
     Assert.assertTrue(suspendedSpec.isSuspended());
 
     String runningSerialized = mapper.writeValueAsString(spec.createRunningSpec());
 
-    KafkaSupervisorSpec runningSpec = mapper.readValue(runningSerialized, KafkaSupervisorSpec.class);
+    PravegaSupervisorSpec runningSpec = mapper.readValue(runningSerialized, PravegaSupervisorSpec.class);
 
     Assert.assertFalse(runningSpec.isSuspended());
   }

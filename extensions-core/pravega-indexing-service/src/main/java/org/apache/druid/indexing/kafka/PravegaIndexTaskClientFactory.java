@@ -28,11 +28,13 @@ import org.apache.druid.indexing.seekablestream.SeekableStreamIndexTaskClientFac
 import org.apache.druid.java.util.http.client.HttpClient;
 import org.apache.druid.rpc.ServiceClientFactory;
 
+import java.nio.ByteBuffer;
+
 @LazySingleton
-public class KafkaIndexTaskClientFactory extends SeekableStreamIndexTaskClientFactory<Integer, Long>
+public class PravegaIndexTaskClientFactory extends SeekableStreamIndexTaskClientFactory<String, ByteBuffer>
 {
   @Inject
-  public KafkaIndexTaskClientFactory(
+  public PravegaIndexTaskClientFactory(
       @EscalatedGlobal ServiceClientFactory serviceClientFactory,
       @EscalatedGlobal HttpClient httpClient,
       @Json ObjectMapper mapper
@@ -41,15 +43,16 @@ public class KafkaIndexTaskClientFactory extends SeekableStreamIndexTaskClientFa
     super(serviceClientFactory, httpClient, mapper);
   }
 
+  // used in the super class, this obj is instantiated in the super class too
   @Override
-  public Class<Integer> getPartitionType()
+  public Class<String> getPartitionType()
   {
-    return Integer.class;
+    return String.class;
   }
 
   @Override
-  public Class<Long> getSequenceType()
+  public Class<ByteBuffer> getSequenceType()
   {
-    return Long.class;
+    return ByteBuffer.class;
   }
 }

@@ -22,7 +22,7 @@ package org.apache.druid.indexing.kafka.test;
 import com.google.common.collect.ImmutableMap;
 import kafka.server.KafkaConfig;
 import kafka.server.KafkaServer;
-import org.apache.druid.indexing.kafka.KafkaConsumerConfigs;
+import org.apache.druid.indexing.kafka.PravegaConsumerConfigs;
 import org.apache.druid.java.util.common.FileUtils;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.kafka.clients.admin.Admin;
@@ -133,7 +133,7 @@ public class TestBroker implements Closeable
 
   public Map<String, Object> consumerProperties()
   {
-    final Map<String, Object> props = KafkaConsumerConfigs.getConsumerProperties();
+    final Map<String, Object> props = PravegaConsumerConfigs.getConsumerProperties();
     props.put("bootstrap.servers", StringUtils.format("localhost:%d", getPort()));
     return props;
   }

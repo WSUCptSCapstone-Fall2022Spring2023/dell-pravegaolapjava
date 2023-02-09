@@ -20,7 +20,7 @@
 package org.apache.druid.tests.indexer;
 
 import com.google.common.base.Preconditions;
-import org.apache.druid.indexing.kafka.KafkaConsumerConfigs;
+import org.apache.druid.indexing.kafka.PravegaConsumerConfigs;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.testing.IntegrationTestingConfig;
 import org.apache.druid.testing.utils.KafkaAdminClient;
@@ -58,7 +58,7 @@ public abstract class AbstractKafkaIndexingServiceTest extends AbstractStreamInd
       IntegrationTestingConfig config
   )
   {
-    final Map<String, Object> consumerConfigs = KafkaConsumerConfigs.getConsumerProperties();
+    final Map<String, Object> consumerConfigs = PravegaConsumerConfigs.getConsumerProperties();
     final Properties consumerProperties = new Properties();
     consumerProperties.putAll(consumerConfigs);
     consumerProperties.setProperty("bootstrap.servers", config.getKafkaInternalHost());

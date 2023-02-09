@@ -26,11 +26,11 @@ import org.apache.druid.indexing.seekablestream.SeekableStreamDataSourceMetadata
 import org.apache.druid.indexing.seekablestream.SeekableStreamEndSequenceNumbers;
 import org.apache.druid.indexing.seekablestream.SeekableStreamSequenceNumbers;
 
-public class KafkaDataSourceMetadata extends SeekableStreamDataSourceMetadata<Integer, Long>
+public class PravegaDataSourceMetadata extends SeekableStreamDataSourceMetadata<Integer, Long>
 {
 
   @JsonCreator
-  public KafkaDataSourceMetadata(
+  public PravegaDataSourceMetadata(
       @JsonProperty("partitions") SeekableStreamSequenceNumbers<Integer, Long> kafkaPartitions
   )
   {
@@ -55,6 +55,6 @@ public class KafkaDataSourceMetadata extends SeekableStreamDataSourceMetadata<In
       SeekableStreamSequenceNumbers<Integer, Long> seekableStreamSequenceNumbers
   )
   {
-    return new KafkaDataSourceMetadata(seekableStreamSequenceNumbers);
+    return new PravegaDataSourceMetadata(seekableStreamSequenceNumbers);
   }
 }

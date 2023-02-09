@@ -124,9 +124,9 @@ public class KafkaIndexTaskTuningConfig extends SeekableStreamIndexTaskTuningCon
   }
 
   @Override
-  public KafkaIndexTaskTuningConfig withBasePersistDirectory(File dir)
+  public PravegaIndexTaskTuningConfig withBasePersistDirectory(File dir)
   {
-    return new KafkaIndexTaskTuningConfig(
+    return new PravegaIndexTaskTuningConfig(
         getAppendableIndexSpec(),
         getMaxRowsInMemory(),
         getMaxBytesInMemory(),
