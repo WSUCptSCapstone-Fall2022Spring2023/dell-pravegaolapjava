@@ -60,9 +60,9 @@ public class PravegaSamplerSpec extends SeekableStreamSamplerSpec
 
       final Map<String, Object> props = new HashMap<>(((PravegaSupervisorIOConfig) ioConfig).getConsumerProperties());
 
-      props.put("enable.auto.commit", "false");
-      props.put("auto.offset.reset", "none");
-      props.put("request.timeout.ms", Integer.toString(samplerConfig.getTimeoutMs()));
+      props.put("scopedStreamName", ioConfig.getStream());
+
+      props.put("readerGroupName", dataSchema.getDataSource()); // set our own prop, user supplies this uniqueName in getDataSrc
 
       return new PravegaEventSupplier(props, objectMapper, ((PravegaSupervisorIOConfig) ioConfig).getConfigOverrides());
     }

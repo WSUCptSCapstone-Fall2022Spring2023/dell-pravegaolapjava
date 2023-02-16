@@ -63,17 +63,18 @@ import java.util.stream.Collectors;
 
 public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, ByteEntity>
 {
-  private final EventStreamReader<ByteBuffer> consumer;
-  private String streamName;
-  private String scopeName;
-  private String readerName;  //We want some sort of reader name var -> string
-  private ReaderGroup readerGroup; // do we need reader group manager? If spec provides us with reader groups, we can just have a manager and access it thru the manager
+  private EventStreamReader<ByteBuffer> consumer;
+  private String readerName = "readerOne";
+  private ReaderGroup readerGroup;
   private StreamManager streamManager;
 
-  private String jobName;
-  private URI controllerURI;
-  private final String readerOnePartitionID = "readerOne";
+  private Stream stream;
+
   private boolean closed;
+
+  ClientConfig config;
+
+  String readerGroupName;
 
   public PravegaEventSupplier(
       Map<String, Object> consumerProperties,
@@ -81,8 +82,7 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
       KafkaConfigOverrides configOverrides
   )
   {
-    //pulsar plugin would call getClient() to setup their pulsar client
-    this(getPravegaReader(sortingMapper, consumerProperties, configOverrides));
+    consumer = getPravegaReader(sortingMapper, consumerProperties, configOverrides);
   }
 
   @VisibleForTesting
@@ -99,19 +99,21 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
   public void assign(Set<StreamPartition<String>> streamPartitions)
   {
     // Assign our one partitionID
-
-    wrapExceptions(() -> consumer.assign(streamPartitions
-                                             .stream()
-                                             .map(x -> new TopicPartition(x.getStream(), x.getPartitionId()))
-                                             .collect(Collectors.toSet())));
+    // We think this is a no op for us for now, since when we create pravega reader we assign our partition already
+    // Once we have multiple readers we might have to come back
   }
 
   // called from seekablestreamindextaskrunner.java
+  // partition contains scopedStream name and sequence num is the pos.
   @Override
   public void seek(StreamPartition<String> partition, ByteBuffer sequenceNumber)
   {
-    // Lets readergroup know that a certain reader went offline and we tell it where to come back online
-    this.readerGroup.readerOffline(partition.getPartitionId(), Position.fromBytes(sequenceNumber));
+    // Close reader at a pos. then set offline - invokes readerOffline() automatically
+    consumer.closeAt(Position.fromBytes(sequenceNumber));
+
+    // Create the reader
+    consumer = EventStreamClientFactory.withScope(stream.getScope(), config)
+            .createReader(readerName, readerGroupName, new ByteBufferSerializer(), ReaderConfig.builder().build());
   }
 
   // called from RecordSupplierInputSource.java
@@ -120,10 +122,11 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
   @Override
   public void seekToEarliest(Set<StreamPartition<String>> partitions)
   {
-    StreamCut head = streamManager.getStreamInfo(scopeName, streamName).getHeadStreamCut();
+
+    StreamCut head = streamManager.getStreamInfo(stream.getScope(), stream.getStreamName()).getHeadStreamCut();
 
     readerGroup.resetReaderGroup(ReaderGroupConfig.builder()
-            .startFromStreamCuts(Collections.singletonMap(Stream.of(scopeName, streamName), head)) // create a map of Stream,StreamCut
+            .startFromStreamCuts(Collections.singletonMap(stream, head)) // create a map of Stream,StreamCut
             .build());
     // force all readers to this new pos.
   }
@@ -133,10 +136,10 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
   public void seekToLatest(Set<StreamPartition<String>> partitions)
   {
     //concern: if we have 5 readers, is this called 5 times? or just once and applied to all readers
-    StreamCut tail = streamManager.getStreamInfo(scopeName, streamName).getTailStreamCut();
+    StreamCut tail = streamManager.getStreamInfo(stream.getScope(), stream.getStreamName()).getTailStreamCut();
 
     readerGroup.resetReaderGroup(ReaderGroupConfig.builder()
-            .startFromStreamCuts(Collections.singletonMap(Stream.of(scopeName, streamName), tail)) // create a map of Stream,StreamCut
+            .startFromStreamCuts(Collections.singletonMap(stream, tail)) // create a map of Stream,StreamCut
             .build());
   }
 
@@ -148,7 +151,7 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
   public Set<StreamPartition<String>> getAssignment()
   {
     // Stream name likely comes from the spec
-    return Collections.singleton(new StreamPartition<>(this.streamName, this.readerOnePartitionID));
+    return Collections.singleton(new StreamPartition<>(stream.getStreamName(), readerName));
   }
 
   // called from recordsupplierinputsource -> return value is turned into an iterator
@@ -295,40 +298,7 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
     }
   }
 
-  private static Deserializer getKafkaDeserializer(Properties properties, String kafkaConfigKey, boolean isKey)
-  {
-    Deserializer deserializerObject;
-    try {
-      Class deserializerClass = Class.forName(properties.getProperty(
-          kafkaConfigKey,
-          ByteArrayDeserializer.class.getTypeName()
-      ));
-      Method deserializerMethod = deserializerClass.getMethod("deserialize", String.class, byte[].class);
-
-      Type deserializerReturnType = deserializerMethod.getGenericReturnType();
-
-      if (deserializerReturnType == byte[].class) {
-        deserializerObject = (Deserializer) deserializerClass.getConstructor().newInstance();
-      } else {
-        throw new IllegalArgumentException("Kafka deserializers must return a byte array (byte[]), " +
-                                           deserializerClass.getName() + " returns " +
-                                           deserializerReturnType.getTypeName());
-      }
-    }
-    catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
-      throw new StreamException(e);
-    }
-
-    Map<String, Object> configs = new HashMap<>();
-    for (String key : properties.stringPropertyNames()) {
-      configs.put(key, properties.get(key));
-    }
-
-    deserializerObject.configure(configs, isKey);
-    return deserializerObject;
-  }
-
-  public static EventStreamReader<ByteBuffer> getPravegaReader(
+  public EventStreamReader<ByteBuffer> getPravegaReader(
       ObjectMapper sortingMapper,
       Map<String, Object> consumerProperties,
       KafkaConfigOverrides configOverrides
@@ -355,23 +325,25 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
     try {
       Thread.currentThread().setContextClassLoader(PravegaEventSupplier.class.getClassLoader());
 
-      // Utilize props to access members since static funtion
-      URI uri = URI.create(props.getProperty("controllerURI"));
-      String scopeName = props.getProperty("scopeName");
-      String streamName = props.getProperty("streamName");
-      String jobName = props.getProperty("jobName");
-      String readerName = props.getProperty("readerName");
+      // Utilize props to fetch members for initializeation
+      URI controllerURI = URI.create(props.getProperty("controllerURI"));
+      String scopedStreamName = props.getProperty("scopedStreamName");
+      readerGroupName = props.getProperty("readerGroupName");
 
+      config = ClientConfig.builder().controllerURI(controllerURI).build();
 
-      ClientConfig config = ClientConfig.builder().controllerURI(uri).build();
-      ReaderGroupConfig readerGroupConfig = ReaderGroupConfig.builder().stream(Stream.of(scopeName, streamName)).build();
-      ReaderGroupManager readerGroupManager = ReaderGroupManager.withScope(scopeName, config);
+      stream = Stream.of(scopedStreamName);
 
-      readerGroupManager.createReaderGroup(jobName, readerGroupConfig);
+      ReaderGroupConfig readerGroupConfig = ReaderGroupConfig.builder().stream(stream).build();
+      ReaderGroupManager readerGroupManager = ReaderGroupManager.withScope(stream.getScope(), config);
 
-      return EventStreamClientFactory.withScope(scopeName, config)
-              .createReader(readerName, jobName, new ByteBufferSerializer(), ReaderConfig.builder().build());
+      streamManager = StreamManager.create(config);
 
+      readerGroupManager.createReaderGroup(readerGroupName, readerGroupConfig); // returns a bool
+      readerGroup = readerGroupManager.getReaderGroup(readerGroupName);
+
+      return EventStreamClientFactory.withScope(stream.getScope(), config)
+              .createReader(readerName, readerGroupName, new ByteBufferSerializer(), ReaderConfig.builder().build());
     }
     finally {
       Thread.currentThread().setContextClassLoader(currCtxCl);

@@ -61,7 +61,7 @@ public abstract class SeekableStreamSamplerSpec<PartitionIdType, SequenceOffsetT
   static final long POLL_TIMEOUT_MS = 100;
 
   @Nullable
-  private final DataSchema dataSchema;
+  protected final DataSchema dataSchema; // was private
   private final InputSourceSampler inputSourceSampler;
 
   protected final SeekableStreamSupervisorIOConfig ioConfig;

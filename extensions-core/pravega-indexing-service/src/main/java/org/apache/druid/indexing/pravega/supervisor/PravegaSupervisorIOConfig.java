@@ -49,7 +49,8 @@ public class PravegaSupervisorIOConfig extends SeekableStreamSupervisorIOConfig
 
   @JsonCreator
   public PravegaSupervisorIOConfig(
-      @JsonProperty("topic") String topic,
+      @JsonProperty("scopeName") String scopeName,
+      @JsonProperty("streamName") String streamName,
       @JsonProperty("inputFormat") InputFormat inputFormat,
       @JsonProperty("replicas") Integer replicas,
       @JsonProperty("taskCount") Integer taskCount,
@@ -69,7 +70,7 @@ public class PravegaSupervisorIOConfig extends SeekableStreamSupervisorIOConfig
   )
   {
     super(
-        Preconditions.checkNotNull(topic, "topic"),
+        Preconditions.checkNotNull(scopeName, "scopeName") + "/" + Preconditions.checkNotNull(streamName, "streamName"),
         inputFormat,
         replicas,
         taskCount,
