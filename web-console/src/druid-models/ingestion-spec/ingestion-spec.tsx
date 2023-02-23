@@ -80,12 +80,13 @@ export function isEmptyIngestionSpec(spec: Partial<IngestionSpec>) {
   return Object.keys(spec).length === 0;
 }
 
-export type IngestionType = 'kafka' | 'kinesis' | 'index_parallel';
+export type IngestionType = 'kafka' | 'kinesis' | 'pravega' | 'index_parallel';
 
 // A combination of IngestionType and inputSourceType
 export type IngestionComboType =
   | 'kafka'
   | 'kinesis'
+  | 'pravega'
   | 'index_parallel:http'
   | 'index_parallel:local'
   | 'index_parallel:druid'
@@ -107,6 +108,7 @@ function ingestionTypeToIoAndTuningConfigType(ingestionType: IngestionType): str
   switch (ingestionType) {
     case 'kafka':
     case 'kinesis':
+    case 'pravega':
     case 'index_parallel':
       return ingestionType;
 
@@ -123,6 +125,7 @@ export function getIngestionComboType(
   switch (ioConfig.type) {
     case 'kafka':
     case 'kinesis':
+    case 'pravega':
       return ioConfig.type;
 
     case 'index_parallel': {
@@ -176,6 +179,9 @@ export function getIngestionTitle(ingestionType: IngestionComboTypeWithExtra): s
     case 'kinesis':
       return 'Amazon Kinesis';
 
+    case 'pravega':
+      return 'Pravega';
+
     case 'hadoop':
       return 'HDFS';
 
@@ -209,6 +215,9 @@ export function getIngestionDocLink(spec: Partial<IngestionSpec>): string {
     case 'kinesis':
       return `${getLink('DOCS')}/development/extensions-core/kinesis-ingestion.html`;
 
+    // case 'pravega':
+      // return link to pravega ingestion docs
+
     default:
       return `${getLink('DOCS')}/ingestion/native-batch.html#input-sources`;
   }
@@ -233,6 +242,9 @@ export function getRequiredModule(ingestionType: IngestionComboTypeWithExtra): s
 
     case 'kinesis':
       return 'druid-kinesis-indexing-service';
+
+    case 'pravega':
+      return 'druid-pravega-indexing-service'
 
     default:
       return;
@@ -288,7 +300,7 @@ export function getSpecType(spec: Partial<IngestionSpec>): IngestionType {
 }
 
 export function isStreamingSpec(spec: Partial<IngestionSpec>): boolean {
-  return oneOf(getSpecType(spec), 'kafka', 'kinesis');
+  return oneOf(getSpecType(spec), 'kafka', 'kinesis', 'pravega');
 }
 
 export function isDruidSource(spec: Partial<IngestionSpec>): boolean {
@@ -425,6 +437,7 @@ export interface IoConfig {
   period?: string;
   useEarliestOffset?: boolean;
   stream?: string;
+  scope?: string; // addition for pravega
   endpoint?: string;
   useEarliestSequenceNumber?: boolean;
 }
@@ -996,6 +1009,60 @@ export function getIoConfigFormFields(ingestionComboType: IngestionComboType): F
           info: <>The AWS external id to use for additional permissions.</>,
         },
       ];
+
+      case 'pravega':
+        return [
+          {
+            name: 'consumerProperties.{controllerURI}',
+            label: 'Controller URIs',
+            type: 'string',
+            required: true,
+            info: (
+              <>
+                <ExternalLink
+                  href={`${getLink(
+                    'DOCS',
+                  )}/development/extensions-core/kafka-ingestion#kafkasupervisorioconfig`}
+                >
+                  consumerProperties
+                </ExternalLink>
+                <p>
+                  A list of Kafka brokers in the form:{' '}
+                  <Code>{`<BROKER_1>:<PORT_1>,<BROKER_2>:<PORT_2>,...`}</Code>
+                </p>
+              </>
+            ),
+          },
+          {
+            name: 'scope',
+            type: 'string',
+            required: true,
+            defined: typeIs('pravega'),
+          },
+          {
+            name: 'stream',
+            type: 'string',
+            required: true,
+            defined: typeIs('pravega'),
+          },
+          {
+            name: 'consumerProperties',
+            type: 'json',
+            defaultValue: {},
+            info: (
+              <>
+                <ExternalLink
+                  href={`${getLink(
+                    'DOCS',
+                  )}/development/extensions-core/kafka-ingestion#kafkasupervisorioconfig`}
+                >
+                  consumerProperties
+                </ExternalLink>
+                <p>A map of properties to be passed to the Kafka consumer.</p>
+              </>
+            ),
+          },
+        ];
   }
 
   throw new Error(`unknown input type ${ingestionComboType}`);
@@ -1021,6 +1088,10 @@ export function issueWithIoConfig(
 
     case 'kinesis':
       if (!ioConfig.stream) return 'must have a stream';
+      break;
+
+    case 'pravega':
+      if (!ioConfig.scope || !ioConfig.stream) return 'must have a scope and a stream';
       break;
   }
 
@@ -1089,6 +1160,7 @@ export function getIoConfigTuningFormFields(
 
     case 'kafka':
     case 'kinesis':
+    case 'pravega':
       return [
         {
           name: 'useEarliestOffset',
@@ -1118,6 +1190,22 @@ export function getIoConfigTuningFormFields(
               earliest or latest sequence numbers in Kinesis. Under normal circumstances, subsequent
               tasks will start from where the previous segments ended so this flag will only be used
               on first run.
+            </>
+          ),
+        },
+        {
+          name: 'useHeadStreamCut',
+          type: 'boolean',
+          defined: typeIs('pravega'),
+          required: true,
+          info: (
+            <>
+              <p>
+                If a supervisor is managing a dataSource for the first time, it will obtain a streamcut which is a set of
+                starting offsets across partitions from Pravega. This flag determines whether it retrieves the head or
+                tail streamcuts in Pravega. Under normal circumstances, subsequent tasks will start
+                from where the previous segments ended so this flag will only be used on first run.
+              </p>
             </>
           ),
         },
@@ -1192,6 +1280,19 @@ export function getIoConfigTuningFormFields(
             <>
               <p>
                 The length of time to wait for the kafka consumer to poll records, in milliseconds.
+              </p>
+            </>
+          ),
+        },
+        {
+          name: 'pollTimeout',
+          type: 'number',
+          defaultValue: 2000,
+          defined: typeIs('pravega'),
+          info: (
+            <>
+              <p>
+                The length of time to wait for the pravega reader to poll records, in milliseconds.
               </p>
             </>
           ),
@@ -1366,6 +1467,9 @@ export function guessDataSourceName(spec: Partial<IngestionSpec>): string | unde
 
     case 'kinesis':
       return ioConfig.stream;
+
+    case 'pravega':
+      return ioConfig.scope + "/" + ioConfig.stream;
 
     default:
       return;
@@ -1688,6 +1792,7 @@ export function getSecondaryPartitionRelatedFormFields(
 
     case 'kafka':
     case 'kinesis':
+    case 'pravega':
       return [
         {
           name: 'spec.tuningConfig.maxRowsPerSegment',
