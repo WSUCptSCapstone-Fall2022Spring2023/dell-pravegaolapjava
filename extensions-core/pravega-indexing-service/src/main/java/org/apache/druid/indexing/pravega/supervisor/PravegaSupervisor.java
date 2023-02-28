@@ -25,7 +25,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.druid.common.utils.IdUtils;
 import org.apache.druid.data.input.impl.ByteEntity;
-import org.apache.druid.data.input.pravega.PravegaEventEntity;
 import org.apache.druid.indexing.common.task.Task;
 import org.apache.druid.indexing.common.task.TaskResource;
 import org.apache.druid.indexing.pravega.PravegaDataSourceMetadata;
@@ -74,12 +73,15 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 /**
- * Supervisor responsible for managing the KafkaIndexTasks for a single dataSource. At a high level, the class accepts a
- * {@link PravegaSupervisorSpec} which includes the Kafka topic and configuration as well as an ingestion spec which will
- * be used to generate the indexing tasks. The run loop periodically refreshes its view of the Kafka topic's partitions
+ * Supervisor responsible for managing the PravegaIndexTasks for a single dataSource. At a high level, the class accepts a
+ * {@link PravegaSupervisorSpec} which includes the Pravega topic and configuration as well as an ingestion spec which will
+ * be used to generate the indexing tasks. The run loop periodically refreshes its view of the Pravega topic's partitions
  * and the list of running indexing tasks and ensures that all partitions are being read from and that there are enough
  * tasks to satisfy the desired number of replicas. As tasks complete, new tasks are queued to process the next range of
- * Kafka offsets.
+ * Pravega offsets.
+ *
+ * Through ReaderGroup abstraction we are presenting a single virtual partition. There can only be one index task for
+ * the one reader within the ReaderGroup.
  */
 public class PravegaSupervisor extends SeekableStreamSupervisor<String, ByteBuffer, ByteEntity>
 {
@@ -206,7 +208,7 @@ public class PravegaSupervisor extends SeekableStreamSupervisor<String, ByteBuff
         minimumMessageTime,
         maximumMessageTime,
         ioConfig.getInputFormat(),
-        kafkaIoConfig.getConfigOverrides()
+        pravegaIoConfig.getConfigOverrides()
     );
   }
 
@@ -215,7 +217,7 @@ public class PravegaSupervisor extends SeekableStreamSupervisor<String, ByteBuff
       int replicas,
       String baseSequenceName,
       ObjectMapper sortingMapper,
-      TreeMap<Integer, Map<Integer, Long>> sequenceOffsets,
+      TreeMap<Integer, Map<String, ByteBuffer>> sequenceOffsets,
       SeekableStreamIndexTaskIOConfig taskIoConfig,
       SeekableStreamIndexTaskTuningConfig taskTuningConfig,
       RowIngestionMetersFactory rowIngestionMetersFactory

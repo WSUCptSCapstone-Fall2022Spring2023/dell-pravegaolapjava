@@ -28,58 +28,43 @@ import io.pravega.client.admin.ReaderGroupManager;
 import io.pravega.client.admin.StreamManager;
 import io.pravega.client.stream.*;
 import io.pravega.client.stream.impl.ByteBufferSerializer;
-import org.apache.druid.common.utils.IdUtils;
 import org.apache.druid.data.input.impl.ByteEntity;
-import org.apache.druid.data.input.pravega.PravegaEventEntity;
 import org.apache.druid.indexing.pravega.supervisor.PravegaSupervisorIOConfig;
 import org.apache.druid.indexing.seekablestream.common.OrderedPartitionableRecord;
 import org.apache.druid.indexing.seekablestream.common.OrderedSequenceNumber;
 import org.apache.druid.indexing.seekablestream.common.RecordSupplier;
 import org.apache.druid.indexing.seekablestream.common.StreamException;
 import org.apache.druid.indexing.seekablestream.common.StreamPartition;
-import org.apache.druid.indexing.seekablestream.extension.KafkaConfigOverrides;
-import org.apache.druid.java.util.common.StringUtils;
+import org.apache.druid.indexing.seekablestream.extension.PravegaConfigOverrides;
 import org.apache.druid.metadata.DynamicConfigProvider;
 import org.apache.druid.metadata.PasswordProvider;
-import org.apache.kafka.common.TopicPartition;
-import org.apache.kafka.common.serialization.ByteArrayDeserializer;
-import org.apache.kafka.common.serialization.Deserializer;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
 
 public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, ByteEntity>
 {
   private EventStreamReader<ByteBuffer> consumer;
-  private String readerName = "readerOne";
+  private final String readerName = "readerOne";
   private ReaderGroup readerGroup;
   private StreamManager streamManager;
-
   private Stream stream;
-
   private boolean closed;
-
-  ClientConfig config;
-
-  String readerGroupName;
+  private ClientConfig config;
+  private String readerGroupName;
 
   public PravegaEventSupplier(
       Map<String, Object> consumerProperties,
       ObjectMapper sortingMapper,
-      KafkaConfigOverrides configOverrides
+      PravegaConfigOverrides configOverrides
   )
   {
     consumer = getPravegaReader(sortingMapper, consumerProperties, configOverrides);
@@ -92,7 +77,6 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
   }
 
   // assign a set of stream partitions to the consumer, contains the partition IDs
-  // we'd get all the segments from a reader group
   // also called from seekablestreamindextaskrunner.java and seeakablestreamsupervisor -> assignRecordSupplierToPartitionIDs()
     // supervisor can grab latest and earliest offsets to be stored in druid metadata (as well as partitions)
   @Override
@@ -111,7 +95,7 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
     // Close reader at a pos. then set offline - invokes readerOffline() automatically
     consumer.closeAt(Position.fromBytes(sequenceNumber));
 
-    // Create the reader
+    // Create the reader at the new position
     consumer = EventStreamClientFactory.withScope(stream.getScope(), config)
             .createReader(readerName, readerGroupName, new ByteBufferSerializer(), ReaderConfig.builder().build());
   }
@@ -128,7 +112,7 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
     readerGroup.resetReaderGroup(ReaderGroupConfig.builder()
             .startFromStreamCuts(Collections.singletonMap(stream, head)) // create a map of Stream,StreamCut
             .build());
-    // force all readers to this new pos.
+    // force all readers to this new pos. by resetting
   }
 
   // called from RecordSupplierInputSource.java
@@ -143,23 +127,18 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
             .build());
   }
 
-  // druid might use this function to recognize which partitions exist?
-  // for us: how do we get all segment names for a reader group OR a single stream(can be multiple)
-    // for a reader group we want to grab stream(s), then associated segments, grab events, get partition IDs
+  // druid might use this function to recognize which partitions exist
   // called from Seekablestreamsupervisor - returning all partitions
   @Override
   public Set<StreamPartition<String>> getAssignment()
   {
-    // Stream name likely comes from the spec
     return Collections.singleton(new StreamPartition<>(stream.getStreamName(), readerName));
   }
 
-  // called from recordsupplierinputsource -> return value is turned into an iterator
   @Nonnull
   @Override
   public List<OrderedPartitionableRecord<String, ByteBuffer, ByteEntity>> poll(long timeout)
   {
-    // do we need a start() or init() to initialize our EventReader to be connected to pravega?
     List<OrderedPartitionableRecord<String, ByteBuffer, ByteEntity>> polledEvents = new ArrayList<>();
 
     try {
@@ -172,13 +151,11 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
         ;
       }
       do {
-
         if (event.getEvent() != null) {
-          // Calling the constructor
           polledEvents.add(new OrderedPartitionableRecord<>(
                   event.getEventPointer().getStream().getStreamName(),   //stream is our topic name
-                  readerName,                                           // partition id [use reader group IDs instead] need a class var for reader group -> sequence offset,storing position
-                  event.getPosition().toBytes(),                         // getting all offsets and partition IDs for the current reader, there may be a length
+                  readerName,                                            //reader ID
+                  event.getPosition().toBytes(),                         //Getting all offsets and partition IDs for the current reader, there may be a length
                   ImmutableList.of(new ByteEntity((event.getEvent())))
           ));
         }
@@ -199,10 +176,6 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
     return polledEvents;
   }
 
-
-  // could be equivalent to ReaderGroup.Config -> get ending stream cuts. patitionID should be string
-  // called from Seekablestreamsupervisor
-  // our position refers to all the offsets that a reader has, ByteBuffer for us? Might not be implementable for us
   @Override
   public ByteBuffer getLatestSequenceNumber(StreamPartition<String> partition)
   {
@@ -213,8 +186,6 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
     return nextPos;
   }
 
-  // could be equivalent to ReaderGroup.Config -> get starting stream cuts
-  // called from Seekablestreamsupervisor
   @Override
   public ByteBuffer getEarliestSequenceNumber(StreamPartition<String> partition)
   {
@@ -251,7 +222,6 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
     return readerGroup.getOnlineReaders();
   }
 
-  // recordsupplierinputsource and seekablestreamsupervisor call close()
   @Override
   public void close()
   {
@@ -301,7 +271,7 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
   public EventStreamReader<ByteBuffer> getPravegaReader(
       ObjectMapper sortingMapper,
       Map<String, Object> consumerProperties,
-      KafkaConfigOverrides configOverrides
+      PravegaConfigOverrides configOverrides
   )
   {
     final Map<String, Object> consumerConfigs = PravegaConsumerConfigs.getConsumerProperties();
@@ -317,8 +287,6 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
         sortingMapper,
         effectiveConsumerProperties
     );
-    props.putIfAbsent("isolation.level", "read_committed");
-    props.putIfAbsent("group.id", StringUtils.format("kafka-supervisor-%s", IdUtils.getRandomId()));
     props.putAll(consumerConfigs);
 
     ClassLoader currCtxCl = Thread.currentThread().getContextClassLoader();

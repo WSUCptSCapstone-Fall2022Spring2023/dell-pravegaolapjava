@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import org.apache.druid.data.input.InputFormat;
 import org.apache.druid.indexing.seekablestream.extension.KafkaConfigOverrides;
+import org.apache.druid.indexing.seekablestream.extension.PravegaConfigOverrides;
 import org.apache.druid.indexing.seekablestream.supervisor.IdleConfig;
 import org.apache.druid.indexing.seekablestream.supervisor.SeekableStreamSupervisorIOConfig;
 import org.apache.druid.indexing.seekablestream.supervisor.autoscaler.AutoScalerConfig;
@@ -45,28 +46,28 @@ public class PravegaSupervisorIOConfig extends SeekableStreamSupervisorIOConfig
 
   private final Map<String, Object> consumerProperties;
   private final long pollTimeout;
-  private final KafkaConfigOverrides configOverrides;
+  private final PravegaConfigOverrides configOverrides;
 
   @JsonCreator
   public PravegaSupervisorIOConfig(
-      @JsonProperty("scopeName") String scopeName,
-      @JsonProperty("streamName") String streamName,
-      @JsonProperty("inputFormat") InputFormat inputFormat,
-      @JsonProperty("replicas") Integer replicas,
-      @JsonProperty("taskCount") Integer taskCount,
-      @JsonProperty("taskDuration") Period taskDuration,
-      @JsonProperty("consumerProperties") Map<String, Object> consumerProperties,
-      @Nullable @JsonProperty("autoScalerConfig") AutoScalerConfig autoScalerConfig,
-      @JsonProperty("pollTimeout") Long pollTimeout,
-      @JsonProperty("startDelay") Period startDelay,
-      @JsonProperty("period") Period period,
-      @JsonProperty("useEarliestOffset") Boolean useEarliestOffset,
-      @JsonProperty("completionTimeout") Period completionTimeout,
-      @JsonProperty("lateMessageRejectionPeriod") Period lateMessageRejectionPeriod,
-      @JsonProperty("earlyMessageRejectionPeriod") Period earlyMessageRejectionPeriod,
-      @JsonProperty("lateMessageRejectionStartDateTime") DateTime lateMessageRejectionStartDateTime,
-      @JsonProperty("configOverrides") KafkaConfigOverrides configOverrides,
-      @JsonProperty("idleConfig") IdleConfig idleConfig
+          @JsonProperty("scopeName") String scopeName,
+          @JsonProperty("streamName") String streamName,
+          @JsonProperty("inputFormat") InputFormat inputFormat,
+          @JsonProperty("replicas") Integer replicas,
+          @JsonProperty("taskCount") Integer taskCount,
+          @JsonProperty("taskDuration") Period taskDuration,
+          @JsonProperty("consumerProperties") Map<String, Object> consumerProperties,
+          @Nullable @JsonProperty("autoScalerConfig") AutoScalerConfig autoScalerConfig,
+          @JsonProperty("pollTimeout") Long pollTimeout,
+          @JsonProperty("startDelay") Period startDelay,
+          @JsonProperty("period") Period period,
+          @JsonProperty("useEarliestOffset") Boolean useEarliestOffset,
+          @JsonProperty("completionTimeout") Period completionTimeout,
+          @JsonProperty("lateMessageRejectionPeriod") Period lateMessageRejectionPeriod,
+          @JsonProperty("earlyMessageRejectionPeriod") Period earlyMessageRejectionPeriod,
+          @JsonProperty("lateMessageRejectionStartDateTime") DateTime lateMessageRejectionStartDateTime,
+          @JsonProperty("configOverrides") PravegaConfigOverrides configOverrides,
+          @JsonProperty("idleConfig") IdleConfig idleConfig
   )
   {
     super(
@@ -120,7 +121,7 @@ public class PravegaSupervisorIOConfig extends SeekableStreamSupervisorIOConfig
   }
 
   @JsonProperty
-  public KafkaConfigOverrides getConfigOverrides()
+  public PravegaConfigOverrides getConfigOverrides()
   {
     return configOverrides;
   }
@@ -128,7 +129,7 @@ public class PravegaSupervisorIOConfig extends SeekableStreamSupervisorIOConfig
   @Override
   public String toString()
   {
-    return "KafkaSupervisorIOConfig{" +
+    return "PravegaSupervisorIOConfig{" +
            "topic='" + getTopic() + '\'' +
            ", replicas=" + getReplicas() +
            ", taskCount=" + getTaskCount() +

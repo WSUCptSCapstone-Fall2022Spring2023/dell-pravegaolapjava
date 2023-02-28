@@ -41,11 +41,11 @@ import java.util.Map;
 
 public class PravegaSupervisorSpec extends SeekableStreamSupervisorSpec
 {
-  private static final String TASK_TYPE = "kafka";
+  private static final String TASK_TYPE = "pravega";
 
   @JsonCreator
   public PravegaSupervisorSpec(
-      @JsonProperty("spec") @Nullable KafkaSupervisorIngestionSpec ingestionSchema,
+      @JsonProperty("spec") @Nullable PravegaSupervisorIngestionSpec ingestionSchema,
       @JsonProperty("dataSchema") @Nullable DataSchema dataSchema,
       @JsonProperty("tuningConfig") @Nullable PravegaSupervisorTuningConfig tuningConfig,
       @JsonProperty("ioConfig") @Nullable PravegaSupervisorIOConfig ioConfig,
@@ -54,7 +54,7 @@ public class PravegaSupervisorSpec extends SeekableStreamSupervisorSpec
       @JacksonInject TaskStorage taskStorage,
       @JacksonInject TaskMaster taskMaster,
       @JacksonInject IndexerMetadataStorageCoordinator indexerMetadataStorageCoordinator,
-      @JacksonInject PravegaIndexTaskClientFactory kafkaIndexTaskClientFactory,
+      @JacksonInject PravegaIndexTaskClientFactory pravegaIndexTaskClientFactory,
       @JacksonInject @Json ObjectMapper mapper,
       @JacksonInject ServiceEmitter emitter,
       @JacksonInject DruidMonitorSchedulerConfig monitorSchedulerConfig,
@@ -65,7 +65,7 @@ public class PravegaSupervisorSpec extends SeekableStreamSupervisorSpec
     super(
         ingestionSchema != null
         ? ingestionSchema
-        : new KafkaSupervisorIngestionSpec( //pravega
+        : new PravegaSupervisorIngestionSpec(
             dataSchema,
             ioConfig,
             tuningConfig != null
@@ -77,7 +77,7 @@ public class PravegaSupervisorSpec extends SeekableStreamSupervisorSpec
         taskStorage,
         taskMaster,
         indexerMetadataStorageCoordinator,
-        kafkaIndexTaskClientFactory,
+        pravegaIndexTaskClientFactory,
         mapper,
         emitter,
         monitorSchedulerConfig,
@@ -130,9 +130,9 @@ public class PravegaSupervisorSpec extends SeekableStreamSupervisorSpec
 
   @Override
   @JsonProperty
-  public KafkaSupervisorIngestionSpec getSpec()
+  public PravegaSupervisorIngestionSpec getSpec()
   {
-    return (KafkaSupervisorIngestionSpec) super.getSpec();
+    return (PravegaSupervisorIngestionSpec) super.getSpec();
   }
 
   @Override
@@ -160,7 +160,7 @@ public class PravegaSupervisorSpec extends SeekableStreamSupervisorSpec
   @Override
   public String toString()
   {
-    return "KafkaSupervisorSpec{" +
+    return "PravegaSupervisorSpec{" +
            "dataSchema=" + getDataSchema() +
            ", tuningConfig=" + getTuningConfig() +
            ", ioConfig=" + getIoConfig() +

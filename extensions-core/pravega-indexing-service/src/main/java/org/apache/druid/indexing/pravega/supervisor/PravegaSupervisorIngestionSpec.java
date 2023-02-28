@@ -31,7 +31,7 @@ public class PravegaSupervisorIngestionSpec extends SeekableStreamSupervisorInge
   private final PravegaSupervisorTuningConfig tuningConfig;
 
   @JsonCreator
-  public KafkaSupervisorIngestionSpec(
+  public PravegaSupervisorIngestionSpec(
       @JsonProperty("dataSchema") DataSchema dataSchema,
       @JsonProperty("ioConfig") PravegaSupervisorIOConfig ioConfig,
       @JsonProperty("tuningConfig") PravegaSupervisorTuningConfig tuningConfig
