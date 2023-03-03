@@ -6,6 +6,8 @@ Changes to the Druid web console have been made for users to be able to access o
 ## Work Summary (Developer Facing)
 Continued working with Dell engineer to modify the existing Kafka Connector to be compatible with the Pravega API. The most work was put into the `PravegaEventSupplier.java` file because this file deals with the data source we are reading from specifically. This meant that the utilization of the Pravega API would occur here for things such as reading events from Pravega, returning the head/tail of a stream and seeking to a particular position in a stream.
 
+Changed to other files such as `PravegaSamplerSpec.java` occurred. In this file, we made additions to the consumerProperties hashmap. This is an object that maps strings to objects. It is created from user input on the web console. We needed to add certain fields to this map that the Pravega API needs to access, things like scopedStreamName and readerGroupName. This means that when a user is using the web console to ingest information, they will input this information.
+
 ## Unfinished Work
 
 
