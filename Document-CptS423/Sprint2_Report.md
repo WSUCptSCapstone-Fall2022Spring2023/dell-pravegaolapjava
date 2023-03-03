@@ -54,7 +54,7 @@ Here are links to the issues that we completed in this sprint:
  https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/159
 
  ## Incomplete Issues/User Stories
-https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/135 - Not completed, still more tests that need to be researched. Currently the `PravegaEventSupplier.java` tests have been reviewed and converted so that they can be added to our MVP report draft two.
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/135 - Not completed, still more tests that need to be researched. Currently the `PravegaEventSupplier.java` and `PravegaSamplerSpec.java` tests have been reviewed and converted so that they can be added to our MVP report draft two.
 
 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/147 - Not completed, still need to research `SeekableStreamIndexTaskRunner.java` more. Now that the team has an understanding of `SeekableStreamSupervisor.java` we can begin looking at the more lower level behind the scenes work that is occuring that the supervisor does not involve itself with directly.
 
