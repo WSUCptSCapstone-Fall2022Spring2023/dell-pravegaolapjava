@@ -64,6 +64,9 @@ https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issue
 ## Code Files for Review
  * [PravegaEventSupplier.java](https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/blob/pravega-connector/extensions-core/pravega-indexing-service/src/main/java/org/apache/druid/indexing/pravega/PravegaEventSupplier.java)
  * [PravegaSamplerSpec.java](https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/blob/pravega-connector/extensions-core/pravega-indexing-service/src/main/java/org/apache/druid/indexing/pravega/PravegaSamplerSpec.java)
+ * [PravegaSupervisorIOConfig.java](https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/blob/pravega-connector/extensions-core/pravega-indexing-service/src/main/java/org/apache/druid/indexing/pravega/supervisor/PravegaSupervisorIOConfig.java)
+ * [ingestion-spec.tsx](https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/blob/pravega-connector/web-console/src/druid-models/ingestion-spec/ingestion-spec.tsx)
+ * [load-data-view.tsx](https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/blob/pravega-connector/web-console/src/views/load-data-view/load-data-view.tsx)
  
 ## Retrospective Summary
 Here's what went well: Scheduling weekly Druid work sessions with the team and any of the client members that are able to make it. These work sessions allowed us all to really dive into and fully ingest the code of the Kafka connector. Studying the code and working on issues before these meetings allowed us to show up prepared and knoweledgeable about the codebase so that we are able to follow along, ask meaningful questions and contribute problem solving ideas. Taking notes and creating diagrams for the code we studied also helped us understand the code more. Proactive creation of issues allowed us to be more organized and keep track of all the work that was being done.
