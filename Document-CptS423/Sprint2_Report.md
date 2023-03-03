@@ -86,4 +86,7 @@ Here's what went well: Scheduling weekly Druid work sessions with the team and a
 
 Here's what we'd like to improve: We would like to get better at reading and studying code. Currently it takes us a long time to read and understand unfamiliar druid code since it very complex. By taking notes on the code and creating high level diagrams, we can start to ingest the code more efficiently.
 
-Here are changes we plan to implement in the next sprint: ....
+Here are changes we plan to implement in the next sprint: 
+ * Add logic for Pravega API checkpointing whenever Druid signals that a checkpoint must occur.
+ * Implement a sort of object wrapper for a Pravega ByteBuffer. ByteBuffer contains positional offset information for a Pravega stream. Druid source code wants direct access to these offsets in order to do offset comparison logic during a tasks execution. With this wrapper, we'll be able to deserialize our byte buffer and do our own offset comparison logic.
+ *  Continue making changes to the rest of the Pravega files listed under `Unfinished Work` above
