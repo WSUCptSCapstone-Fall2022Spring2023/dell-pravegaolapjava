@@ -56,6 +56,7 @@ Here are links to the issues that we completed in this sprint:
  ## Incomplete Issues/User Stories
 
 ## Code Files for Review
- * [PravegaEventSupplier.java](https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/blob/pravega-connector/extensions-core/pravega-indexing-service/src/main/java/org/apache/druid/indexing/kafka/PravegaEventSupplier.java)
+ * [PravegaEventSupplier.java](https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/blob/pravega-connector/extensions-core/pravega-indexing-service/src/main/java/org/apache/druid/indexing/pravega/PravegaEventSupplier.java)
+ * [PravegaSamplerSpec.java](https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/blob/pravega-connector/extensions-core/pravega-indexing-service/src/main/java/org/apache/druid/indexing/pravega/PravegaSamplerSpec.java)
  
 ## Retrospective Summary
