@@ -4,6 +4,7 @@
 Changes to the Druid web console have been made for users to be able to access our plugin through the web console. When a user launches the web console through a localhost, they can select: Load Data -> Streaming. Different cards will be shown for the user to select which data source they want to read from. Things like Apache Kafka, Amazon Kinesis, and of course, Pravega. 
 
 ## Work Summary (Developer Facing)
+Continued working with Dell engineer to modify the existing Kafka Connector to be compatible with the Pravega API. The most work was put into the `PravegaEventSupplier.java` file because this file deals with the data source we are reading from specifically. This meant that the utilization of the Pravega API would occur here for things such as reading events from Pravega, returning the head/tail of a stream and seeking to a particular position in a stream.
 
 ## Unfinished Work
 
