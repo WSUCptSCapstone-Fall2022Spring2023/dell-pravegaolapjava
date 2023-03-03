@@ -6,6 +6,8 @@ Changes to the Druid web console have been made for users to be able to access o
 ## Work Summary (Developer Facing)
 Continued working with Dell engineer to modify the existing Kafka Connector to be compatible with the Pravega API. The most work was put into the `PravegaEventSupplier.java` file because this file deals with the data source we are reading from specifically. This meant that the utilization of the Pravega API would occur here for things such as reading events from Pravega, returning the head/tail of a stream and seeking to a particular position in a stream.
 
+Usage of Pravega ReaderGroup abstraction level occurred to manage the reading of streams and handling of offsets easier. There are potential clashes from the high level readergroup abstraction level and the lower level `SeekableStreamSupervisor.java` that still need to be investigated further.
+
 Changed to other files such as `PravegaSamplerSpec.java` occurred. In this file, we made additions to the consumerProperties hashmap. This is an object that maps strings to objects. It is created from user input on the web console. We needed to add certain fields to this map that the Pravega API needs to access, things like scopedStreamName and readerGroupName. This means that when a user is using the web console to ingest information, they will input this information.
 
 ## Unfinished Work
@@ -64,3 +66,8 @@ https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issue
  * [PravegaSamplerSpec.java](https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/blob/pravega-connector/extensions-core/pravega-indexing-service/src/main/java/org/apache/druid/indexing/pravega/PravegaSamplerSpec.java)
  
 ## Retrospective Summary
+Here's what went well: Scheduling weekly Druid work sessions with the team and any of the client members that are able to make it. These work sessions allowed us all to really dive into and fully ingest the code of the Kafka connector. Studying the code and working on issues before these meetings allowed us to show up prepared and knoweledgeable about the codebase so that we are able to follow along, ask meaningful questions and contribute problem solving ideas. Taking notes and creating diagrams for the code we studied also helped us understand the code more. Proactive creation of issues allowed us to be more organized and keep track of all the work that was being done.
+
+Here's what we'd like to improve: We would like to get better at reading and studying code. Currently it takes us a long time to read and understand unfamiliar druid code since it very complex. By taking notes on the code and creating high level diagrams, we can start to ingest the code more efficiently.
+
+Here are changes we plan to implement in the next sprint: ....
