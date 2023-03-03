@@ -39,7 +39,6 @@ Here are links to the issues that we completed in this sprint:
  https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/144
  https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/145
  https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/145
- https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/147
  https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/148
  https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/149
  https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/150
