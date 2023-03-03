@@ -1,4 +1,4 @@
-# Sprint x Report (8/26/21 - 9/24/2021)
+# Sprint 2 Report (02/02/23 - 03/02/2023)
 
 ## What's New (User Facing)
 Changes to the Druid web console have been made for users to be able to access our plugin through the web console. When a user launches the web console through a localhost, they can select: Load Data -> Streaming. Different cards will be shown for the user to select which data source they want to read from. Things like Apache Kafka, Amazon Kinesis, and of course, Pravega. 
@@ -11,7 +11,20 @@ Usage of Pravega ReaderGroup abstraction level occurred to manage the reading of
 Changed to other files such as `PravegaSamplerSpec.java` occurred. In this file, we made additions to the consumerProperties hashmap. This is an object that maps strings to objects. It is created from user input on the web console. We needed to add certain fields to this map that the Pravega API needs to access, things like scopedStreamName and readerGroupName. This means that when a user is using the web console to ingest information, they will input this information.
 
 ## Unfinished Work
-
+1. IncrementalPublishingPravegaIndexTaskRunner.java
+2. PravegaConsumerConfigs.java
+3. PravegaDataSourceMetadata.java
+4. PravegaIndexTask.java
+5. PravegaIndexTaskClientFactory.java
+6. PravegaIndexTaskModule.java
+7. PravegaIndexTaskTuningConfig.java
+8. PravegaPositionBuffer.java
+9. PravegaSequenceNumber.java
+10. PravegaSupervisor.java
+11. PravegaSupervisorIngestionSpec.java
+12. PravegaSupervisorReportPayload.java
+13. PravegaSupervisorSpec.java
+14. PravegaSupervisorTuningConfig.java
 
 ## Completed Issues/User Stories
 Here are links to the issues that we completed in this sprint:
