@@ -1,6 +1,7 @@
 # Sprint x Report (8/26/21 - 9/24/2021)
 
 ## What's New (User Facing)
+Changes to the Druid web console have been made for users to be able to access our plugin through the web console. When a user launches the web console through a localhost, they can select: Load Data -> Streaming. Different cards will be shown for the user to select which data source they want to read from. Things like Apache Kafka, Amazon Kinesis, and of course, Pravega. 
 
 ## Work Summary (Developer Facing)
 
