@@ -249,9 +249,9 @@ public class KafkaRecordSupplierTest
     // Insert data
     insertData();
 
-    Set<StreamPartition<Integer>> partitions = ImmutableSet.of(
-        StreamPartition.of(topic, 0),
-        StreamPartition.of(topic, 1)
+    Set<StreamPartition<String>> partitions = ImmutableSet.of(
+        StreamPartition.of(topic, "0"),
+        StreamPartition.of(topic, "1")
     );
 
     Map<String, Object> properties = kafkaServer.consumerProperties();

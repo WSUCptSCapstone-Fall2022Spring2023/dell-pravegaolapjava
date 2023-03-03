@@ -26,7 +26,7 @@ import org.apache.druid.data.input.InputRow;
 import org.apache.druid.data.input.InputRowListPlusRawValues;
 import org.apache.druid.data.input.InputRowSchema;
 import org.apache.druid.data.input.MapBasedInputRow;
-import org.apache.druid.data.input.pravega.PravegaEventEntity;
+import org.apache.druid.data.input.impl.ByteEntity;
 import org.apache.druid.indexing.seekablestream.SettableByteEntity;
 import org.apache.druid.java.util.common.CloseableIterators;
 import org.apache.druid.java.util.common.Pair;
@@ -49,9 +49,9 @@ import java.util.stream.Collectors;
 public class KafkaInputReader implements InputEntityReader
 {
   private final InputRowSchema inputRowSchema;
-  private final SettableByteEntity<PravegaEventEntity> source;
-  private final Function<PravegaEventEntity, KafkaHeaderReader> headerParserSupplier;
-  private final Function<PravegaEventEntity, InputEntityReader> keyParserSupplier;
+  private final SettableByteEntity<ByteEntity> source;
+  private final Function<ByteEntity, KafkaHeaderReader> headerParserSupplier;
+  private final Function<ByteEntity, InputEntityReader> keyParserSupplier;
   private final InputEntityReader valueParser;
   private final String keyColumnName;
   private final String timestampColumnName;
@@ -68,9 +68,9 @@ public class KafkaInputReader implements InputEntityReader
    */
   public KafkaInputReader(
       InputRowSchema inputRowSchema,
-      SettableByteEntity<PravegaEventEntity> source,
-      @Nullable Function<PravegaEventEntity, KafkaHeaderReader> headerParserSupplier,
-      @Nullable Function<PravegaEventEntity, InputEntityReader> keyParserSupplier,
+      SettableByteEntity<ByteEntity> source,
+      @Nullable Function<ByteEntity, KafkaHeaderReader> headerParserSupplier,
+      @Nullable Function<ByteEntity, InputEntityReader> keyParserSupplier,
       InputEntityReader valueParser,
       String keyColumnName,
       String timestampColumnName
@@ -88,7 +88,7 @@ public class KafkaInputReader implements InputEntityReader
   @Override
   public CloseableIterator<InputRow> read() throws IOException
   {
-    final PravegaEventEntity record = source.getEntity();
+    final ByteEntity record = source.getEntity();
     final Map<String, Object> mergedHeaderMap = new HashMap<>();
     if (headerParserSupplier != null) {
       KafkaHeaderReader headerParser = headerParserSupplier.apply(record);

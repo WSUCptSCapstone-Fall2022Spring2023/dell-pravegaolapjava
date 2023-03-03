@@ -158,7 +158,7 @@ public class PravegaSupervisor extends SeekableStreamSupervisor<String, ByteBuff
   }
 
   @Override
-  protected SeekableStreamSupervisorReportPayload<<String, ByteBuffer> createReportPayload(
+  protected SeekableStreamSupervisorReportPayload<String, ByteBuffer> createReportPayload(
       int numPartitions,
       boolean includeOffsets
   )

@@ -27,7 +27,6 @@ import org.apache.druid.data.input.InputFormat;
 import org.apache.druid.data.input.InputRowSchema;
 import org.apache.druid.data.input.impl.ByteEntity;
 import org.apache.druid.data.input.impl.TimestampSpec;
-import org.apache.druid.data.input.pravega.PravegaEventEntity;
 import org.apache.druid.indexing.seekablestream.SettableByteEntity;
 import org.apache.druid.java.util.common.DateTimes;
 
@@ -81,7 +80,7 @@ public class KafkaInputFormat implements InputFormat
   @Override
   public InputEntityReader createReader(InputRowSchema inputRowSchema, InputEntity source, File temporaryDirectory)
   {
-    SettableByteEntity<PravegaEventEntity> settableByteEntitySource = (SettableByteEntity<PravegaEventEntity>) source;
+    SettableByteEntity<ByteEntity> settableByteEntitySource = (SettableByteEntity<PravegaEventEntity>) source;
     InputRowSchema newInputRowSchema = new InputRowSchema(
         dummyTimestampSpec,
         inputRowSchema.getDimensionsSpec(),

@@ -60,7 +60,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-public class KafkaSamplerSpecTest extends InitializedNullHandlingTest
+public class PravegaSamplerSpecTest extends InitializedNullHandlingTest
 {
   @Rule
   public ExpectedException expectedException = ExpectedException.none();
@@ -88,7 +88,7 @@ public class KafkaSamplerSpecTest extends InitializedNullHandlingTest
   );
 
   private static TestingCluster zkServer;
-  private static TestBroker kafkaServer;
+  private static TestBroker pravegaServer;
 
   private static List<ProducerRecord<byte[], byte[]>> generateRecords(String topic)
   {
@@ -108,14 +108,14 @@ public class KafkaSamplerSpecTest extends InitializedNullHandlingTest
     zkServer = new TestingCluster(1);
     zkServer.start();
 
-    kafkaServer = new TestBroker(zkServer.getConnectString(), null, 1, ImmutableMap.of("num.partitions", "2"));
-    kafkaServer.start();
+    pravegaServer = new TestBroker(zkServer.getConnectString(), null, 1, ImmutableMap.of("num.partitions", "2"));
+    pravegaServer.start();
   }
 
   @AfterClass
   public static void tearDownClass() throws Exception
   {
-    kafkaServer.close();
+    pravegaServer.close();
     zkServer.stop();
   }
 
@@ -129,12 +129,13 @@ public class KafkaSamplerSpecTest extends InitializedNullHandlingTest
         DATA_SCHEMA,
         null,
         new PravegaSupervisorIOConfig(
-            TOPIC,
+            "scopeName",
+            "streamName",
             new JsonInputFormat(JSONPathSpec.DEFAULT, null, null, null, null),
             null,
             null,
             null,
-            kafkaServer.consumerProperties(),
+                pravegaServer.consumerProperties(),
             null,
             null,
             null,
@@ -266,7 +267,7 @@ public class KafkaSamplerSpecTest extends InitializedNullHandlingTest
 
   private static void insertData(List<ProducerRecord<byte[], byte[]>> data)
   {
-    try (final KafkaProducer<byte[], byte[]> kafkaProducer = kafkaServer.newProducer()) {
+    try (final KafkaProducer<byte[], byte[]> kafkaProducer = pravegaServer.newProducer()) {
       kafkaProducer.initTransactions();
       kafkaProducer.beginTransaction();
 
@@ -303,7 +304,8 @@ public class KafkaSamplerSpecTest extends InitializedNullHandlingTest
         DATA_SCHEMA,
         null,
         new PravegaSupervisorIOConfig(
-            TOPIC,
+                "scopeName",
+                "streamName",
             new JsonInputFormat(JSONPathSpec.DEFAULT, null, null, null, null),
             null,
             null,
