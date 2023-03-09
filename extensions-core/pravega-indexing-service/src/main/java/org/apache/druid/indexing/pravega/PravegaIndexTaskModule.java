@@ -39,16 +39,16 @@ public class PravegaIndexTaskModule implements DruidModule
     return ImmutableList.of(
         new SimpleModule(getClass().getSimpleName())
             .registerSubtypes(
-                new NamedType(PravegaIndexTask.class, "index_kafka"),
-                new NamedType(PravegaDataSourceMetadata.class, "kafka"),
-                new NamedType(PravegaIndexTaskIOConfig.class, "kafka"),
+                new NamedType(PravegaIndexTask.class, "index_pravega"),
+                new NamedType(PravegaDataSourceMetadata.class, "pravega"),
+                new NamedType(PravegaIndexTaskIOConfig.class, "pravega"),
                 // "KafkaTuningConfig" is not the ideal name, but is needed for backwards compatibility.
                 // (Older versions of Druid didn't specify a type name and got this one by default.)
-                new NamedType(PravegaIndexTaskTuningConfig.class, "KafkaTuningConfig"),
-                new NamedType(PravegaSupervisorTuningConfig.class, "kafka"),
-                new NamedType(PravegaSupervisorSpec.class, "kafka"),
-                new NamedType(PravegaSamplerSpec.class, "kafka"),
-                new NamedType(KafkaInputFormat.class, "kafka")
+                new NamedType(PravegaIndexTaskTuningConfig.class, "PravegaTuningConfig"),
+                new NamedType(PravegaSupervisorTuningConfig.class, "pravega"),
+                new NamedType(PravegaSupervisorSpec.class, "pravega"),
+                new NamedType(PravegaSamplerSpec.class, "pravega"),
+                new NamedType(KafkaInputFormat.class, "pravega")
             )
     );
   }

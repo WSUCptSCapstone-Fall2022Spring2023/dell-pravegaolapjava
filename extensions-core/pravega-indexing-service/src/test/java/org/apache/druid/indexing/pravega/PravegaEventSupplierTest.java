@@ -24,7 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.apache.curator.test.TestingCluster;
-import org.apache.druid.data.input.pravega.PravegaEventEntity;
+import org.apache.druid.data.input.impl.ByteEntity;
 import org.apache.druid.indexing.pravega.supervisor.PravegaSupervisorIOConfig;
 import org.apache.druid.indexing.pravega.test.TestBroker;
 import org.apache.druid.indexing.seekablestream.common.OrderedPartitionableRecord;
@@ -46,6 +46,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -56,21 +57,17 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-public class KafkaRecordSupplierTest
+public class PravegaEventSupplierTest
 {
-
   private static String topic = "topic";
   private static String additonal_parameter = "additional.parameter";
   private static long poll_timeout_millis = 1000;
   private static int pollRetry = 5;
   private static int topicPosFix = 0;
   private static final ObjectMapper OBJECT_MAPPER = TestHelper.makeJsonMapper();
-
   private static TestingCluster zkServer;
-  private static TestBroker kafkaServer;
-
+  private static TestBroker pravegaServer;
   private List<ProducerRecord<byte[], byte[]>> records;
-
 
   private static List<ProducerRecord<byte[], byte[]>> generateRecords(String topic)
   {
@@ -117,9 +114,9 @@ public class KafkaRecordSupplierTest
     return "topic-" + topicPosFix++;
   }
 
-  private List<OrderedPartitionableRecord<Integer, Long, PravegaEventEntity>> createOrderedPartitionableRecords()
+  private List<OrderedPartitionableRecord<String, ByteBuffer, ByteEntity>> createOrderedPartitionableRecords()
   {
-    Map<Integer, Long> partitionToOffset = new HashMap<>();
+    Map<String> ByteBuffer, partitionToOffset = new HashMap<>();
     return records.stream().map(r -> {
       long offset = 0;
       if (partitionToOffset.containsKey(r.partition())) {
@@ -132,14 +129,14 @@ public class KafkaRecordSupplierTest
           topic,
           r.partition(),
           offset,
-          r.value() == null ? null : Collections.singletonList(new PravegaEventEntity(
+          r.value() == null ? null : Collections.singletonList(
               new ConsumerRecord<>(r.topic(), r.partition(), offset, r.key(), r.value())
-          ))
+          )
       );
     }).collect(Collectors.toList());
   }
 
-  public static class TestKafkaDeserializer implements Deserializer<byte[]>
+  public static class TestPravegaDeserializer implements Deserializer<byte[]>
   {
     @Override
     public void configure(Map<String, ?> map, boolean b)
@@ -161,7 +158,7 @@ public class KafkaRecordSupplierTest
   }
 
 
-  public static class TestKafkaDeserializerRequiresParameter implements Deserializer<byte[]>
+  public static class TestPravegaDeserializerRequiresParameter implements Deserializer<byte[]>
   {
     @Override
     public void configure(Map<String, ?> map, boolean b)
@@ -190,13 +187,13 @@ public class KafkaRecordSupplierTest
     zkServer = new TestingCluster(1);
     zkServer.start();
 
-    kafkaServer = new TestBroker(
+    pravegaServer = new TestBroker(
         zkServer.getConnectString(),
         null,
         1,
         ImmutableMap.of("num.partitions", "2")
     );
-    kafkaServer.start();
+    pravegaServer.start();
 
   }
 
@@ -210,8 +207,8 @@ public class KafkaRecordSupplierTest
   @AfterClass
   public static void tearDownClass() throws Exception
   {
-    kafkaServer.close();
-    kafkaServer = null;
+    pravegaServer.close();
+    pravegaServer = null;
 
     zkServer.stop();
     zkServer = null;
@@ -224,13 +221,13 @@ public class KafkaRecordSupplierTest
     // Insert data
     insertData();
 
-    Set<StreamPartition<Integer>> partitions = ImmutableSet.of(
-        StreamPartition.of(topic, 0),
+    Set<StreamPartition<String>> partitions = ImmutableSet.of(
+        StreamPartition.of(topic, ""),
         StreamPartition.of(topic, 1)
     );
 
     PravegaEventSupplier recordSupplier = new PravegaEventSupplier(
-        kafkaServer.consumerProperties(), OBJECT_MAPPER, null);
+        pravegaServer.consumerProperties(), OBJECT_MAPPER, null);
 
     Assert.assertTrue(recordSupplier.getAssignment().isEmpty());
 
@@ -249,14 +246,14 @@ public class KafkaRecordSupplierTest
     // Insert data
     insertData();
 
-    Set<StreamPartition<Integer>> partitions = ImmutableSet.of(
-        StreamPartition.of(topic, 0),
+    Set<StreamPartition<String>> partitions = ImmutableSet.of(
+        StreamPartition.of(topic, ""),
         StreamPartition.of(topic, 1)
     );
 
-    Map<String, Object> properties = kafkaServer.consumerProperties();
-    properties.put("key.deserializer", KafkaRecordSupplierTest.TestKafkaDeserializer.class.getName());
-    properties.put("value.deserializer", KafkaRecordSupplierTest.TestKafkaDeserializer.class.getName());
+    Map<String, Object> properties = pravegaServer.consumerProperties();
+    properties.put("key.deserializer", PravegaEventSupplierTest.TestKafkaDeserializer.class.getName());
+    properties.put("value.deserializer", PravegaEventSupplierTest.TestKafkaDeserializer.class.getName());
 
     PravegaEventSupplier recordSupplier = new PravegaEventSupplier(
         properties,
@@ -279,9 +276,9 @@ public class KafkaRecordSupplierTest
   public void testSupplierSetupCustomDeserializerRequiresParameter()
   {
 
-    Map<String, Object> properties = kafkaServer.consumerProperties();
-    properties.put("key.deserializer", KafkaRecordSupplierTest.TestKafkaDeserializerRequiresParameter.class.getName());
-    properties.put("value.deserializer", KafkaRecordSupplierTest.TestKafkaDeserializerRequiresParameter.class.getName());
+    Map<String, Object> properties = pravegaServer.consumerProperties();
+    properties.put("key.deserializer", PravegaEventSupplierTest.TestKafkaDeserializerRequiresParameter.class.getName());
+    properties.put("value.deserializer", PravegaEventSupplierTest.TestKafkaDeserializerRequiresParameter.class.getName());
     properties.put(additonal_parameter, "stringValue");
 
     PravegaEventSupplier recordSupplier = new PravegaEventSupplier(
@@ -298,9 +295,9 @@ public class KafkaRecordSupplierTest
   public void testSupplierSetupCustomDeserializerRequiresParameterButMissingIt()
   {
 
-    Map<String, Object> properties = kafkaServer.consumerProperties();
-    properties.put("key.deserializer", KafkaRecordSupplierTest.TestKafkaDeserializerRequiresParameter.class.getName());
-    properties.put("value.deserializer", KafkaRecordSupplierTest.TestKafkaDeserializerRequiresParameter.class.getName());
+    Map<String, Object> properties = pravegaServer.consumerProperties();
+    properties.put("key.deserializer", PravegaEventSupplierTest.TestPravegaDeserializerRequiresParameter.class.getName());
+    properties.put("value.deserializer", PravegaEventSupplierTest.TestPravegaDeserializerRequiresParameter.class.getName());
 
     PravegaEventSupplier recordSupplier = new PravegaEventSupplier(
             properties,
@@ -319,14 +316,14 @@ public class KafkaRecordSupplierTest
     // Insert data
     insertData();
 
-    Set<StreamPartition<Integer>> partitions = ImmutableSet.of(
-        StreamPartition.of(topic, 0),
+    Set<StreamPartition<String>> partitions = ImmutableSet.of(
+        StreamPartition.of(topic, ""),
         StreamPartition.of(topic, 1)
     );
 
-    Map<String, Object> properties = kafkaServer.consumerProperties();
-    properties.put("key.deserializer", KafkaRecordSupplierTest.TestKafkaDeserializer.class.getName());
-    properties.put("value.deserializer", KafkaRecordSupplierTest.TestKafkaDeserializer.class.getName());
+    Map<String, Object> properties = pravegaServer.consumerProperties();
+    properties.put("key.deserializer", PravegaEventSupplierTest.TestPravegaDeserializer.class.getName());
+    properties.put("value.deserializer", PravegaEventSupplierTest.TestPravegaDeserializer.class.getName());
 
     PravegaEventSupplier recordSupplier = new PravegaEventSupplier(
         properties,
@@ -337,9 +334,9 @@ public class KafkaRecordSupplierTest
     recordSupplier.assign(partitions);
     recordSupplier.seekToEarliest(partitions);
 
-    List<OrderedPartitionableRecord<Integer, Long, PravegaEventEntity>> initialRecords = new ArrayList<>(createOrderedPartitionableRecords());
+    List<OrderedPartitionableRecord<String, ByteBuffer, ByteEntity>> initialRecords = new ArrayList<>(createOrderedPartitionableRecords());
 
-    List<OrderedPartitionableRecord<Integer, Long, PravegaEventEntity>> polledRecords = recordSupplier.poll(poll_timeout_millis);
+    List<OrderedPartitionableRecord<String, ByteBuffer, ByteEntity>> polledRecords = recordSupplier.poll(poll_timeout_millis);
     for (int i = 0; polledRecords.size() != initialRecords.size() && i < pollRetry; i++) {
       polledRecords.addAll(recordSupplier.poll(poll_timeout_millis));
       Thread.sleep(200);
@@ -359,13 +356,13 @@ public class KafkaRecordSupplierTest
     // Insert data
     insertData();
 
-    Set<StreamPartition<Integer>> partitions = ImmutableSet.of(
-        StreamPartition.of(topic, 0),
+    Set<StreamPartition<String>> partitions = ImmutableSet.of(
+        StreamPartition.of(topic, ""),
         StreamPartition.of(topic, 1)
     );
 
     PravegaEventSupplier recordSupplier = new PravegaEventSupplier(
-        kafkaServer.consumerProperties(),
+        pravegaServer.consumerProperties(),
         OBJECT_MAPPER,
         null
     );
@@ -373,9 +370,9 @@ public class KafkaRecordSupplierTest
     recordSupplier.assign(partitions);
     recordSupplier.seekToEarliest(partitions);
 
-    List<OrderedPartitionableRecord<Integer, Long, PravegaEventEntity>> initialRecords = new ArrayList<>(createOrderedPartitionableRecords());
+    List<OrderedPartitionableRecord<String, ByteBuffer, ByteEntity>> initialRecords = new ArrayList<>(createOrderedPartitionableRecords());
 
-    List<OrderedPartitionableRecord<Integer, Long, PravegaEventEntity>> polledRecords = recordSupplier.poll(poll_timeout_millis);
+    List<OrderedPartitionableRecord<String, ByteBuffer, ByteEntity>> polledRecords = recordSupplier.poll(poll_timeout_millis);
     for (int i = 0; polledRecords.size() != initialRecords.size() && i < pollRetry; i++) {
       polledRecords.addAll(recordSupplier.poll(poll_timeout_millis));
       Thread.sleep(200);
@@ -393,7 +390,7 @@ public class KafkaRecordSupplierTest
   public void testPollAfterMoreDataAdded() throws InterruptedException, ExecutionException
   {
     // Insert data
-    try (final KafkaProducer<byte[], byte[]> kafkaProducer = kafkaServer.newProducer()) {
+    try (final KafkaProducer<byte[], byte[]> kafkaProducer = pravegaServer.newProducer()) {
       kafkaProducer.initTransactions();
       kafkaProducer.beginTransaction();
       for (ProducerRecord<byte[], byte[]> record : records.subList(0, 13)) {
@@ -402,26 +399,26 @@ public class KafkaRecordSupplierTest
       kafkaProducer.commitTransaction();
     }
 
-    Set<StreamPartition<Integer>> partitions = ImmutableSet.of(
-        StreamPartition.of(topic, 0),
+    Set<StreamPartition<String>> partitions = ImmutableSet.of(
+        StreamPartition.of(topic, ""),
         StreamPartition.of(topic, 1)
     );
 
 
     PravegaEventSupplier recordSupplier = new PravegaEventSupplier(
-        kafkaServer.consumerProperties(), OBJECT_MAPPER, null);
+        pravegaServer.consumerProperties(), OBJECT_MAPPER, null);
 
     recordSupplier.assign(partitions);
     recordSupplier.seekToEarliest(partitions);
 
-    List<OrderedPartitionableRecord<Integer, Long, PravegaEventEntity>> polledRecords = recordSupplier.poll(poll_timeout_millis);
+    List<OrderedPartitionableRecord<String, ByteBuffer, ByteEntity>> polledRecords = recordSupplier.poll(poll_timeout_millis);
     for (int i = 0; polledRecords.size() != 13 && i < pollRetry; i++) {
       polledRecords.addAll(recordSupplier.poll(poll_timeout_millis));
       Thread.sleep(200);
     }
 
     // Insert data
-    try (final KafkaProducer<byte[], byte[]> kafkaProducer = kafkaServer.newProducer()) {
+    try (final KafkaProducer<byte[], byte[]> kafkaProducer = pravegaServer.newProducer()) {
       kafkaProducer.initTransactions();
       kafkaProducer.beginTransaction();
       for (ProducerRecord<byte[], byte[]> record : records.subList(13, 15)) {
@@ -436,7 +433,7 @@ public class KafkaRecordSupplierTest
       Thread.sleep(200);
     }
 
-    List<OrderedPartitionableRecord<Integer, Long, PravegaEventEntity>> initialRecords = createOrderedPartitionableRecords();
+    List<OrderedPartitionableRecord<String, ByteBuffer, ByteEntity>> initialRecords = createOrderedPartitionableRecords();
 
     Assert.assertEquals(records.size(), polledRecords.size());
     Assert.assertEquals(partitions, recordSupplier.getAssignment());
@@ -471,16 +468,16 @@ public class KafkaRecordSupplierTest
     // Insert data
     insertData();
 
-    StreamPartition<Integer> partition0 = StreamPartition.of(topic, 0);
-    StreamPartition<Integer> partition1 = StreamPartition.of(topic, 1);
+    StreamPartition<String> partition0 = StreamPartition.of(topic, "");
+    StreamPartition<String> partition1 = StreamPartition.of(topic, 1);
 
-    Set<StreamPartition<Integer>> partitions = ImmutableSet.of(
-        StreamPartition.of(topic, 0),
+    Set<StreamPartition<String>> partitions = ImmutableSet.of(
+        StreamPartition.of(topic, ""),
         StreamPartition.of(topic, 1)
     );
 
     PravegaEventSupplier recordSupplier = new PravegaEventSupplier(
-        kafkaServer.consumerProperties(), OBJECT_MAPPER, null);
+        pravegaServer.consumerProperties(), OBJECT_MAPPER, null);
 
     recordSupplier.assign(partitions);
     recordSupplier.seekToEarliest(partitions);
@@ -491,9 +488,9 @@ public class KafkaRecordSupplierTest
     recordSupplier.seek(partition0, 2L);
     recordSupplier.seek(partition1, 2L);
 
-    List<OrderedPartitionableRecord<Integer, Long, PravegaEventEntity>> initialRecords = createOrderedPartitionableRecords();
+    List<OrderedPartitionableRecord<String, ByteBuffer, ByteEntity>> initialRecords = createOrderedPartitionableRecords();
 
-    List<OrderedPartitionableRecord<Integer, Long, PravegaEventEntity>> polledRecords = recordSupplier.poll(poll_timeout_millis);
+    List<OrderedPartitionableRecord<String, ByteBuffer, ByteEntity>> polledRecords = recordSupplier.poll(poll_timeout_millis);
     for (int i = 0; polledRecords.size() != 11 && i < pollRetry; i++) {
       polledRecords.addAll(recordSupplier.poll(poll_timeout_millis));
       Thread.sleep(200);
@@ -514,16 +511,16 @@ public class KafkaRecordSupplierTest
     // Insert data
     insertData();
 
-    StreamPartition<Integer> partition0 = StreamPartition.of(topic, 0);
-    StreamPartition<Integer> partition1 = StreamPartition.of(topic, 1);
+    StreamPartition<String> partition0 = StreamPartition.of(topic, "");
+    StreamPartition<String> partition1 = StreamPartition.of(topic, 1);
 
-    Set<StreamPartition<Integer>> partitions = ImmutableSet.of(
-        StreamPartition.of(topic, 0),
+    Set<StreamPartition<String>> partitions = ImmutableSet.of(
+        StreamPartition.of(topic, ""),
         StreamPartition.of(topic, 1)
     );
 
     PravegaEventSupplier recordSupplier = new PravegaEventSupplier(
-        kafkaServer.consumerProperties(), OBJECT_MAPPER, null);
+        pravegaServer.consumerProperties(), OBJECT_MAPPER, null);
 
     recordSupplier.assign(partitions);
     recordSupplier.seekToEarliest(partitions);
@@ -532,7 +529,7 @@ public class KafkaRecordSupplierTest
     Assert.assertEquals(0L, (long) recordSupplier.getEarliestSequenceNumber(partition1));
 
     recordSupplier.seekToLatest(partitions);
-    List<OrderedPartitionableRecord<Integer, Long, PravegaEventEntity>> polledRecords = recordSupplier.poll(poll_timeout_millis);
+    List<OrderedPartitionableRecord<String, ByteBuffer, ByteEntity>> polledRecords = recordSupplier.poll(poll_timeout_millis);
 
     Assert.assertEquals(Collections.emptyList(), polledRecords);
     recordSupplier.close();
@@ -542,21 +539,21 @@ public class KafkaRecordSupplierTest
   public void testSeekUnassigned() throws InterruptedException, ExecutionException
   {
     // Insert data
-    try (final KafkaProducer<byte[], byte[]> kafkaProducer = kafkaServer.newProducer()) {
+    try (final KafkaProducer<byte[], byte[]> kafkaProducer = pravegaServer.newProducer()) {
       for (ProducerRecord<byte[], byte[]> record : records) {
         kafkaProducer.send(record).get();
       }
     }
 
-    StreamPartition<Integer> partition0 = StreamPartition.of(topic, 0);
-    StreamPartition<Integer> partition1 = StreamPartition.of(topic, 1);
+    StreamPartition<String> partition0 = StreamPartition.of(topic, "");
+    StreamPartition<String> partition1 = StreamPartition.of(topic, 1);
 
-    Set<StreamPartition<Integer>> partitions = ImmutableSet.of(
-        StreamPartition.of(topic, 0)
+    Set<StreamPartition<String>> partitions = ImmutableSet.of(
+        StreamPartition.of(topic, "")
     );
 
     PravegaEventSupplier recordSupplier = new PravegaEventSupplier(
-        kafkaServer.consumerProperties(), OBJECT_MAPPER, null);
+        pravegaServer.consumerProperties(), OBJECT_MAPPER, null);
 
     recordSupplier.assign(partitions);
 
@@ -573,16 +570,16 @@ public class KafkaRecordSupplierTest
     // Insert data
     insertData();
 
-    StreamPartition<Integer> partition0 = StreamPartition.of(topic, 0);
-    StreamPartition<Integer> partition1 = StreamPartition.of(topic, 1);
+    StreamPartition<String> partition0 = StreamPartition.of(topic, "");
+    StreamPartition<String> partition1 = StreamPartition.of(topic, 1);
 
-    Set<StreamPartition<Integer>> partitions = ImmutableSet.of(
-        StreamPartition.of(topic, 0),
+    Set<StreamPartition<String>> partitions = ImmutableSet.of(
+        StreamPartition.of(topic, ""),
         StreamPartition.of(topic, 1)
     );
 
     PravegaEventSupplier recordSupplier = new PravegaEventSupplier(
-        kafkaServer.consumerProperties(), OBJECT_MAPPER, null);
+        pravegaServer.consumerProperties(), OBJECT_MAPPER, null);
 
     recordSupplier.assign(partitions);
     recordSupplier.seekToEarliest(partitions);
@@ -617,9 +614,9 @@ public class KafkaRecordSupplierTest
   public void getLatestSequenceNumberWhenPartitionIsEmptyAndUseEarliestOffsetShouldReturnsValidNonNull()
   {
     PravegaEventSupplier recordSupplier = new PravegaEventSupplier(
-        kafkaServer.consumerProperties(), OBJECT_MAPPER, null);
-    StreamPartition<Integer> streamPartition = StreamPartition.of(topic, 0);
-    Set<StreamPartition<Integer>> partitions = ImmutableSet.of(streamPartition);
+        pravegaServer.consumerProperties(), OBJECT_MAPPER, null);
+    StreamPartition<String> streamPartition = StreamPartition.of(topic, "");
+    Set<StreamPartition<String>> partitions = ImmutableSet.of(streamPartition);
     recordSupplier.assign(partitions);
     recordSupplier.seekToEarliest(partitions);
     Assert.assertEquals(new Long(0), recordSupplier.getLatestSequenceNumber(streamPartition));
@@ -629,9 +626,9 @@ public class KafkaRecordSupplierTest
   public void getEarliestSequenceNumberWhenPartitionIsEmptyAndUseEarliestOffsetShouldReturnsValidNonNull()
   {
     PravegaEventSupplier recordSupplier = new PravegaEventSupplier(
-        kafkaServer.consumerProperties(), OBJECT_MAPPER, null);
-    StreamPartition<Integer> streamPartition = StreamPartition.of(topic, 0);
-    Set<StreamPartition<Integer>> partitions = ImmutableSet.of(streamPartition);
+        pravegaServer.consumerProperties(), OBJECT_MAPPER, null);
+    StreamPartition<String> streamPartition = StreamPartition.of(topic, "");
+    Set<StreamPartition<String>> partitions = ImmutableSet.of(streamPartition);
     recordSupplier.assign(partitions);
     recordSupplier.seekToEarliest(partitions);
     Assert.assertEquals(new Long(0), recordSupplier.getEarliestSequenceNumber(streamPartition));
@@ -641,9 +638,9 @@ public class KafkaRecordSupplierTest
   public void getLatestSequenceNumberWhenPartitionIsEmptyAndUseLatestOffsetShouldReturnsValidNonNull()
   {
     PravegaEventSupplier recordSupplier = new PravegaEventSupplier(
-        kafkaServer.consumerProperties(), OBJECT_MAPPER, null);
-    StreamPartition<Integer> streamPartition = StreamPartition.of(topic, 0);
-    Set<StreamPartition<Integer>> partitions = ImmutableSet.of(streamPartition);
+        pravegaServer.consumerProperties(), OBJECT_MAPPER, null);
+    StreamPartition<String> streamPartition = StreamPartition.of(topic, "");
+    Set<StreamPartition<String>> partitions = ImmutableSet.of(streamPartition);
     recordSupplier.assign(partitions);
     recordSupplier.seekToLatest(partitions);
     Assert.assertEquals(new Long(0), recordSupplier.getLatestSequenceNumber(streamPartition));
@@ -653,9 +650,9 @@ public class KafkaRecordSupplierTest
   public void getEarliestSequenceNumberWhenPartitionIsEmptyAndUseLatestOffsetShouldReturnsValidNonNull()
   {
     PravegaEventSupplier recordSupplier = new PravegaEventSupplier(
-        kafkaServer.consumerProperties(), OBJECT_MAPPER, null);
-    StreamPartition<Integer> streamPartition = StreamPartition.of(topic, 0);
-    Set<StreamPartition<Integer>> partitions = ImmutableSet.of(streamPartition);
+        pravegaServer.consumerProperties(), OBJECT_MAPPER, null);
+    StreamPartition<String> streamPartition = StreamPartition.of(topic, "");
+    Set<StreamPartition<String>> partitions = ImmutableSet.of(streamPartition);
     recordSupplier.assign(partitions);
     recordSupplier.seekToLatest(partitions);
     Assert.assertEquals(new Long(0), recordSupplier.getEarliestSequenceNumber(streamPartition));
@@ -689,11 +686,11 @@ public class KafkaRecordSupplierTest
   }
 
   @Test
-  public void testUseKafkaConsumerOverrides()
+  public void testUsePravegaConsumerOverrides()
   {
-    KafkaConsumer<byte[], byte[]> kafkaConsumer = PravegaEventSupplier.getPravegaReader(
+    KafkaConsumer<byte[], byte[]> kafkaConsumer = PravegaEventSupplier(
         OBJECT_MAPPER,
-        kafkaServer.consumerProperties(),
+        pravegaServer.consumerProperties(),
         originalConsumerProperties -> {
           final Map<String, Object> newMap = new HashMap<>(originalConsumerProperties);
           newMap.put("client.id", "overrideConfigTest");
@@ -711,7 +708,7 @@ public class KafkaRecordSupplierTest
 
   private void insertData() throws ExecutionException, InterruptedException
   {
-    try (final KafkaProducer<byte[], byte[]> kafkaProducer = kafkaServer.newProducer()) {
+    try (final KafkaProducer<byte[], byte[]> kafkaProducer = pravegaServer.newProducer()) {
       kafkaProducer.initTransactions();
       kafkaProducer.beginTransaction();
       for (ProducerRecord<byte[], byte[]> record : records) {
@@ -720,5 +717,4 @@ public class KafkaRecordSupplierTest
       kafkaProducer.commitTransaction();
     }
   }
-
 }

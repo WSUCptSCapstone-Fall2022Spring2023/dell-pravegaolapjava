@@ -43,6 +43,6 @@ public class PravegaSequenceNumber extends OrderedSequenceNumber<ByteBuffer>
       @NotNull OrderedSequenceNumber<ByteBuffer> o
   )
   {
-    return this.get().compareTo(o.get());
+    return this.get().compareTo(o.get()); // we need to use our wrapper here
   }
 }

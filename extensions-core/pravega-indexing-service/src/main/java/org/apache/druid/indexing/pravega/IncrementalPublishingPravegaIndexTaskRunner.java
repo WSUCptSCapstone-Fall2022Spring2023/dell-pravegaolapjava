@@ -121,6 +121,9 @@ public class IncrementalPublishingPravegaIndexTaskRunner extends SeekableStreamI
   @Override
   protected OrderedSequenceNumber<ByteBuffer> createSequenceNumber(ByteBuffer sequenceNumber)
   {
+    // take in the byte buffer to transform to a stream cut
+    // allows for comparisons inside here
+    // we'd return orderedseqNumber that is a version of our wrapper that can do comparisons
     return PravegaSequenceNumber.of(sequenceNumber);
   }
 

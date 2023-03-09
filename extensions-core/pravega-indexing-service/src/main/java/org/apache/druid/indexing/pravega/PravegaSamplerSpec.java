@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JacksonInject;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.druid.common.utils.IdUtils;
 import org.apache.druid.indexing.pravega.supervisor.PravegaSupervisorIOConfig;
 import org.apache.druid.indexing.pravega.supervisor.PravegaSupervisorSpec;
 import org.apache.druid.indexing.overlord.sampler.InputSourceSampler;
@@ -32,6 +33,7 @@ import org.apache.druid.indexing.seekablestream.SeekableStreamSamplerSpec;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class PravegaSamplerSpec extends SeekableStreamSamplerSpec
 {
@@ -61,7 +63,7 @@ public class PravegaSamplerSpec extends SeekableStreamSamplerSpec
       final Map<String, Object> props = new HashMap<>(((PravegaSupervisorIOConfig) ioConfig).getConsumerProperties());
 
       props.put("scopedStreamName", ioConfig.getStream());
-      props.put("readerGroupName", dataSchema.getDataSource()); // set our own prop, user supplies this uniqueName in getDataSrc
+      props.put("readerGroupName", IdUtils.getRandomIdWithPrefix(dataSchema.getDataSource())); // set our own prop, user supplies this uniqueName in getDataSrc, add random uuid. This uuid gives us an option, whether we want to passforward readergroup name, also task replicas need separate readergroup names.
 
       return new PravegaEventSupplier(props, objectMapper, ((PravegaSupervisorIOConfig) ioConfig).getConfigOverrides());
     }

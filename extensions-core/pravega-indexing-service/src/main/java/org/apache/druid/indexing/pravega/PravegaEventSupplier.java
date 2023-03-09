@@ -38,16 +38,16 @@ import org.apache.druid.indexing.seekablestream.common.StreamPartition;
 import org.apache.druid.indexing.seekablestream.extension.PravegaConfigOverrides;
 import org.apache.druid.metadata.DynamicConfigProvider;
 import org.apache.druid.metadata.PasswordProvider;
+import org.apache.kafka.common.serialization.ByteArrayDeserializer;
+import org.apache.kafka.common.serialization.Deserializer;
 
 import javax.annotation.Nonnull;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, ByteEntity>
@@ -67,7 +67,11 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
       PravegaConfigOverrides configOverrides
   )
   {
-    consumer = getPravegaReader(sortingMapper, consumerProperties, configOverrides);
+    // NOTE: we may want to delay the instantiation of the consumer
+      // we know that we need a readergroup to inst. the consumer, but we don't know where to start yet,
+        // we find out where to start once seek() is called [seekablestreamsupervisor]
+        // maybe we can have a dummy supervisor right here for now?
+    // consumer = getPravegaReader(sortingMapper, consumerProperties, configOverrides);
   }
 
   @VisibleForTesting
@@ -93,9 +97,11 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
   public void seek(StreamPartition<String> partition, ByteBuffer sequenceNumber)
   {
     // Close reader at a pos. then set offline - invokes readerOffline() automatically
+    // NOTE: we may need to recreate the reader group [this is after the streamCut option was decided]
     consumer.closeAt(Position.fromBytes(sequenceNumber));
 
     // Create the reader at the new position
+    // NOTE: this needs change, we'd need to close the OLD readergroup above and then open a new readergroup with a new name
     consumer = EventStreamClientFactory.withScope(stream.getScope(), config)
             .createReader(readerName, readerGroupName, new ByteBufferSerializer(), ReaderConfig.builder().build());
   }
@@ -106,16 +112,15 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
   @Override
   public void seekToEarliest(Set<StreamPartition<String>> partitions)
   {
-
-    StreamCut head = streamManager.getStreamInfo(stream.getScope(), stream.getStreamName()).getHeadStreamCut();
+    // NOTE: can we use streamcut.unbounded within startfromstreamcuts() to refer to the head without having to use a stream manager?
+    // StreamCut head = streamManager.getStreamInfo(stream.getScope(), stream.getStreamName()).getHeadStreamCut();
 
     readerGroup.resetReaderGroup(ReaderGroupConfig.builder()
-            .startFromStreamCuts(Collections.singletonMap(stream, head)) // create a map of Stream,StreamCut
+            .startFromStreamCuts(Collections.singletonMap(stream, StreamCut.UNBOUNDED)) // create a map of Stream,StreamCut
             .build());
     // force all readers to this new pos. by resetting
   }
 
-  // called from RecordSupplierInputSource.java
   @Override
   public void seekToLatest(Set<StreamPartition<String>> partitions)
   {
@@ -125,6 +130,8 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
     readerGroup.resetReaderGroup(ReaderGroupConfig.builder()
             .startFromStreamCuts(Collections.singletonMap(stream, tail)) // create a map of Stream,StreamCut
             .build());
+
+    // Reset Reader
   }
 
   // druid might use this function to recognize which partitions exist
@@ -152,10 +159,13 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
       }
       do {
         if (event.getEvent() != null) {
+
+          // pravega position buffer?
+
           polledEvents.add(new OrderedPartitionableRecord<>(
                   event.getEventPointer().getStream().getStreamName(),   //stream is our topic name
-                  readerName,                                            //reader ID
-                  event.getPosition().toBytes(),                         //Getting all offsets and partition IDs for the current reader, there may be a length
+                  readerGroupName,                                       //reader group ID
+                  event.getPosition().toBytes(),                         //Getting all offsets and partition IDs for the current reader, there may be a length, COULD convert to streamCUt here or it'll be in our position wrapper
                   ImmutableList.of(new ByteEntity((event.getEvent())))
           ));
         }
@@ -168,6 +178,7 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
     } catch (ReinitializationRequiredException e){
       //There are certain circumstances where the reader needs to be reinitialized, reinit the readergroup?
       //Not sure what to do yet, we dont want to ignore this - reinstantiate our consumer or reader?
+      // Occurs when readergroup is reset
       e.printStackTrace();
       // init consumer() -> re create the reader to overwrite our consumer
     } catch (TruncatedDataException e) { //We'd want to skip to the next event for this exception
@@ -266,6 +277,41 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
         properties.setProperty(e.getKey(), e.getValue());
       }
     }
+  }
+
+  // added for test
+  private static Deserializer getPravegaDeserializer(Properties properties, String pravegaConfigKey, boolean isKey)
+  {
+    Deserializer deserializerObject;
+    try {
+      Class deserializerClass = Class.forName(properties.getProperty(
+              pravegaConfigKey,
+              ByteArrayDeserializer.class.getTypeName()
+      ));
+      Method deserializerMethod = deserializerClass.getMethod("deserialize", String.class, byte[].class);
+
+      Type deserializerReturnType = deserializerMethod.getGenericReturnType();
+
+      if (deserializerReturnType == byte[].class) {
+        deserializerObject = (Deserializer) deserializerClass.getConstructor().newInstance();
+      } else {
+        throw new IllegalArgumentException("Pravega deserializers must return a byte array (byte[]), " +
+                deserializerClass.getName() + " returns " +
+                deserializerReturnType.getTypeName());
+      }
+    }
+    catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException |
+           InvocationTargetException e) {
+      throw new StreamException(e);
+    }
+
+    Map<String, Object> configs = new HashMap<>();
+    for (String key : properties.stringPropertyNames()) {
+      configs.put(key, properties.get(key));
+    }
+
+    deserializerObject.configure(configs, isKey);
+    return deserializerObject;
   }
 
   public EventStreamReader<ByteBuffer> getPravegaReader(
