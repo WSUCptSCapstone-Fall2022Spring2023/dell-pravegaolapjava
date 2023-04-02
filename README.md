@@ -162,4 +162,4 @@ https://druid.apache.org/docs/latest/tutorials/cluster.html#:~:text=Apache%20Dru
 
 ## License
 
-License URL: https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/blob/master/Document/License.txt
+License URL: https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/blob/master/Document-CptS421/License.txt
