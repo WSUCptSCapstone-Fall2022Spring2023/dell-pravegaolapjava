@@ -15,7 +15,7 @@ This would involve creating a new indexing service layer specifically designed t
 By extending the current APIs, we could bridge the gap between the SeekableStream abstraction and Pravega ReaderGroup APIs, ensuring compatibility.
 
 We went and work on Pravega APIs. The primary work in this Sprint is to make the Pravega StreamCut comparable so we can determine the relative position
-of two streamcuts within stream.
+of two streamcuts within the stream.
 
 ## Unfinished Work
 N/A
