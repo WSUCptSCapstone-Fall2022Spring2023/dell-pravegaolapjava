@@ -21,7 +21,33 @@ of two streamcuts within the stream.
 N/A
 
 ## Completed Issues/User Stories
-
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/135
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/146
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/147
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/160
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/161
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/162
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/163
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/164
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/165
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/166
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/167
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/168
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/169
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/170
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/171
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/172
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/173
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/174
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/175
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/176
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/177
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/178
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/179
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/180
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/181
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/182
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/183
 
  ## Incomplete Issues/User Stories
 
