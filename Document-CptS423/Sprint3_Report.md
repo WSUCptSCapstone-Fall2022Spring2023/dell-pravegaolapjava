@@ -59,6 +59,9 @@ https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issue
  ## Incomplete Issues/User Stories
 
 ## Code Files for Review
+- [StreamCutImpl.java](https://github.com/derekm/pravega/blob/c76e8773cdf758301dd335e4c652a660acc7a0fd/client/src/main/java/io/pravega/client/stream/impl/StreamCutImpl.java)
+- [StreamCut.java](https://github.com/derekm/pravega/blob/c76e8773cdf758301dd335e4c652a660acc7a0fd/client/src/main/java/io/pravega/client/stream/StreamCut.java)
+- [StreamCutTest.java](https://github.com/derekm/pravega/blob/a606aa7bc47a3aa9b52f200a78673895e5e9b9d9/client/src/test/java/io/pravega/client/stream/StreamCutTest.java)
 
 ## Retrospective Summary
 Here's what went well:
