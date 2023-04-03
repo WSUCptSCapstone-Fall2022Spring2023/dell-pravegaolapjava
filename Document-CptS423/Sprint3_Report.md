@@ -57,6 +57,7 @@ https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issue
 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/183
 
  ## Incomplete Issues/User Stories
+- NA
 
 ## Code Files for Review
 - [StreamCutImpl.java](https://github.com/derekm/pravega/blob/c76e8773cdf758301dd335e4c652a660acc7a0fd/client/src/main/java/io/pravega/client/stream/impl/StreamCutImpl.java)
