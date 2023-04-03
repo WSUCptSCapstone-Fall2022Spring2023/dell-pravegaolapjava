@@ -23,7 +23,9 @@ We went and work on Pravega APIs. The primary work in this Sprint is to make the
 of two streamcuts within the stream.
 
 ## Unfinished Work
-N/A
+- Continue modifying the druid pravega plugin to support the Pravega client API's readergroups. We will begin next sprint by adding calls to Pravega's StreamCut's `compareTo()` within the extension.
+- Ensure that stream cuts are passed forward from the druid indexing service to our pravega extension so that we can handle these stream cuts.
+- Implement Pravega checkpointing.
 
 ## Completed Issues/User Stories
 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/135
