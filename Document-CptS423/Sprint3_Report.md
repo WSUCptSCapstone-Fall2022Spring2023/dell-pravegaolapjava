@@ -1,4 +1,9 @@
 # Sprint 3 Report (03/02/23 - 04/02/2023)
+After further testing, users of Pravega's client API will have access to the `compareTo()` method within a stream cut. 
+This will allow for a user to compare their current stream cut to another stream cut. A stream cut is a snapshot of a consistent 
+point in time of a stream. It can be used as a marker so that a Pravega reader can begin consuming events from this stream cut marker.
+Users will have access to this because it is a public method that was needed to be created for the druid pravega extension since druid 
+makes calls to an overloaded `compareTo()`.
 
 ## What's New (User Facing)
 
