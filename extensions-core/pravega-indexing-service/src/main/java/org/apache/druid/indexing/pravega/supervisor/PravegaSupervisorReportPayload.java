@@ -19,6 +19,7 @@
 
 package org.apache.druid.indexing.pravega.supervisor;
 
+import io.pravega.client.stream.StreamCut;
 import org.apache.druid.indexing.overlord.supervisor.SupervisorStateManager;
 import org.apache.druid.indexing.seekablestream.supervisor.SeekableStreamSupervisorReportPayload;
 import org.joda.time.DateTime;
@@ -27,23 +28,23 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 
-public class PravegaSupervisorReportPayload extends SeekableStreamSupervisorReportPayload<Integer, Long>
+public class PravegaSupervisorReportPayload extends SeekableStreamSupervisorReportPayload<String, StreamCut>
 {
   public PravegaSupervisorReportPayload(
-      String dataSource,
-      String topic,
-      int partitions,
-      int replicas,
-      long durationSeconds,
-      @Nullable Map<Integer, Long> latestOffsets, //string, bytebuffer?
-      @Nullable Map<Integer, Long> minimumLag,
-      @Nullable Long aggregateLag,
-      @Nullable DateTime offsetsLastUpdated,
-      boolean suspended,
-      boolean healthy,
-      SupervisorStateManager.State state,
-      SupervisorStateManager.State detailedState,
-      List<SupervisorStateManager.ExceptionEvent> recentErrors
+          String dataSource,
+          String topic,
+          int partitions,
+          int replicas,
+          long durationSeconds,
+          @Nullable Map<String, StreamCut> latestOffsets,
+          @Nullable Map<String, Long> minimumLag,
+          @Nullable Long aggregateLag,
+          @Nullable DateTime offsetsLastUpdated,
+          boolean suspended,
+          boolean healthy,
+          SupervisorStateManager.State state,
+          SupervisorStateManager.State detailedState,
+          List<SupervisorStateManager.ExceptionEvent> recentErrors
   )
   {
     super(
@@ -69,7 +70,7 @@ public class PravegaSupervisorReportPayload extends SeekableStreamSupervisorRepo
   @Override
   public String toString()
   {
-    return "KafkaSupervisorReportPayload{" +
+    return "PravegaSupervisorReportPayload{" +
            "dataSource='" + getDataSource() + '\'' +
            ", topic='" + getStream() + '\'' +
            ", partitions=" + getPartitions() +

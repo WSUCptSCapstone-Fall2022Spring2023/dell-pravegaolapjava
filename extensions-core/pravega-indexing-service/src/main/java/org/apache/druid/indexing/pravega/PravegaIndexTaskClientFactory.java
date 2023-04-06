@@ -21,6 +21,7 @@ package org.apache.druid.indexing.pravega;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
+import io.pravega.client.stream.StreamCut;
 import org.apache.druid.guice.LazySingleton;
 import org.apache.druid.guice.annotations.EscalatedGlobal;
 import org.apache.druid.guice.annotations.Json;
@@ -31,7 +32,7 @@ import org.apache.druid.rpc.ServiceClientFactory;
 import java.nio.ByteBuffer;
 
 @LazySingleton
-public class PravegaIndexTaskClientFactory extends SeekableStreamIndexTaskClientFactory<String, ByteBuffer>
+public class PravegaIndexTaskClientFactory extends SeekableStreamIndexTaskClientFactory<String, StreamCut>
 {
   @Inject
   public PravegaIndexTaskClientFactory(
@@ -42,8 +43,6 @@ public class PravegaIndexTaskClientFactory extends SeekableStreamIndexTaskClient
   {
     super(serviceClientFactory, httpClient, mapper);
   }
-
-  // used in the super class, this obj is instantiated in the super class too
   @Override
   public Class<String> getPartitionType()
   {
@@ -51,8 +50,8 @@ public class PravegaIndexTaskClientFactory extends SeekableStreamIndexTaskClient
   }
 
   @Override
-  public Class<ByteBuffer> getSequenceType()
+  public Class<StreamCut> getSequenceType()
   {
-    return ByteBuffer.class;
+    return StreamCut.class;
   }
 }

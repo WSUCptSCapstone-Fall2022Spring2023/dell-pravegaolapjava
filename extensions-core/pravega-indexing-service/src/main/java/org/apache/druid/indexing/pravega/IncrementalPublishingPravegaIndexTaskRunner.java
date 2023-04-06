@@ -21,9 +21,9 @@ package org.apache.druid.indexing.pravega;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.pravega.client.stream.StreamCut;
 import org.apache.druid.data.input.impl.ByteEntity;
 import org.apache.druid.data.input.impl.InputRowParser;
-import org.apache.druid.data.input.pravega.PravegaEventEntity;
 import org.apache.druid.indexing.common.LockGranularity;
 import org.apache.druid.indexing.common.TaskToolbox;
 import org.apache.druid.indexing.seekablestream.SeekableStreamDataSourceMetadata;
@@ -55,10 +55,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Pravega indexing task runner supporting incremental segments publishing
- */
-public class IncrementalPublishingPravegaIndexTaskRunner extends SeekableStreamIndexTaskRunner<String, ByteBuffer, ByteEntity>
+public class IncrementalPublishingPravegaIndexTaskRunner extends SeekableStreamIndexTaskRunner<String, StreamCut, ByteEntity>
 {
   private static final EmittingLogger log = new EmittingLogger(IncrementalPublishingPravegaIndexTaskRunner.class);
   private final PravegaIndexTask task;
@@ -81,15 +78,15 @@ public class IncrementalPublishingPravegaIndexTaskRunner extends SeekableStreamI
 
   // same behavior here currently as the kinesis connector since we can't do +1 in pravega like kafka does
   @Override
-  protected ByteBuffer getNextStartOffset(@NotNull ByteBuffer sequenceNumber)
+  protected StreamCut getNextStartOffset(@NotNull StreamCut sequenceNumber)
   {
     return sequenceNumber;
   }
 
   @Nonnull
   @Override
-  protected List<OrderedPartitionableRecord<String, ByteBuffer, ByteEntity>> getRecords(
-      RecordSupplier<String, ByteBuffer, ByteEntity> recordSupplier,
+  protected List<OrderedPartitionableRecord<String, StreamCut, ByteEntity>> getRecords(
+      RecordSupplier<String, StreamCut, ByteEntity> recordSupplier,
       TaskToolbox toolbox
   )
   {
@@ -97,7 +94,7 @@ public class IncrementalPublishingPravegaIndexTaskRunner extends SeekableStreamI
   }
 
   @Override
-  protected SeekableStreamEndSequenceNumbers<String, ByteBuffer> deserializePartitionsFromMetadata(
+  protected SeekableStreamEndSequenceNumbers<String, StreamCut> deserializePartitionsFromMetadata(
       ObjectMapper mapper,
       Object object
   )
@@ -111,15 +108,15 @@ public class IncrementalPublishingPravegaIndexTaskRunner extends SeekableStreamI
   }
 
   @Override
-  protected SeekableStreamDataSourceMetadata<String, ByteBuffer> createDataSourceMetadata(
-      SeekableStreamSequenceNumbers<String, ByteBuffer> partitions
+  protected SeekableStreamDataSourceMetadata<String, StreamCut> createDataSourceMetadata(
+      SeekableStreamSequenceNumbers<String, StreamCut> partitions
   )
   {
     return new PravegaDataSourceMetadata(partitions);
   }
 
   @Override
-  protected OrderedSequenceNumber<ByteBuffer> createSequenceNumber(ByteBuffer sequenceNumber)
+  protected OrderedSequenceNumber<StreamCut> createSequenceNumber(StreamCut sequenceNumber)
   {
     // take in the byte buffer to transform to a stream cut
     // allows for comparisons inside here
@@ -130,7 +127,7 @@ public class IncrementalPublishingPravegaIndexTaskRunner extends SeekableStreamI
   @Override
   protected void possiblyResetDataSourceMetadata(
       TaskToolbox toolbox,
-      RecordSupplier<String, ByteBuffer, ByteEntity>recordSupplier,
+      RecordSupplier<String, StreamCut, ByteEntity>recordSupplier,
       Set<StreamPartition<String>> assignment
   )
   {
@@ -145,15 +142,15 @@ public class IncrementalPublishingPravegaIndexTaskRunner extends SeekableStreamI
   }
 
   @Override
-  protected boolean isEndOfShard(ByteBuffer seqNum)
+  protected boolean isEndOfShard(StreamCut seqNum)
   {
     return false;
   }
 
   @Override
-  public TypeReference<List<SequenceMetadata<String, ByteBuffer>>> getSequenceMetadataTypeReference()
+  public TypeReference<List<SequenceMetadata<String, StreamCut>>> getSequenceMetadataTypeReference()
   {
-    return new TypeReference<List<SequenceMetadata<String, ByteBuffer>>>()
+    return new TypeReference<List<SequenceMetadata<String, StreamCut>>>()
     {
     };
   }
@@ -161,7 +158,7 @@ public class IncrementalPublishingPravegaIndexTaskRunner extends SeekableStreamI
   // Right now we think that the integer refers to a task, so since we just have one, we think integer == 1
   @Nullable
   @Override
-  protected TreeMap<Integer, Map<String, ByteBuffer>> getCheckPointsFromContext(
+  protected TreeMap<Integer, Map<String, StreamCut>> getCheckPointsFromContext(
       TaskToolbox toolbox,
       String checkpointsString
   ) throws IOException
@@ -170,7 +167,7 @@ public class IncrementalPublishingPravegaIndexTaskRunner extends SeekableStreamI
       log.debug("Got checkpoints from task context[%s].", checkpointsString);
       return toolbox.getJsonMapper().readValue(
           checkpointsString,
-          new TypeReference<TreeMap<Integer, Map<String, ByteBuffer>>>()
+          new TypeReference<TreeMap<Integer, Map<String, StreamCut>>>()
           {
           }
       );

@@ -19,30 +19,31 @@
 
 package org.apache.druid.indexing.pravega;
 
+import io.pravega.client.stream.StreamCut;
+import io.pravega.client.stream.impl.StreamCutImpl;
 import org.apache.druid.indexing.seekablestream.common.OrderedSequenceNumber;
 
 import javax.validation.constraints.NotNull;
 import java.nio.ByteBuffer;
 
-// OrderedSequenceNumber.equals() should be used instead.
 @SuppressWarnings("ComparableImplementedButEqualsNotOverridden")
-public class PravegaSequenceNumber extends OrderedSequenceNumber<ByteBuffer>
+public class PravegaSequenceNumber extends OrderedSequenceNumber<StreamCut>
 {
-  private PravegaSequenceNumber(ByteBuffer sequenceNumber)
+  private PravegaSequenceNumber(StreamCut streamCut)
   {
-    super(sequenceNumber, false);
+    super(streamCut, false);
   }
 
-  public static PravegaSequenceNumber of(ByteBuffer sequenceNumber)
+  public static PravegaSequenceNumber of(StreamCut streamCut)
   {
-    return new PravegaSequenceNumber(sequenceNumber);
+    return new PravegaSequenceNumber(streamCut);
   }
 
   @Override
   public int compareTo(
-      @NotNull OrderedSequenceNumber<ByteBuffer> o
+      @NotNull OrderedSequenceNumber<StreamCut> o
   )
   {
-    return this.get().compareTo(o.get()); // we need to use our wrapper here
+    return this.get().compareTo(o.get());
   }
 }

@@ -22,6 +22,7 @@ package org.apache.druid.indexing.pravega;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import io.pravega.client.stream.StreamCut;
 import org.apache.druid.data.input.InputFormat;
 import org.apache.druid.indexing.pravega.supervisor.PravegaSupervisorIOConfig;
 import org.apache.druid.indexing.seekablestream.SeekableStreamEndSequenceNumbers;
@@ -33,7 +34,7 @@ import org.joda.time.DateTime;
 import javax.annotation.Nullable;
 import java.util.Map;
 
-public class PravegaIndexTaskIOConfig extends SeekableStreamIndexTaskIOConfig<Integer, Long>
+public class PravegaIndexTaskIOConfig extends SeekableStreamIndexTaskIOConfig<String, StreamCut>
 {
   private final Map<String, Object> consumerProperties;
   private final long pollTimeout;
@@ -45,14 +46,14 @@ public class PravegaIndexTaskIOConfig extends SeekableStreamIndexTaskIOConfig<In
       @JsonProperty("baseSequenceName") String baseSequenceName,
       // startPartitions and endPartitions exist to be able to read old ioConfigs in metadata store
       @JsonProperty("startPartitions") @Nullable
-      @Deprecated SeekableStreamEndSequenceNumbers<Integer, Long> startPartitions,
+      @Deprecated SeekableStreamEndSequenceNumbers<String, StreamCut> startPartitions,
       @JsonProperty("endPartitions") @Nullable
-      @Deprecated SeekableStreamEndSequenceNumbers<Integer, Long> endPartitions,
+      @Deprecated SeekableStreamEndSequenceNumbers<String, StreamCut> endPartitions,
       // startSequenceNumbers and endSequenceNumbers must be set for new versions
       @JsonProperty("startSequenceNumbers")
-      @Nullable SeekableStreamStartSequenceNumbers<Integer, Long> startSequenceNumbers,
+      @Nullable SeekableStreamStartSequenceNumbers<String, StreamCut> startSequenceNumbers,
       @JsonProperty("endSequenceNumbers")
-      @Nullable SeekableStreamEndSequenceNumbers<Integer, Long> endSequenceNumbers,
+      @Nullable SeekableStreamEndSequenceNumbers<String, StreamCut> endSequenceNumbers,
       @JsonProperty("consumerProperties") Map<String, Object> consumerProperties,
       @JsonProperty("pollTimeout") Long pollTimeout,
       @JsonProperty("useTransaction") Boolean useTransaction,
@@ -79,8 +80,8 @@ public class PravegaIndexTaskIOConfig extends SeekableStreamIndexTaskIOConfig<In
     this.pollTimeout = pollTimeout != null ? pollTimeout : PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS;
     this.configOverrides = configOverrides;
 
-    final SeekableStreamEndSequenceNumbers<Integer, Long> myEndSequenceNumbers = getEndSequenceNumbers();
-    for (int partition : myEndSequenceNumbers.getPartitionSequenceNumberMap().keySet()) {
+    final SeekableStreamEndSequenceNumbers<String, StreamCut> myEndSequenceNumbers = getEndSequenceNumbers();
+    for (String partition : myEndSequenceNumbers.getPartitionSequenceNumberMap().keySet()) {
       Preconditions.checkArgument(
           myEndSequenceNumbers.getPartitionSequenceNumberMap()
                               .get(partition)
@@ -94,8 +95,8 @@ public class PravegaIndexTaskIOConfig extends SeekableStreamIndexTaskIOConfig<In
   public PravegaIndexTaskIOConfig(
       int taskGroupId,
       String baseSequenceName,
-      SeekableStreamStartSequenceNumbers<Integer, Long> startSequenceNumbers,
-      SeekableStreamEndSequenceNumbers<Integer, Long> endSequenceNumbers,
+      SeekableStreamStartSequenceNumbers<String, StreamCut> startSequenceNumbers,
+      SeekableStreamEndSequenceNumbers<String, StreamCut> endSequenceNumbers,
       Map<String, Object> consumerProperties,
       Long pollTimeout,
       Boolean useTransaction,

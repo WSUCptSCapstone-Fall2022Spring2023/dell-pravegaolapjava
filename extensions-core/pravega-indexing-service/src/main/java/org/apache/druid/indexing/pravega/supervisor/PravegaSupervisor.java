@@ -23,6 +23,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
+import io.pravega.client.stream.StreamCut;
 import org.apache.druid.common.utils.IdUtils;
 import org.apache.druid.data.input.impl.ByteEntity;
 import org.apache.druid.indexing.common.task.Task;
@@ -83,20 +84,22 @@ import java.util.stream.Collectors;
  * Through ReaderGroup abstraction we are presenting a single virtual partition. There can only be one index task for
  * the one reader within the ReaderGroup.
  */
-public class PravegaSupervisor extends SeekableStreamSupervisor<String, ByteBuffer, ByteEntity>
+public class PravegaSupervisor extends SeekableStreamSupervisor<String, StreamCut, ByteEntity>
 {
-  public static final TypeReference<TreeMap<Integer, Map<String, ByteBuffer>>> CHECKPOINTS_TYPE_REF =
-      new TypeReference<TreeMap<Integer, Map<String, ByteBuffer>>>()
+  public static final TypeReference<TreeMap<Integer, Map<String, StreamCut>>> CHECKPOINTS_TYPE_REF =
+      new TypeReference<TreeMap<Integer, Map<String, StreamCut>>>()
       {
       };
 
   private static final EmittingLogger log = new EmittingLogger(PravegaSupervisor.class);
-  private static final Long NOT_SET = -1L;
-  private static final Long END_OF_PARTITION = Long.MAX_VALUE;
+  private static final StreamCut NOT_SET = StreamCut.UNBOUNDED; // mark this and come back to it, what does kafka do
+                                                                // with the -1 it sets for NOT_SET?
+                                                                // is not_set ever passed into a seek()?
+  private static final StreamCut END_OF_PARTITION = StreamCut.UNBOUNDED;
 
   private final ServiceEmitter emitter;
   private final DruidMonitorSchedulerConfig monitorSchedulerConfig;
-  private volatile Map<String, ByteBuffer> latestSequenceFromStream;
+  private volatile Map<String, StreamCut> latestSequenceFromStream;
 
 
   private final PravegaSupervisorSpec spec;
@@ -112,7 +115,7 @@ public class PravegaSupervisor extends SeekableStreamSupervisor<String, ByteBuff
   )
   {
     super(
-        StringUtils.format("KafkaSupervisor-%s", spec.getDataSchema().getDataSource()),
+        StringUtils.format("PravegaSupervisor-%s", spec.getDataSchema().getDataSource()),
         taskStorage,
         taskMaster,
         indexerMetadataStorageCoordinator,
@@ -130,7 +133,7 @@ public class PravegaSupervisor extends SeekableStreamSupervisor<String, ByteBuff
 
 
   @Override
-  protected RecordSupplier<String, ByteBuffer, ByteEntity> setupRecordSupplier()
+  protected RecordSupplier<String, StreamCut, ByteEntity> setupRecordSupplier()
   {
     return new PravegaEventSupplier(
         spec.getIoConfig().getConsumerProperties(),
@@ -158,13 +161,13 @@ public class PravegaSupervisor extends SeekableStreamSupervisor<String, ByteBuff
   }
 
   @Override
-  protected SeekableStreamSupervisorReportPayload<String, ByteBuffer> createReportPayload(
+  protected SeekableStreamSupervisorReportPayload<String, StreamCut> createReportPayload(
       int numPartitions,
       boolean includeOffsets
   )
   {
     PravegaSupervisorIOConfig ioConfig = spec.getIoConfig();
-    Map<String, ByteBuffer> partitionLag = getRecordLagPerPartitionInLatestSequences(getHighestCurrentOffsets());
+    Map<String, Long> partitionLag = getRecordLagPerPartitionInLatestSequences(getHighestCurrentOffsets());
     return new PravegaSupervisorReportPayload(
         spec.getDataSchema().getDataSource(),
         ioConfig.getTopic(),
@@ -187,8 +190,8 @@ public class PravegaSupervisor extends SeekableStreamSupervisor<String, ByteBuff
   @Override
   protected SeekableStreamIndexTaskIOConfig createTaskIoConfig(
       int groupId,
-      Map<String, ByteBuffer> startPartitions,
-      Map<String, ByteBuffer> endPartitions,
+      Map<String, StreamCut> startPartitions,
+      Map<String, StreamCut> endPartitions,
       String baseSequenceName,
       DateTime minimumMessageTime,
       DateTime maximumMessageTime,
@@ -213,11 +216,11 @@ public class PravegaSupervisor extends SeekableStreamSupervisor<String, ByteBuff
   }
 
   @Override
-  protected List<SeekableStreamIndexTask<String, ByteBuffer, ByteEntity>> createIndexTasks(
+  protected List<SeekableStreamIndexTask<String, StreamCut, ByteEntity>> createIndexTasks(
       int replicas,
       String baseSequenceName,
       ObjectMapper sortingMapper,
-      TreeMap<Integer, Map<String, ByteBuffer>> sequenceOffsets,
+      TreeMap<Integer, Map<String, StreamCut>> sequenceOffsets,
       SeekableStreamIndexTaskIOConfig taskIoConfig,
       SeekableStreamIndexTaskTuningConfig taskTuningConfig,
       RowIngestionMetersFactory rowIngestionMetersFactory
@@ -231,7 +234,7 @@ public class PravegaSupervisor extends SeekableStreamSupervisor<String, ByteBuff
     // Kafka index task will pick up LegacyKafkaIndexTaskRunner without the below configuration.
     context.put("IS_INCREMENTAL_HANDOFF_SUPPORTED", true);
 
-    List<SeekableStreamIndexTask<String, ByteBuffer, ByteEntity>> taskList = new ArrayList<>();
+    List<SeekableStreamIndexTask<String, StreamCut, ByteEntity>> taskList = new ArrayList<>();
     for (int i = 0; i < replicas; i++) {
       String taskId = IdUtils.getRandomIdWithPrefix(baseSequenceName);
       taskList.add(new PravegaIndexTask(
@@ -248,9 +251,9 @@ public class PravegaSupervisor extends SeekableStreamSupervisor<String, ByteBuff
   }
 
   @Override
-  protected Map<String, ByteBuffer> getPartitionRecordLag()
+  protected Map<String, Long> getPartitionRecordLag()
   {
-    Map<String, ByteBuffer> highestCurrentOffsets = getHighestCurrentOffsets();
+    Map<String, StreamCut> highestCurrentOffsets = getHighestCurrentOffsets();
 
     if (latestSequenceFromStream == null) {
       return null;
@@ -258,7 +261,7 @@ public class PravegaSupervisor extends SeekableStreamSupervisor<String, ByteBuff
 
     if (!latestSequenceFromStream.keySet().equals(highestCurrentOffsets.keySet())) {
       log.warn(
-          "Lag metric: Kafka partitions %s do not match task partitions %s",
+          "Lag metric: Pravega partitions %s do not match task partitions %s",
           latestSequenceFromStream.keySet(),
           highestCurrentOffsets.keySet()
       );
@@ -269,7 +272,7 @@ public class PravegaSupervisor extends SeekableStreamSupervisor<String, ByteBuff
 
   @Nullable
   @Override
-  protected Map<String, ByteBuffer> getPartitionTimeLag()
+  protected Map<String, Long> getPartitionTimeLag()
   {
     // time lag not currently support with kafka
     return null;
@@ -278,7 +281,7 @@ public class PravegaSupervisor extends SeekableStreamSupervisor<String, ByteBuff
   // suppress use of CollectionUtils.mapValues() since the valueMapper function is dependent on map key here
   @SuppressWarnings("SSBasedInspection")
   // Used while calculating cummulative lag for entire stream
-  private Map<String, ByteBuffer> getRecordLagPerPartitionInLatestSequences(Map<String, ByteBuffer>currentOffsets)
+  private Map<String, Long> getRecordLagPerPartitionInLatestSequences(Map<String, StreamCut>currentOffsets)
   {
     if (latestSequenceFromStream == null) {
       return Collections.emptyMap();
@@ -301,7 +304,7 @@ public class PravegaSupervisor extends SeekableStreamSupervisor<String, ByteBuff
   // suppress use of CollectionUtils.mapValues() since the valueMapper function is dependent on map key here
   @SuppressWarnings("SSBasedInspection")
   // Used while generating Supervisor lag reports per task
-  protected Map<String, ByteBuffer> getRecordLagPerPartition(Map<String, ByteBuffer> currentOffsets)
+  protected Map<String, Long> getRecordLagPerPartition(Map<String, StreamCut> currentOffsets)
   {
     if (latestSequenceFromStream == null || currentOffsets == null) {
       return Collections.emptyMap();
@@ -322,43 +325,40 @@ public class PravegaSupervisor extends SeekableStreamSupervisor<String, ByteBuff
   }
 
   @Override
-  protected Map<String, ByteBuffer> getTimeLagPerPartition(Map<String, ByteBuffer> currentOffsets)
+  protected Map<String, Long> getTimeLagPerPartition(Map<String, StreamCut> currentOffsets)
   {
     return null;
   }
 
   @Override
-  protected PravegaDataSourceMetadata createDataSourceMetaDataForReset(String topic, Map<String, ByteBuffer> map)
+  protected PravegaDataSourceMetadata createDataSourceMetaDataForReset(String topic, Map<String, StreamCut> map)
   {
     return new PravegaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, map));
   }
 
   @Override
-  protected OrderedSequenceNumber<ByteBuffer> makeSequenceNumber(ByteBuffer seq, boolean isExclusive)
+  protected OrderedSequenceNumber<StreamCut> makeSequenceNumber(StreamCut seq, boolean isExclusive)
   {
     return PravegaSequenceNumber.of(seq);
   }
 
   @Override
-  protected ByteBuffer getNotSetMarker()
+  protected StreamCut getNotSetMarker()
   {
     return NOT_SET;
   }
 
   @Override
-  protected ByteBuffer getEndOfPartitionMarker()
-  {
-    return END_OF_PARTITION;
-  }
+  protected StreamCut getEndOfPartitionMarker() { return END_OF_PARTITION; }
 
   @Override
-  protected boolean isEndOfShard(ByteBuffer seqNum)
+  protected boolean isEndOfShard(StreamCut seqNum)
   {
     return false;
   }
 
   @Override
-  protected boolean isShardExpirationMarker(ByteBuffer seqNum)
+  protected boolean isShardExpirationMarker(StreamCut seqNum)
   {
     return false;
   }
@@ -372,7 +372,7 @@ public class PravegaSupervisor extends SeekableStreamSupervisor<String, ByteBuff
   @Override
   public LagStats computeLagStats()
   {
-    Map<String, ByteBuffer> partitionRecordLag = getPartitionRecordLag();
+    Map<String, Long> partitionRecordLag = getPartitionRecordLag();
     if (partitionRecordLag == null) {
       return new LagStats(0, 0, 0);
     }
@@ -416,7 +416,7 @@ public class PravegaSupervisor extends SeekableStreamSupervisor<String, ByteBuff
   }
 
   @Override
-  protected Map<String, ByteBuffer> getLatestSequencesFromStream()
+  protected Map<String, StreamCut> getLatestSequencesFromStream()
   {
     return latestSequenceFromStream != null ? latestSequenceFromStream : new HashMap<>();
   }
@@ -424,7 +424,7 @@ public class PravegaSupervisor extends SeekableStreamSupervisor<String, ByteBuff
   @Override
   protected String baseTaskName()
   {
-    return "index_kafka";
+    return "index_pravega";
   }
 
   @Override

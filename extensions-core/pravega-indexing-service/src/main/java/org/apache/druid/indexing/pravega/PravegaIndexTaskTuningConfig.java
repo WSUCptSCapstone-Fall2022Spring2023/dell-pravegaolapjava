@@ -153,7 +153,7 @@ public class PravegaIndexTaskTuningConfig extends SeekableStreamIndexTaskTuningC
   @Override
   public String toString()
   {
-    return "KafkaIndexTaskTuningConfig{" +
+    return "PravegaIndexTaskTuningConfig{" +
            "maxRowsInMemory=" + getMaxRowsInMemory() +
            ", maxRowsPerSegment=" + getMaxRowsPerSegment() +
            ", maxTotalRows=" + getMaxTotalRows() +

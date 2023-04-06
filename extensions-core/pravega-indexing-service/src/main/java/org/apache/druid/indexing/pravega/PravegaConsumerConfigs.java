@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Common place to keep all kafka consumer configs
+ * Common place to keep all pravega consumer configs
  */
 public class PravegaConsumerConfigs
 {

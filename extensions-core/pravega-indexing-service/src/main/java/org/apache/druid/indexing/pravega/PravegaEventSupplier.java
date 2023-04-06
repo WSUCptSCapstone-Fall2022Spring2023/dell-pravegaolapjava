@@ -49,8 +49,9 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 
-public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, ByteEntity>
+public class PravegaEventSupplier implements RecordSupplier<String, StreamCut, ByteEntity>
 {
   private EventStreamReader<ByteBuffer> consumer;
   private final String readerName = "readerOne";
@@ -60,6 +61,8 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
   private boolean closed;
   private ClientConfig config;
   private String readerGroupName;
+
+  private StreamCut streamCut;
 
   public PravegaEventSupplier(
       Map<String, Object> consumerProperties,
@@ -94,11 +97,12 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
   // called from seekablestreamindextaskrunner.java
   // partition contains scopedStream name and sequence num is the pos.
   @Override
-  public void seek(StreamPartition<String> partition, ByteBuffer sequenceNumber)
+  public void seek(StreamPartition<String> partition, StreamCut sequenceNumber)
   {
-    // Close reader at a pos. then set offline - invokes readerOffline() automatically
+    // Close reader at a pos. then set offline - invokes readerOffline() automatically, do we need to use readeroffline() instead of closeat?
+      // "move away from closeAt(), reconfigure the reader group to start from a streamcut?  closeAt() resets readergroups to the begininning (of a stream?)
     // NOTE: we may need to recreate the reader group [this is after the streamCut option was decided]
-    consumer.closeAt(Position.fromBytes(sequenceNumber));
+    consumer.closeAt(Position.fromBytes(sequenceNumber.toBytes()));
 
     // Create the reader at the new position
     // NOTE: this needs change, we'd need to close the OLD readergroup above and then open a new readergroup with a new name
@@ -110,28 +114,37 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
   // called from Seekablestreamsupervisor
   // utilize streammanager to fetch the tail, we want to seek to tail so we'd need to modify something
   @Override
-  public void seekToEarliest(Set<StreamPartition<String>> partitions)
-  {
-    // NOTE: can we use streamcut.unbounded within startfromstreamcuts() to refer to the head without having to use a stream manager?
-    // StreamCut head = streamManager.getStreamInfo(stream.getScope(), stream.getStreamName()).getHeadStreamCut();
+  public void seekToEarliest(Set<StreamPartition<String>> partitions) {
+    try {
+      // NOTE: can we use streamcut.unbounded within startfromstreamcuts() to refer to the head without having to use a stream manager?
+      streamCut = streamManager.fetchStreamInfo(stream.getScope(), stream.getStreamName()).get().getHeadStreamCut();
 
-    readerGroup.resetReaderGroup(ReaderGroupConfig.builder()
-            .startFromStreamCuts(Collections.singletonMap(stream, StreamCut.UNBOUNDED)) // create a map of Stream,StreamCut
-            .build());
-    // force all readers to this new pos. by resetting
+      readerGroup.resetReaderGroup(ReaderGroupConfig.builder()
+              .startFromStreamCuts(Collections.singletonMap(stream, streamCut)) // create a map of Stream,StreamCut
+              .build());
+      // force all readers to this new pos. by resetting
+    }
+    catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    } catch (ExecutionException e) {
+      throw new RuntimeException(e);
+    }
   }
-
   @Override
   public void seekToLatest(Set<StreamPartition<String>> partitions)
   {
     //concern: if we have 5 readers, is this called 5 times? or just once and applied to all readers
-    StreamCut tail = streamManager.getStreamInfo(stream.getScope(), stream.getStreamName()).getTailStreamCut();
+    try {
+      streamCut = streamManager.fetchStreamInfo(stream.getScope(), stream.getStreamName()).get().getTailStreamCut();
 
     readerGroup.resetReaderGroup(ReaderGroupConfig.builder()
-            .startFromStreamCuts(Collections.singletonMap(stream, tail)) // create a map of Stream,StreamCut
+            .startFromStreamCuts(Collections.singletonMap(stream, streamCut)) // create a map of Stream,StreamCut
             .build());
-
-    // Reset Reader
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    } catch (ExecutionException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   // druid might use this function to recognize which partitions exist
@@ -144,35 +157,34 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
 
   @Nonnull
   @Override
-  public List<OrderedPartitionableRecord<String, ByteBuffer, ByteEntity>> poll(long timeout)
+  public List<OrderedPartitionableRecord<String, StreamCut, ByteEntity>> poll(long timeout)
   {
-    List<OrderedPartitionableRecord<String, ByteBuffer, ByteEntity>> polledEvents = new ArrayList<>();
+    List<OrderedPartitionableRecord<String, StreamCut, ByteEntity>> polledEvents = new ArrayList<>();
 
     try {
       EventRead<ByteBuffer> event;
+      boolean hasCheckpoint = false;
 
       // Initial loop to grab the first batch of events since the first batch can be null
       while ((event = consumer.readNextEvent(timeout)) == null)
       {
-        // Log the timeout/communication failure
-        ;
+        ;        // Log the timeout/communication failure
       }
       do {
         if (event.getEvent() != null) {
-
-          // pravega position buffer?
-
+          if (hasCheckpoint) {
+            streamCut = readerGroup.getStreamCuts().get(stream);
+            hasCheckpoint = false;
+          }
           polledEvents.add(new OrderedPartitionableRecord<>(
-                  event.getEventPointer().getStream().getStreamName(),   //stream is our topic name
-                  readerGroupName,                                       //reader group ID
-                  event.getPosition().toBytes(),                         //Getting all offsets and partition IDs for the current reader, there may be a length, COULD convert to streamCUt here or it'll be in our position wrapper
+                  event.getEventPointer().getStream().getStreamName(),
+                  readerGroupName,
+                  streamCut,
                   ImmutableList.of(new ByteEntity((event.getEvent())))
           ));
         }
         else if (event.isCheckpoint()){
-          // empty body, allow next event to be read to pass the checkpoint
-          // coord. checkpoints with druid maybe
-          // initial plan is to let druid record its checkpoints so we might not do anything here manually
+          hasCheckpoint = true;
         }
       } while ((event = consumer.readNextEvent(0)) != null) ;
     } catch (ReinitializationRequiredException e){
@@ -188,36 +200,36 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
   }
 
   @Override
-  public ByteBuffer getLatestSequenceNumber(StreamPartition<String> partition)
+  public StreamCut getLatestSequenceNumber(StreamPartition<String> partition)
   {
-    ByteBuffer currPos = getPosition(partition);
+    StreamCut currPos = getPosition(partition);
     seekToLatest(Collections.singleton(partition));
-    ByteBuffer nextPos = getPosition(partition);
+    StreamCut nextPos = getPosition(partition);
     seek(partition, currPos);
     return nextPos;
   }
 
   @Override
-  public ByteBuffer getEarliestSequenceNumber(StreamPartition<String> partition)
+  public StreamCut getEarliestSequenceNumber(StreamPartition<String> partition)
   {
-    ByteBuffer currPos = getPosition(partition);
+    StreamCut currPos = getPosition(partition);
     seekToEarliest(Collections.singleton(partition));
-    ByteBuffer nextPos = getPosition(partition);
+    StreamCut nextPos = getPosition(partition);
     seek(partition, currPos);
     return nextPos;
   }
 
   @Override
-  public boolean isOffsetAvailable(StreamPartition<String> partition, OrderedSequenceNumber<ByteBuffer> offset)
+  public boolean isOffsetAvailable(StreamPartition<String> partition, OrderedSequenceNumber<StreamCut> offset)
   {
-    final ByteBuffer earliestOffset = getEarliestSequenceNumber(partition);
+    final StreamCut earliestOffset = getEarliestSequenceNumber(partition);
     return earliestOffset != null
            && offset.isAvailableWithEarliest(PravegaSequenceNumber.of(earliestOffset));
   }
 
   // not called anywhere else except in the kafka/pravega indexing service
   @Override
-  public ByteBuffer getPosition(StreamPartition<String> partition)
+  public StreamCut getPosition(StreamPartition<String> partition)
   {
     throw new UnsupportedOperationException();
   }
@@ -336,6 +348,8 @@ public class PravegaEventSupplier implements RecordSupplier<String, ByteBuffer, 
     props.putAll(consumerConfigs);
 
     ClassLoader currCtxCl = Thread.currentThread().getContextClassLoader();
+
+    // start from earliest? -> check config to start with either a head or a tail
     try {
       Thread.currentThread().setContextClassLoader(PravegaEventSupplier.class.getClassLoader());
 

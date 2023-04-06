@@ -210,7 +210,7 @@ public class PravegaSupervisorTuningConfig extends PravegaIndexTaskTuningConfig
   @Override
   public String toString()
   {
-    return "KafkaSupervisorTuningConfig{" +
+    return "PravegaSupervisorTuningConfig{" +
            "maxRowsInMemory=" + getMaxRowsInMemory() +
            ", maxRowsPerSegment=" + getMaxRowsPerSegment() +
            ", maxTotalRows=" + getMaxTotalRows() +

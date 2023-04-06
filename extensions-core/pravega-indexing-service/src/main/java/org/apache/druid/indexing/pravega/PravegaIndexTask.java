@@ -25,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import io.pravega.client.stream.StreamCut;
 import org.apache.druid.data.input.impl.ByteEntity;
 import org.apache.druid.indexing.common.task.TaskResource;
 import org.apache.druid.indexing.seekablestream.SeekableStreamIndexTask;
@@ -35,7 +36,7 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PravegaIndexTask extends SeekableStreamIndexTask<String, ByteBuffer, ByteEntity>
+public class PravegaIndexTask extends SeekableStreamIndexTask<String, StreamCut, ByteEntity>
 {
   private static final String TYPE = "index_pravega";
 
@@ -79,7 +80,7 @@ public class PravegaIndexTask extends SeekableStreamIndexTask<String, ByteBuffer
 
   // creating task runner (seekablestream has task runner) and record supplier
   @Override
-  protected SeekableStreamIndexTaskRunner<String, ByteBuffer, ByteEntity> createTaskRunner()
+  protected SeekableStreamIndexTaskRunner<String, StreamCut, ByteEntity> createTaskRunner()
   {
     //noinspection unchecked
     return new IncrementalPublishingPravegaIndexTaskRunner(

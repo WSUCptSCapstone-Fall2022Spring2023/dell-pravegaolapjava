@@ -21,6 +21,7 @@ package org.apache.druid.indexing.pravega;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.pravega.client.stream.StreamCut;
 import org.apache.druid.indexing.overlord.DataSourceMetadata;
 import org.apache.druid.indexing.seekablestream.SeekableStreamDataSourceMetadata;
 import org.apache.druid.indexing.seekablestream.SeekableStreamEndSequenceNumbers;
@@ -28,12 +29,12 @@ import org.apache.druid.indexing.seekablestream.SeekableStreamSequenceNumbers;
 
 import java.nio.ByteBuffer;
 
-public class PravegaDataSourceMetadata extends SeekableStreamDataSourceMetadata<String, ByteBuffer>
+public class PravegaDataSourceMetadata extends SeekableStreamDataSourceMetadata<String, StreamCut>
 {
 
   @JsonCreator
   public PravegaDataSourceMetadata(
-      @JsonProperty("partitions") SeekableStreamSequenceNumbers<String, ByteBuffer> pravegaPartitions
+      @JsonProperty("partitions") SeekableStreamSequenceNumbers<String, StreamCut> pravegaPartitions
   )
   {
     super(pravegaPartitions);
@@ -42,10 +43,10 @@ public class PravegaDataSourceMetadata extends SeekableStreamDataSourceMetadata<
   @Override
   public DataSourceMetadata asStartMetadata()
   {
-    final SeekableStreamSequenceNumbers<String, ByteBuffer> sequenceNumbers = getSeekableStreamSequenceNumbers();
+    final SeekableStreamSequenceNumbers<String, StreamCut> sequenceNumbers = getSeekableStreamSequenceNumbers();
     if (sequenceNumbers instanceof SeekableStreamEndSequenceNumbers) {
       return createConcreteDataSourceMetaData(
-          ((SeekableStreamEndSequenceNumbers<String, ByteBuffer>) sequenceNumbers).asStartPartitions(true)
+          ((SeekableStreamEndSequenceNumbers<String, StreamCut>) sequenceNumbers).asStartPartitions(true)
       );
     } else {
       return this;
@@ -53,8 +54,8 @@ public class PravegaDataSourceMetadata extends SeekableStreamDataSourceMetadata<
   }
 
   @Override
-  protected SeekableStreamDataSourceMetadata<String, ByteBuffer> createConcreteDataSourceMetaData(
-      SeekableStreamSequenceNumbers<String, ByteBuffer> seekableStreamSequenceNumbers
+  protected SeekableStreamDataSourceMetadata<String, StreamCut> createConcreteDataSourceMetaData(
+      SeekableStreamSequenceNumbers<String, StreamCut> seekableStreamSequenceNumbers
   )
   {
     return new PravegaDataSourceMetadata(seekableStreamSequenceNumbers);
