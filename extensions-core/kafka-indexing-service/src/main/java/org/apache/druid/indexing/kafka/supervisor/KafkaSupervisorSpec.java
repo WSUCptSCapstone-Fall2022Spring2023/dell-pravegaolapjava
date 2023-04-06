@@ -24,7 +24,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.druid.guice.annotations.Json;
-import org.apache.druid.indexing.kafka.PravegaIndexTaskClientFactory;
+import org.apache.druid.indexing.kafka.KafkaIndexTaskClientFactory;
 import org.apache.druid.indexing.overlord.IndexerMetadataStorageCoordinator;
 import org.apache.druid.indexing.overlord.TaskMaster;
 import org.apache.druid.indexing.overlord.TaskStorage;
@@ -47,14 +47,14 @@ public class KafkaSupervisorSpec extends SeekableStreamSupervisorSpec
   public KafkaSupervisorSpec(
       @JsonProperty("spec") @Nullable KafkaSupervisorIngestionSpec ingestionSchema,
       @JsonProperty("dataSchema") @Nullable DataSchema dataSchema,
-      @JsonProperty("tuningConfig") @Nullable PravegaSupervisorTuningConfig tuningConfig,
-      @JsonProperty("ioConfig") @Nullable PravegaSupervisorIOConfig ioConfig,
+      @JsonProperty("tuningConfig") @Nullable KafkaSupervisorTuningConfig tuningConfig,
+      @JsonProperty("ioConfig") @Nullable KafkaSupervisorIOConfig ioConfig,
       @JsonProperty("context") Map<String, Object> context,
       @JsonProperty("suspended") Boolean suspended,
       @JacksonInject TaskStorage taskStorage,
       @JacksonInject TaskMaster taskMaster,
       @JacksonInject IndexerMetadataStorageCoordinator indexerMetadataStorageCoordinator,
-      @JacksonInject PravegaIndexTaskClientFactory kafkaIndexTaskClientFactory,
+      @JacksonInject KafkaIndexTaskClientFactory kafkaIndexTaskClientFactory,
       @JacksonInject @Json ObjectMapper mapper,
       @JacksonInject ServiceEmitter emitter,
       @JacksonInject DruidMonitorSchedulerConfig monitorSchedulerConfig,
@@ -70,7 +70,7 @@ public class KafkaSupervisorSpec extends SeekableStreamSupervisorSpec
             ioConfig,
             tuningConfig != null
             ? tuningConfig
-            : PravegaSupervisorTuningConfig.defaultConfig()
+            : KafkaSupervisorTuningConfig.defaultConfig()
         ),
         context,
         suspended,
@@ -101,11 +101,11 @@ public class KafkaSupervisorSpec extends SeekableStreamSupervisorSpec
   @Override
   public Supervisor createSupervisor()
   {
-    return new PravegaSupervisor(
+    return new KafkaSupervisor(
         taskStorage,
         taskMaster,
         indexerMetadataStorageCoordinator,
-        (PravegaIndexTaskClientFactory) indexTaskClientFactory,
+        (KafkaIndexTaskClientFactory) indexTaskClientFactory,
         mapper,
         this,
         rowIngestionMetersFactory
@@ -115,17 +115,17 @@ public class KafkaSupervisorSpec extends SeekableStreamSupervisorSpec
   @Override
   @Deprecated
   @JsonProperty
-  public PravegaSupervisorTuningConfig getTuningConfig()
+  public KafkaSupervisorTuningConfig getTuningConfig()
   {
-    return (PravegaSupervisorTuningConfig) super.getTuningConfig();
+    return (KafkaSupervisorTuningConfig) super.getTuningConfig();
   }
 
   @Override
   @Deprecated
   @JsonProperty
-  public PravegaSupervisorIOConfig getIoConfig()
+  public KafkaSupervisorIOConfig getIoConfig()
   {
-    return (PravegaSupervisorIOConfig) super.getIoConfig();
+    return (KafkaSupervisorIOConfig) super.getIoConfig();
   }
 
   @Override
@@ -136,9 +136,9 @@ public class KafkaSupervisorSpec extends SeekableStreamSupervisorSpec
   }
 
   @Override
-  protected PravegaSupervisorSpec toggleSuspend(boolean suspend)
+  protected KafkaSupervisorSpec toggleSuspend(boolean suspend)
   {
-    return new PravegaSupervisorSpec(
+    return new KafkaSupervisorSpec(
         getSpec(),
         getDataSchema(),
         getTuningConfig(),
@@ -148,7 +148,7 @@ public class KafkaSupervisorSpec extends SeekableStreamSupervisorSpec
         taskStorage,
         taskMaster,
         indexerMetadataStorageCoordinator,
-        (PravegaIndexTaskClientFactory) indexTaskClientFactory,
+        (KafkaIndexTaskClientFactory) indexTaskClientFactory,
         mapper,
         emitter,
         monitorSchedulerConfig,

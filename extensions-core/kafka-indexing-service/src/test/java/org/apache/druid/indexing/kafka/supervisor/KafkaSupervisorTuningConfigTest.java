@@ -21,7 +21,7 @@ package org.apache.druid.indexing.kafka.supervisor;
 
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.druid.indexing.kafka.PravegaIndexTaskModule;
+import org.apache.druid.indexing.kafka.KafkaIndexTaskModule;
 import org.apache.druid.jackson.DefaultObjectMapper;
 import org.apache.druid.segment.IndexSpec;
 import org.apache.druid.segment.data.CompressionStrategy;
@@ -39,7 +39,7 @@ public class KafkaSupervisorTuningConfigTest
   public KafkaSupervisorTuningConfigTest()
   {
     mapper = new DefaultObjectMapper();
-    mapper.registerModules((Iterable<Module>) new PravegaIndexTaskModule().getJacksonModules());
+    mapper.registerModules((Iterable<Module>) new KafkaIndexTaskModule().getJacksonModules());
   }
 
   @Test
@@ -47,7 +47,7 @@ public class KafkaSupervisorTuningConfigTest
   {
     String jsonStr = "{\"type\": \"kafka\"}";
 
-    PravegaSupervisorTuningConfig config = (PravegaSupervisorTuningConfig) mapper.readValue(
+    KafkaSupervisorTuningConfig config = (KafkaSupervisorTuningConfig) mapper.readValue(
         mapper.writeValueAsString(
             mapper.readValue(
                 jsonStr,
@@ -98,7 +98,7 @@ public class KafkaSupervisorTuningConfigTest
                      + "  \"appendableIndexSpec\": { \"type\" : \"onheap\" }\n"
                      + "}";
 
-    PravegaSupervisorTuningConfig config = (PravegaSupervisorTuningConfig) mapper.readValue(
+    KafkaSupervisorTuningConfig config = (KafkaSupervisorTuningConfig) mapper.readValue(
         mapper.writeValueAsString(
             mapper.readValue(
                 jsonStr,

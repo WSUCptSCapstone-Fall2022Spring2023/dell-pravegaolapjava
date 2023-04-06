@@ -60,8 +60,8 @@ import org.apache.druid.indexing.common.task.IndexTaskTest;
 import org.apache.druid.indexing.common.task.ParseExceptionReport;
 import org.apache.druid.indexing.common.task.Task;
 import org.apache.druid.indexing.common.task.Tasks;
-import org.apache.druid.indexing.kafka.supervisor.PravegaSupervisor;
-import org.apache.druid.indexing.kafka.supervisor.PravegaSupervisorIOConfig;
+import org.apache.druid.indexing.kafka.supervisor.KafkaSupervisor;
+import org.apache.druid.indexing.kafka.supervisor.KafkaSupervisorIOConfig;
 import org.apache.druid.indexing.kafka.test.TestBroker;
 import org.apache.druid.indexing.overlord.DataSourceMetadata;
 import org.apache.druid.indexing.seekablestream.SeekableStreamEndSequenceNumbers;
@@ -181,7 +181,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
 
   static {
     Stream.concat(
-        new PravegaIndexTaskModule().getJacksonModules().stream(),
+        new KafkaIndexTaskModule().getJacksonModules().stream(),
         Stream.of(TEST_MODULE)
     ).forEach(OBJECT_MAPPER::registerModule);
   }
@@ -339,15 +339,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
     // Insert data
     insertData();
 
-    final PravegaIndexTask task = createTask(
+    final KafkaIndexTask task = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 2L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -373,7 +373,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
         publishedDescriptors()
     );
     Assert.assertEquals(
-        new PravegaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L))),
+        new KafkaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L))),
         newDataSchemaMetadata()
     );
   }
@@ -394,16 +394,16 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
             new FloatDimensionSchema("dimFloat")
         )
     );
-    final PravegaIndexTask task = createTask(
+    final KafkaIndexTask task = createTask(
         null,
         NEW_DATA_SCHEMA.withDimensionsSpec(dimensionsSpec),
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 2L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -431,7 +431,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
     // Insert data
     insertData();
 
-    final PravegaIndexTask task = createTask(
+    final KafkaIndexTask task = createTask(
         null,
         NEW_DATA_SCHEMA.withDimensionsSpec(
             new DimensionsSpec(
@@ -445,13 +445,13 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
                 )
             )
         ),
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 2L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -477,16 +477,16 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
     // Insert data
     insertData();
 
-    final PravegaIndexTask task = createTask(
+    final KafkaIndexTask task = createTask(
         null,
         OLD_DATA_SCHEMA,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 2L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -511,7 +511,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
         publishedDescriptors()
     );
     Assert.assertEquals(
-        new PravegaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L))),
+        new KafkaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L))),
         newDataSchemaMetadata()
     );
   }
@@ -519,15 +519,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
   @Test(timeout = 60_000L)
   public void testRunBeforeDataInserted() throws Exception
   {
-    final PravegaIndexTask task = createTask(
+    final KafkaIndexTask task = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 2L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -560,7 +560,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
         publishedDescriptors()
     );
     Assert.assertEquals(
-        new PravegaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L))),
+        new KafkaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L))),
         newDataSchemaMetadata()
     );
   }
@@ -570,15 +570,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
   {
     // Insert data
     insertData();
-    final PravegaIndexTask task = createTask(
+    final KafkaIndexTask task = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 2L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 12L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -647,15 +647,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
         topic,
         ImmutableMap.of(0, 10L, 1, 2L)
     );
-    final PravegaIndexTask task = createTask(
+    final KafkaIndexTask task = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             baseSequenceName,
             startPartitions,
             endPartitions,
             consumerProps,
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -680,7 +680,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
             Objects.hash(
                 NEW_DATA_SCHEMA.getDataSource(),
                 0,
-                new PravegaDataSourceMetadata(startPartitions)
+                new KafkaDataSourceMetadata(startPartitions)
             )
         )
     );
@@ -702,7 +702,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
         publishedDescriptors()
     );
     Assert.assertEquals(
-        new PravegaDataSourceMetadata(
+        new KafkaDataSourceMetadata(
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 10L, 1, 2L))
         ),
         newDataSchemaMetadata()
@@ -750,15 +750,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
         topic,
         ImmutableMap.of(0, 10L, 1, 2L)
     );
-    final PravegaIndexTask task = createTask(
+    final KafkaIndexTask task = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             baseSequenceName,
             startPartitions,
             endPartitions,
             consumerProps,
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -802,7 +802,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
             Objects.hash(
                 NEW_DATA_SCHEMA.getDataSource(),
                 0,
-                new PravegaDataSourceMetadata(startPartitions)
+                new KafkaDataSourceMetadata(startPartitions)
             )
         )
     );
@@ -811,7 +811,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
             Objects.hash(
                 NEW_DATA_SCHEMA.getDataSource(),
                 0,
-                new PravegaDataSourceMetadata(
+                new KafkaDataSourceMetadata(
                     new SeekableStreamStartSequenceNumbers<>(topic, currentOffsets, ImmutableSet.of())
                 )
             )
@@ -835,14 +835,14 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
         publishedDescriptors()
     );
     Assert.assertEquals(
-        new PravegaDataSourceMetadata(
+        new KafkaDataSourceMetadata(
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 10L, 1, 2L))
         ),
         newDataSchemaMetadata()
     );
 
     Assert.assertEquals(
-        new PravegaDataSourceMetadata(
+        new KafkaDataSourceMetadata(
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 10L, 1, 2L))
         ),
         newDataSchemaMetadata()
@@ -876,15 +876,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
         topic,
         ImmutableMap.of(0, 2L, 1, 0L)
     );
-    final PravegaIndexTask task = createTask(
+    final KafkaIndexTask task = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             baseSequenceName,
             startPartitions,
             endPartitions,
             consumerProps,
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -909,7 +909,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
             Objects.hash(
                 NEW_DATA_SCHEMA.getDataSource(),
                 0,
-                new PravegaDataSourceMetadata(startPartitions)
+                new KafkaDataSourceMetadata(startPartitions)
             )
         )
     );
@@ -925,7 +925,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
         publishedDescriptors()
     );
     Assert.assertEquals(
-        new PravegaDataSourceMetadata(
+        new KafkaDataSourceMetadata(
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 2L, 1, 0L))
         ),
         newDataSchemaMetadata()
@@ -960,15 +960,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
     final SeekableStreamEndSequenceNumbers<Integer, Long> endPartitions =
         new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, Long.MAX_VALUE));
 
-    final PravegaIndexTask normalReplica = createTask(
+    final KafkaIndexTask normalReplica = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             baseSequenceName,
             startPartitions,
             endPartitions,
             consumerProps,
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -976,15 +976,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
             null
         )
     );
-    final PravegaIndexTask staleReplica = createTask(
+    final KafkaIndexTask staleReplica = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             baseSequenceName,
             startPartitions,
             endPartitions,
             consumerProps,
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -1041,15 +1041,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
   @Test(timeout = 60_000L)
   public void testRunWithMinimumMessageTime() throws Exception
   {
-    final PravegaIndexTask task = createTask(
+    final KafkaIndexTask task = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 0L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             DateTimes.of("2010"),
             null,
@@ -1081,7 +1081,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
         publishedDescriptors()
     );
     Assert.assertEquals(
-        new PravegaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L))),
+        new KafkaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L))),
         newDataSchemaMetadata()
     );
   }
@@ -1089,15 +1089,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
   @Test(timeout = 60_000L)
   public void testRunWithMaximumMessageTime() throws Exception
   {
-    final PravegaIndexTask task = createTask(
+    final KafkaIndexTask task = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 0L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             DateTimes.of("2010"),
@@ -1130,7 +1130,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
         publishedDescriptors()
     );
     Assert.assertEquals(
-        new PravegaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L))),
+        new KafkaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L))),
         newDataSchemaMetadata()
     );
   }
@@ -1138,7 +1138,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
   @Test(timeout = 60_000L)
   public void testRunWithTransformSpec() throws Exception
   {
-    final PravegaIndexTask task = createTask(
+    final KafkaIndexTask task = createTask(
         null,
         NEW_DATA_SCHEMA.withTransformSpec(
             new TransformSpec(
@@ -1148,13 +1148,13 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
                 )
             )
         ),
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 0L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -1181,7 +1181,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
     final List<SegmentDescriptor> publishedDescriptors = publishedDescriptors();
     assertEqualsExceptVersion(ImmutableList.of(sdd("2009/P1D", 0)), publishedDescriptors);
     Assert.assertEquals(
-        new PravegaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L))),
+        new KafkaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L))),
         newDataSchemaMetadata()
     );
 
@@ -1196,7 +1196,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
     // Insert data
     insertData(Iterables.limit(records, 3));
 
-    final PravegaIndexTask task = createTask(
+    final KafkaIndexTask task = createTask(
         null,
         new DataSchema(
             "test_ds",
@@ -1220,13 +1220,13 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
             new UniformGranularitySpec(Granularities.DAY, Granularities.NONE, null),
             null
         ),
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 0L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -1271,7 +1271,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
     // Insert data
     insertData(Iterables.limit(records, 3));
 
-    final PravegaIndexTask task = createTask(
+    final KafkaIndexTask task = createTask(
         null,
         new DataSchema(
             "test_ds",
@@ -1293,13 +1293,13 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
             new UniformGranularitySpec(Granularities.DAY, Granularities.NONE, null),
             null
         ),
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 0L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -1342,15 +1342,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
     // Insert data
     insertData();
 
-    final PravegaIndexTask task = createTask(
+    final KafkaIndexTask task = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 2L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 2L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -1377,15 +1377,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
     // Insert data
     insertData();
 
-    final PravegaIndexTask task = createTask(
+    final KafkaIndexTask task = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 2L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -1409,7 +1409,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
         publishedDescriptors()
     );
     Assert.assertEquals(
-        new PravegaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L))),
+        new KafkaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L))),
         newDataSchemaMetadata()
     );
   }
@@ -1423,15 +1423,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
     // Insert data
     insertData();
 
-    final PravegaIndexTask task = createTask(
+    final KafkaIndexTask task = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 2L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -1455,7 +1455,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
         publishedDescriptors()
     );
     Assert.assertEquals(
-        new PravegaDataSourceMetadata(
+        new KafkaDataSourceMetadata(
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L))
         ),
         newDataSchemaMetadata()
@@ -1474,15 +1474,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
     // Insert data
     insertData();
 
-    final PravegaIndexTask task = createTask(
+    final KafkaIndexTask task = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 2L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 7L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -1512,15 +1512,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
     // Insert data
     insertData();
 
-    final PravegaIndexTask task = createTask(
+    final KafkaIndexTask task = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 2L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 13L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -1548,7 +1548,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
         publishedDescriptors()
     );
     Assert.assertEquals(
-        new PravegaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 13L))),
+        new KafkaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 13L))),
         newDataSchemaMetadata()
     );
 
@@ -1600,15 +1600,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
     // Insert data
     insertData();
 
-    final PravegaIndexTask task = createTask(
+    final KafkaIndexTask task = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 2L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 10L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -1662,15 +1662,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
   @Test(timeout = 60_000L)
   public void testRunReplicas() throws Exception
   {
-    final PravegaIndexTask task1 = createTask(
+    final KafkaIndexTask task1 = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 2L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -1678,15 +1678,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
             null
         )
     );
-    final PravegaIndexTask task2 = createTask(
+    final KafkaIndexTask task2 = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 2L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -1718,7 +1718,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
         publishedDescriptors()
     );
     Assert.assertEquals(
-        new PravegaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L))),
+        new KafkaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L))),
         newDataSchemaMetadata()
     );
   }
@@ -1726,15 +1726,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
   @Test(timeout = 60_000L)
   public void testRunConflicting() throws Exception
   {
-    final PravegaIndexTask task1 = createTask(
+    final KafkaIndexTask task1 = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 2L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -1742,15 +1742,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
             null
         )
     );
-    final PravegaIndexTask task2 = createTask(
+    final KafkaIndexTask task2 = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             1,
             "sequence1",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 3L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 10L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -1784,7 +1784,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
         publishedDescriptors
     );
     Assert.assertEquals(
-        new PravegaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L))),
+        new KafkaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L))),
         newDataSchemaMetadata()
     );
   }
@@ -1792,15 +1792,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
   @Test(timeout = 60_000L)
   public void testRunConflictingWithoutTransactions() throws Exception
   {
-    final PravegaIndexTask task1 = createTask(
+    final KafkaIndexTask task1 = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 2L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             false,
             null,
             null,
@@ -1808,15 +1808,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
             null
         )
     );
-    final PravegaIndexTask task2 = createTask(
+    final KafkaIndexTask task2 = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             1,
             "sequence1",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 3L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 10L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             false,
             null,
             null,
@@ -1856,15 +1856,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
   @Test(timeout = 60_000L)
   public void testRunOneTaskTwoPartitions() throws Exception
   {
-    final PravegaIndexTask task = createTask(
+    final KafkaIndexTask task = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 2L, 1, 0L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L, 1, 2L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -1892,7 +1892,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
     SegmentDescriptorAndExpectedDim1Values desc4 = sdd("2012/P1D", 0, ImmutableList.of("g"));
     assertEqualsExceptVersion(ImmutableList.of(desc1, desc2, desc4), publishedDescriptors());
     Assert.assertEquals(
-        new PravegaDataSourceMetadata(
+        new KafkaDataSourceMetadata(
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L, 1, 2L))
         ),
         newDataSchemaMetadata()
@@ -1902,15 +1902,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
   @Test(timeout = 60_000L)
   public void testRunTwoTasksTwoPartitions() throws Exception
   {
-    final PravegaIndexTask task1 = createTask(
+    final KafkaIndexTask task1 = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 2L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -1918,15 +1918,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
             null
         )
     );
-    final PravegaIndexTask task2 = createTask(
+    final KafkaIndexTask task2 = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             1,
             "sequence1",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(1, 0L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(1, 1L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -1958,7 +1958,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
         publishedDescriptors()
     );
     Assert.assertEquals(
-        new PravegaDataSourceMetadata(
+        new KafkaDataSourceMetadata(
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L, 1, 1L))
         ),
         newDataSchemaMetadata()
@@ -1968,15 +1968,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
   @Test(timeout = 60_000L)
   public void testRestore() throws Exception
   {
-    final PravegaIndexTask task1 = createTask(
+    final KafkaIndexTask task1 = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 2L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 6L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -2002,15 +2002,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
     Assert.assertEquals(TaskState.SUCCESS, future1.get().getStatusCode());
 
     // Start a new task
-    final PravegaIndexTask task2 = createTask(
+    final KafkaIndexTask task2 = createTask(
         task1.getId(),
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 2L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 6L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -2039,7 +2039,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
         publishedDescriptors()
     );
     Assert.assertEquals(
-        new PravegaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 6L))),
+        new KafkaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 6L))),
         newDataSchemaMetadata()
     );
   }
@@ -2052,15 +2052,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
     Map<String, Object> consumerProps = kafkaServer.consumerProperties();
     consumerProps.put("max.poll.records", "1");
 
-    final PravegaIndexTask task1 = createTask(
+    final KafkaIndexTask task1 = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 0L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 10L)),
             consumerProps,
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -2095,15 +2095,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
     Assert.assertEquals(TaskState.SUCCESS, future1.get().getStatusCode());
 
     // Start a new task
-    final PravegaIndexTask task2 = createTask(
+    final KafkaIndexTask task2 = createTask(
         task1.getId(),
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 0L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 10L)),
             consumerProps,
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -2138,7 +2138,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
         publishedDescriptors()
     );
     Assert.assertEquals(
-        new PravegaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 10L))),
+        new KafkaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 10L))),
         newDataSchemaMetadata()
     );
   }
@@ -2146,15 +2146,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
   @Test(timeout = 60_000L)
   public void testRunWithPauseAndResume() throws Exception
   {
-    final PravegaIndexTask task = createTask(
+    final KafkaIndexTask task = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 2L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 6L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -2209,7 +2209,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
         publishedDescriptors()
     );
     Assert.assertEquals(
-        new PravegaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 6L))),
+        new KafkaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 6L))),
         newDataSchemaMetadata()
     );
   }
@@ -2217,15 +2217,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
   @Test(timeout = 60_000L)
   public void testRunWithOffsetOutOfRangeExceptionAndPause() throws Exception
   {
-    final PravegaIndexTask task = createTask(
+    final KafkaIndexTask task = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 2L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -2254,15 +2254,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
     // Insert data
     insertData();
 
-    final PravegaIndexTask task = createTask(
+    final KafkaIndexTask task = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 200L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 500L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -2297,19 +2297,19 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
     final Map<String, Object> context = new HashMap<>();
     context.put(
         SeekableStreamSupervisor.CHECKPOINTS_CTX_KEY,
-        OBJECT_MAPPER.writerFor(PravegaSupervisor.CHECKPOINTS_TYPE_REF).writeValueAsString(sequences)
+        OBJECT_MAPPER.writerFor(KafkaSupervisor.CHECKPOINTS_TYPE_REF).writeValueAsString(sequences)
     );
 
-    final PravegaIndexTask task = createTask(
+    final KafkaIndexTask task = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             // task should ignore these and use sequence info sent in the context
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 0L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -2334,7 +2334,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
         publishedDescriptors()
     );
     Assert.assertEquals(
-        new PravegaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L))),
+        new KafkaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L))),
         newDataSchemaMetadata()
     );
   }
@@ -2345,15 +2345,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
     // Insert data
     insertData();
 
-    final PravegaIndexTask task = createTask(
+    final KafkaIndexTask task = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 200L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 500L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -2382,9 +2382,9 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
   @Test(timeout = 60_000L)
   public void testRunTransactionModeRollback() throws Exception
   {
-    final PravegaIndexTask task = createTask(
+    final KafkaIndexTask task = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 0L), ImmutableSet.of()),
@@ -2392,7 +2392,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
             // End offset is one after 12 real messages + 2 txn control messages (last seen message: offset 13).
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 14L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -2455,7 +2455,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
         publishedDescriptors()
     );
     Assert.assertEquals(
-        new PravegaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 14L))),
+        new KafkaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 14L))),
         newDataSchemaMetadata()
     );
   }
@@ -2465,15 +2465,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
   {
     Map<String, Object> configs = kafkaServer.consumerProperties();
     configs.put("isolation.level", "read_uncommitted");
-    final PravegaIndexTask task = createTask(
+    final KafkaIndexTask task = createTask(
             null,
-            new PravegaIndexTaskIOConfig(
+            new KafkaIndexTaskIOConfig(
                     0,
                     "sequence0",
                     new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 0L), ImmutableSet.of()),
                     new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 13L)),
                     configs,
-                    PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+                    KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
                     true,
                     null,
                     null,
@@ -2525,15 +2525,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
         ImmutableMap.of(0, 10L, 1, 2L)
     );
 
-    final PravegaIndexTask task = createTask(
+    final KafkaIndexTask task = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             baseSequenceName,
             startPartitions,
             endPartitions,
             consumerProps,
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -2548,15 +2548,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
   @Test(timeout = 60_000L)
   public void testRunWithoutDataInserted() throws Exception
   {
-    final PravegaIndexTask task = createTask(
+    final KafkaIndexTask task = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 2L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 5L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -2588,7 +2588,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
   {
     // This is both a serde test and a regression test for https://github.com/apache/druid/issues/7724.
 
-    final PravegaIndexTask task = createTask(
+    final KafkaIndexTask task = createTask(
         "taskid",
         NEW_DATA_SCHEMA.withTransformSpec(
             new TransformSpec(
@@ -2596,13 +2596,13 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
                 ImmutableList.of(new ExpressionTransform("beep", "nofunc()", ExprMacroTable.nil()))
             )
         ),
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of()),
             ImmutableMap.of(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -2618,7 +2618,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
   /**
    * Wait for a task to consume certain offsets (inclusive).
    */
-  private void awaitConsumedOffsets(final PravegaIndexTask task, final Map<Integer, Long> targetOffsets)
+  private void awaitConsumedOffsets(final KafkaIndexTask task, final Map<Integer, Long> targetOffsets)
       throws InterruptedException
   {
     while (true) {
@@ -2696,41 +2696,41 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
     }
   }
 
-  private PravegaIndexTask createTask(
+  private KafkaIndexTask createTask(
       final String taskId,
-      final PravegaIndexTaskIOConfig ioConfig
+      final KafkaIndexTaskIOConfig ioConfig
   ) throws JsonProcessingException
   {
     return createTask(taskId, NEW_DATA_SCHEMA, ioConfig);
   }
 
-  private PravegaIndexTask createTask(
+  private KafkaIndexTask createTask(
       final String taskId,
-      final PravegaIndexTaskIOConfig ioConfig,
+      final KafkaIndexTaskIOConfig ioConfig,
       final Map<String, Object> context
   ) throws JsonProcessingException
   {
     return createTask(taskId, NEW_DATA_SCHEMA, ioConfig, context);
   }
 
-  private PravegaIndexTask createTask(
+  private KafkaIndexTask createTask(
       final String taskId,
       final DataSchema dataSchema,
-      final PravegaIndexTaskIOConfig ioConfig
+      final KafkaIndexTaskIOConfig ioConfig
   ) throws JsonProcessingException
   {
     final Map<String, Object> context = new HashMap<>();
     return createTask(taskId, dataSchema, ioConfig, context);
   }
 
-  private PravegaIndexTask createTask(
+  private KafkaIndexTask createTask(
       final String taskId,
       final DataSchema dataSchema,
-      final PravegaIndexTaskIOConfig ioConfig,
+      final KafkaIndexTaskIOConfig ioConfig,
       final Map<String, Object> context
   ) throws JsonProcessingException
   {
-    final PravegaIndexTaskTuningConfig tuningConfig = new PravegaIndexTaskTuningConfig(
+    final KafkaIndexTaskTuningConfig tuningConfig = new KafkaIndexTaskTuningConfig(
         null,
         1000,
         null,
@@ -2755,12 +2755,12 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
       final TreeMap<Integer, Map<Integer, Long>> checkpoints = new TreeMap<>();
       checkpoints.put(0, ioConfig.getStartSequenceNumbers().getPartitionSequenceNumberMap());
       final String checkpointsJson = OBJECT_MAPPER
-          .writerFor(PravegaSupervisor.CHECKPOINTS_TYPE_REF)
+          .writerFor(KafkaSupervisor.CHECKPOINTS_TYPE_REF)
           .writeValueAsString(checkpoints);
       context.put(SeekableStreamSupervisor.CHECKPOINTS_CTX_KEY, checkpointsJson);
     }
 
-    final PravegaIndexTask task = new PravegaIndexTask(
+    final KafkaIndexTask task = new KafkaIndexTask(
         taskId,
         null,
         cloneDataSchema(dataSchema),
@@ -2823,7 +2823,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
     final TestUtils testUtils = new TestUtils();
     final ObjectMapper objectMapper = testUtils.getTestObjectMapper();
 
-    for (Module module : new PravegaIndexTaskModule().getJacksonModules()) {
+    for (Module module : new KafkaIndexTaskModule().getJacksonModules()) {
       objectMapper.registerModule(module);
     }
     objectMapper.registerModule(TEST_MODULE);
@@ -2859,15 +2859,15 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
     records = producerRecords;
     insertData();
 
-    final PravegaIndexTask task = createTask(
+    final KafkaIndexTask task = createTask(
         null,
-        new PravegaIndexTaskIOConfig(
+        new KafkaIndexTaskIOConfig(
             0,
             "sequence0",
             new SeekableStreamStartSequenceNumbers<>(topic, ImmutableMap.of(0, 0L), ImmutableSet.of()),
             new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 4L)),
             kafkaServer.consumerProperties(),
-            PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+            KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
             true,
             null,
             null,
@@ -2891,7 +2891,7 @@ public class KafkaIndexTaskTest extends SeekableStreamIndexTaskTestBase
         publishedDescriptors()
     );
     Assert.assertEquals(
-        new PravegaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 4L))),
+        new KafkaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, ImmutableMap.of(0, 4L))),
         newDataSchemaMetadata()
     );
   }

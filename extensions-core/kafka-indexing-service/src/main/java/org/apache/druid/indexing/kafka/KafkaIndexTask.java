@@ -48,8 +48,8 @@ public class KafkaIndexTask extends SeekableStreamIndexTask<Integer, Long, Kafka
       @JsonProperty("id") String id,
       @JsonProperty("resource") TaskResource taskResource,
       @JsonProperty("dataSchema") DataSchema dataSchema,
-      @JsonProperty("tuningConfig") PravegaIndexTaskTuningConfig tuningConfig,
-      @JsonProperty("ioConfig") PravegaIndexTaskIOConfig ioConfig,
+      @JsonProperty("tuningConfig") KafkaIndexTaskTuningConfig tuningConfig,
+      @JsonProperty("ioConfig") KafkaIndexTaskIOConfig ioConfig,
       @JsonProperty("context") Map<String, Object> context,
       @JacksonInject ObjectMapper configMapper
   )
@@ -80,7 +80,7 @@ public class KafkaIndexTask extends SeekableStreamIndexTask<Integer, Long, Kafka
   protected SeekableStreamIndexTaskRunner<Integer, Long, KafkaRecordEntity> createTaskRunner()
   {
     //noinspection unchecked
-    return new IncrementalPublishingPravegaIndexTaskRunner(
+    return new IncrementalPublishingKafkaIndexTaskRunner(
         this,
         dataSchema.getParser(),
         authorizerMapper,
@@ -94,7 +94,7 @@ public class KafkaIndexTask extends SeekableStreamIndexTask<Integer, Long, Kafka
     ClassLoader currCtxCl = Thread.currentThread().getContextClassLoader();
     try {
       Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-      PravegaIndexTaskIOConfig kafkaIndexTaskIOConfig = (PravegaIndexTaskIOConfig) super.ioConfig;
+      KafkaIndexTaskIOConfig kafkaIndexTaskIOConfig = (KafkaIndexTaskIOConfig) super.ioConfig;
       final Map<String, Object> props = new HashMap<>(kafkaIndexTaskIOConfig.getConsumerProperties());
 
       props.put("auto.offset.reset", "none");
@@ -108,9 +108,9 @@ public class KafkaIndexTask extends SeekableStreamIndexTask<Integer, Long, Kafka
 
   @Override
   @JsonProperty
-  public PravegaIndexTaskTuningConfig getTuningConfig()
+  public KafkaIndexTaskTuningConfig getTuningConfig()
   {
-    return (PravegaIndexTaskTuningConfig) super.getTuningConfig();
+    return (KafkaIndexTaskTuningConfig) super.getTuningConfig();
   }
 
   @VisibleForTesting
@@ -121,9 +121,9 @@ public class KafkaIndexTask extends SeekableStreamIndexTask<Integer, Long, Kafka
 
   @Override
   @JsonProperty("ioConfig")
-  public PravegaIndexTaskIOConfig getIOConfig()
+  public KafkaIndexTaskIOConfig getIOConfig()
   {
-    return (PravegaIndexTaskIOConfig) super.getIOConfig();
+    return (KafkaIndexTaskIOConfig) super.getIOConfig();
   }
 
   @Override

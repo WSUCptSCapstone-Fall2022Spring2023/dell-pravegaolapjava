@@ -27,13 +27,7 @@ import org.apache.druid.common.utils.IdUtils;
 import org.apache.druid.data.input.kafka.KafkaRecordEntity;
 import org.apache.druid.indexing.common.task.Task;
 import org.apache.druid.indexing.common.task.TaskResource;
-import org.apache.druid.indexing.kafka.PravegaDataSourceMetadata;
-import org.apache.druid.indexing.kafka.PravegaIndexTask;
-import org.apache.druid.indexing.kafka.PravegaIndexTaskClientFactory;
-import org.apache.druid.indexing.kafka.PravegaIndexTaskIOConfig;
-import org.apache.druid.indexing.kafka.PravegaIndexTaskTuningConfig;
-import org.apache.druid.indexing.kafka.PravegaEventSupplier;
-import org.apache.druid.indexing.kafka.PravegaSequenceNumber;
+import org.apache.druid.indexing.kafka.*;
 import org.apache.druid.indexing.overlord.DataSourceMetadata;
 import org.apache.druid.indexing.overlord.IndexerMetadataStorageCoordinator;
 import org.apache.druid.indexing.overlord.TaskMaster;
@@ -73,7 +67,7 @@ import java.util.stream.Collectors;
 
 /**
  * Supervisor responsible for managing the KafkaIndexTasks for a single dataSource. At a high level, the class accepts a
- * {@link PravegaSupervisorSpec} which includes the Kafka topic and configuration as well as an ingestion spec which will
+ * {@link KafkaSupervisorSpec} which includes the Kafka topic and configuration as well as an ingestion spec which will
  * be used to generate the indexing tasks. The run loop periodically refreshes its view of the Kafka topic's partitions
  * and the list of running indexing tasks and ensures that all partitions are being read from and that there are enough
  * tasks to satisfy the desired number of replicas. As tasks complete, new tasks are queued to process the next range of
@@ -86,7 +80,7 @@ public class KafkaSupervisor extends SeekableStreamSupervisor<Integer, Long, Kaf
       {
       };
 
-  private static final EmittingLogger log = new EmittingLogger(PravegaSupervisor.class);
+  private static final EmittingLogger log = new EmittingLogger(KafkaSupervisor.class);
   private static final Long NOT_SET = -1L;
   private static final Long END_OF_PARTITION = Long.MAX_VALUE;
 
@@ -95,15 +89,15 @@ public class KafkaSupervisor extends SeekableStreamSupervisor<Integer, Long, Kaf
   private volatile Map<Integer, Long> latestSequenceFromStream;
 
 
-  private final PravegaSupervisorSpec spec;
+  private final KafkaSupervisorSpec spec;
 
   public KafkaSupervisor(
       final TaskStorage taskStorage,
       final TaskMaster taskMaster,
       final IndexerMetadataStorageCoordinator indexerMetadataStorageCoordinator,
-      final PravegaIndexTaskClientFactory taskClientFactory,
+      final KafkaIndexTaskClientFactory taskClientFactory,
       final ObjectMapper mapper,
-      final PravegaSupervisorSpec spec,
+      final KafkaSupervisorSpec spec,
       final RowIngestionMetersFactory rowIngestionMetersFactory
   )
   {
@@ -128,7 +122,7 @@ public class KafkaSupervisor extends SeekableStreamSupervisor<Integer, Long, Kaf
   @Override
   protected RecordSupplier<Integer, Long, KafkaRecordEntity> setupRecordSupplier()
   {
-    return new PravegaEventSupplier(
+    return new KafkaRecordSupplier(
         spec.getIoConfig().getConsumerProperties(),
         sortingMapper,
         spec.getIoConfig().getConfigOverrides()
@@ -144,13 +138,13 @@ public class KafkaSupervisor extends SeekableStreamSupervisor<Integer, Long, Kaf
   @Override
   protected boolean checkSourceMetadataMatch(DataSourceMetadata metadata)
   {
-    return metadata instanceof PravegaDataSourceMetadata;
+    return metadata instanceof KafkaDataSourceMetadata;
   }
 
   @Override
   protected boolean doesTaskTypeMatchSupervisor(Task task)
   {
-    return task instanceof PravegaIndexTask;
+    return task instanceof KafkaIndexTask;
   }
 
   @Override
@@ -159,9 +153,9 @@ public class KafkaSupervisor extends SeekableStreamSupervisor<Integer, Long, Kaf
       boolean includeOffsets
   )
   {
-    PravegaSupervisorIOConfig ioConfig = spec.getIoConfig();
+    KafkaSupervisorIOConfig ioConfig = spec.getIoConfig();
     Map<Integer, Long> partitionLag = getRecordLagPerPartitionInLatestSequences(getHighestCurrentOffsets());
-    return new PravegaSupervisorReportPayload(
+    return new KafkaSupervisorReportPayload(
         spec.getDataSchema().getDataSource(),
         ioConfig.getTopic(),
         numPartitions,
@@ -192,8 +186,8 @@ public class KafkaSupervisor extends SeekableStreamSupervisor<Integer, Long, Kaf
       SeekableStreamSupervisorIOConfig ioConfig
   )
   {
-    PravegaSupervisorIOConfig kafkaIoConfig = (PravegaSupervisorIOConfig) ioConfig;
-    return new PravegaIndexTaskIOConfig(
+    KafkaSupervisorIOConfig kafkaIoConfig = (KafkaSupervisorIOConfig) ioConfig;
+    return new KafkaIndexTaskIOConfig(
         groupId,
         baseSequenceName,
         new SeekableStreamStartSequenceNumbers<>(kafkaIoConfig.getTopic(), startPartitions, Collections.emptySet()),
@@ -230,12 +224,12 @@ public class KafkaSupervisor extends SeekableStreamSupervisor<Integer, Long, Kaf
     List<SeekableStreamIndexTask<Integer, Long, KafkaRecordEntity>> taskList = new ArrayList<>();
     for (int i = 0; i < replicas; i++) {
       String taskId = IdUtils.getRandomIdWithPrefix(baseSequenceName);
-      taskList.add(new PravegaIndexTask(
+      taskList.add(new KafkaIndexTask(
           taskId,
           new TaskResource(baseSequenceName, 1),
           spec.getDataSchema(),
-          (PravegaIndexTaskTuningConfig) taskTuningConfig,
-          (PravegaIndexTaskIOConfig) taskIoConfig,
+          (KafkaIndexTaskTuningConfig) taskTuningConfig,
+          (KafkaIndexTaskIOConfig) taskIoConfig,
           context,
           sortingMapper
       ));
@@ -324,15 +318,15 @@ public class KafkaSupervisor extends SeekableStreamSupervisor<Integer, Long, Kaf
   }
 
   @Override
-  protected PravegaDataSourceMetadata createDataSourceMetaDataForReset(String topic, Map<Integer, Long> map)
+  protected KafkaDataSourceMetadata createDataSourceMetaDataForReset(String topic, Map<Integer, Long> map)
   {
-    return new PravegaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, map));
+    return new KafkaDataSourceMetadata(new SeekableStreamEndSequenceNumbers<>(topic, map));
   }
 
   @Override
   protected OrderedSequenceNumber<Long> makeSequenceNumber(Long seq, boolean isExclusive)
   {
-    return PravegaSequenceNumber.of(seq);
+    return KafkaSequenceNumber.of(seq);
   }
 
   @Override
@@ -425,13 +419,13 @@ public class KafkaSupervisor extends SeekableStreamSupervisor<Integer, Long, Kaf
 
   @Override
   @VisibleForTesting
-  public PravegaSupervisorIOConfig getIoConfig()
+  public KafkaSupervisorIOConfig getIoConfig()
   {
     return spec.getIoConfig();
   }
 
   @VisibleForTesting
-  public PravegaSupervisorTuningConfig getTuningConfig()
+  public KafkaSupervisorTuningConfig getTuningConfig()
   {
     return spec.getTuningConfig();
   }

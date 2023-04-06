@@ -30,8 +30,8 @@ import org.apache.druid.data.input.impl.JsonInputFormat;
 import org.apache.druid.data.input.impl.LongDimensionSchema;
 import org.apache.druid.data.input.impl.StringDimensionSchema;
 import org.apache.druid.data.input.impl.TimestampSpec;
-import org.apache.druid.indexing.kafka.supervisor.PravegaSupervisorIOConfig;
-import org.apache.druid.indexing.kafka.supervisor.PravegaSupervisorSpec;
+import org.apache.druid.indexing.kafka.supervisor.KafkaSupervisorIOConfig;
+import org.apache.druid.indexing.kafka.supervisor.KafkaSupervisorSpec;
 import org.apache.druid.indexing.kafka.test.TestBroker;
 import org.apache.druid.indexing.overlord.sampler.InputSourceSampler;
 import org.apache.druid.indexing.overlord.sampler.SamplerConfig;
@@ -124,11 +124,11 @@ public class KafkaSamplerSpecTest extends InitializedNullHandlingTest
   {
     insertData(generateRecords(TOPIC));
 
-    PravegaSupervisorSpec supervisorSpec = new PravegaSupervisorSpec(
+    KafkaSupervisorSpec supervisorSpec = new KafkaSupervisorSpec(
         null,
         DATA_SCHEMA,
         null,
-        new PravegaSupervisorIOConfig(
+        new KafkaSupervisorIOConfig(
             TOPIC,
             new JsonInputFormat(JSONPathSpec.DEFAULT, null, null, null, null),
             null,
@@ -160,7 +160,7 @@ public class KafkaSamplerSpecTest extends InitializedNullHandlingTest
         null
     );
 
-    PravegaSamplerSpec samplerSpec = new PravegaSamplerSpec(
+    KafkaSamplerSpec samplerSpec = new KafkaSamplerSpec(
         supervisorSpec,
         new SamplerConfig(5, null, null, null),
         new InputSourceSampler(OBJECT_MAPPER),
@@ -298,11 +298,11 @@ public class KafkaSamplerSpecTest extends InitializedNullHandlingTest
   @Test
   public void testInvalidKafkaConfig()
   {
-    PravegaSupervisorSpec supervisorSpec = new PravegaSupervisorSpec(
+    KafkaSupervisorSpec supervisorSpec = new KafkaSupervisorSpec(
         null,
         DATA_SCHEMA,
         null,
-        new PravegaSupervisorIOConfig(
+        new KafkaSupervisorIOConfig(
             TOPIC,
             new JsonInputFormat(JSONPathSpec.DEFAULT, null, null, null, null),
             null,
@@ -337,7 +337,7 @@ public class KafkaSamplerSpecTest extends InitializedNullHandlingTest
         null
     );
 
-    PravegaSamplerSpec samplerSpec = new PravegaSamplerSpec(
+    KafkaSamplerSpec samplerSpec = new KafkaSamplerSpec(
         supervisorSpec,
         new SamplerConfig(5, null, null, null),
         new InputSourceSampler(OBJECT_MAPPER),

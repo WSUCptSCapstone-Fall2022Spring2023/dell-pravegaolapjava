@@ -25,7 +25,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.apache.curator.test.TestingCluster;
 import org.apache.druid.data.input.kafka.KafkaRecordEntity;
-import org.apache.druid.indexing.kafka.supervisor.PravegaSupervisorIOConfig;
+import org.apache.druid.indexing.kafka.supervisor.KafkaSupervisorIOConfig;
 import org.apache.druid.indexing.kafka.test.TestBroker;
 import org.apache.druid.indexing.seekablestream.common.OrderedPartitionableRecord;
 import org.apache.druid.indexing.seekablestream.common.StreamPartition;
@@ -229,7 +229,7 @@ public class KafkaRecordSupplierTest
         StreamPartition.of(topic, 1)
     );
 
-    PravegaEventSupplier recordSupplier = new PravegaEventSupplier(
+    KafkaRecordSupplier recordSupplier = new KafkaRecordSupplier(
         kafkaServer.consumerProperties(), OBJECT_MAPPER, null);
 
     Assert.assertTrue(recordSupplier.getAssignment().isEmpty());
@@ -258,7 +258,7 @@ public class KafkaRecordSupplierTest
     properties.put("key.deserializer", KafkaRecordSupplierTest.TestKafkaDeserializer.class.getName());
     properties.put("value.deserializer", KafkaRecordSupplierTest.TestKafkaDeserializer.class.getName());
 
-    PravegaEventSupplier recordSupplier = new PravegaEventSupplier(
+    KafkaRecordSupplier recordSupplier = new KafkaRecordSupplier(
         properties,
         OBJECT_MAPPER,
         null
@@ -284,7 +284,7 @@ public class KafkaRecordSupplierTest
     properties.put("value.deserializer", KafkaRecordSupplierTest.TestKafkaDeserializerRequiresParameter.class.getName());
     properties.put(additonal_parameter, "stringValue");
 
-    PravegaEventSupplier recordSupplier = new PravegaEventSupplier(
+    KafkaRecordSupplier recordSupplier = new KafkaRecordSupplier(
             properties,
             OBJECT_MAPPER,
             null
@@ -302,7 +302,7 @@ public class KafkaRecordSupplierTest
     properties.put("key.deserializer", KafkaRecordSupplierTest.TestKafkaDeserializerRequiresParameter.class.getName());
     properties.put("value.deserializer", KafkaRecordSupplierTest.TestKafkaDeserializerRequiresParameter.class.getName());
 
-    PravegaEventSupplier recordSupplier = new PravegaEventSupplier(
+    KafkaRecordSupplier recordSupplier = new KafkaRecordSupplier(
             properties,
             OBJECT_MAPPER,
             null
@@ -328,7 +328,7 @@ public class KafkaRecordSupplierTest
     properties.put("key.deserializer", KafkaRecordSupplierTest.TestKafkaDeserializer.class.getName());
     properties.put("value.deserializer", KafkaRecordSupplierTest.TestKafkaDeserializer.class.getName());
 
-    PravegaEventSupplier recordSupplier = new PravegaEventSupplier(
+    KafkaRecordSupplier recordSupplier = new KafkaRecordSupplier(
         properties,
         OBJECT_MAPPER,
         null
@@ -364,7 +364,7 @@ public class KafkaRecordSupplierTest
         StreamPartition.of(topic, 1)
     );
 
-    PravegaEventSupplier recordSupplier = new PravegaEventSupplier(
+    KafkaRecordSupplier recordSupplier = new KafkaRecordSupplier(
         kafkaServer.consumerProperties(),
         OBJECT_MAPPER,
         null
@@ -408,7 +408,7 @@ public class KafkaRecordSupplierTest
     );
 
 
-    PravegaEventSupplier recordSupplier = new PravegaEventSupplier(
+    KafkaRecordSupplier recordSupplier = new KafkaRecordSupplier(
         kafkaServer.consumerProperties(), OBJECT_MAPPER, null);
 
     recordSupplier.assign(partitions);
@@ -479,7 +479,7 @@ public class KafkaRecordSupplierTest
         StreamPartition.of(topic, 1)
     );
 
-    PravegaEventSupplier recordSupplier = new PravegaEventSupplier(
+    KafkaRecordSupplier recordSupplier = new KafkaRecordSupplier(
         kafkaServer.consumerProperties(), OBJECT_MAPPER, null);
 
     recordSupplier.assign(partitions);
@@ -522,7 +522,7 @@ public class KafkaRecordSupplierTest
         StreamPartition.of(topic, 1)
     );
 
-    PravegaEventSupplier recordSupplier = new PravegaEventSupplier(
+    KafkaRecordSupplier recordSupplier = new KafkaRecordSupplier(
         kafkaServer.consumerProperties(), OBJECT_MAPPER, null);
 
     recordSupplier.assign(partitions);
@@ -555,7 +555,7 @@ public class KafkaRecordSupplierTest
         StreamPartition.of(topic, 0)
     );
 
-    PravegaEventSupplier recordSupplier = new PravegaEventSupplier(
+    KafkaRecordSupplier recordSupplier = new KafkaRecordSupplier(
         kafkaServer.consumerProperties(), OBJECT_MAPPER, null);
 
     recordSupplier.assign(partitions);
@@ -581,7 +581,7 @@ public class KafkaRecordSupplierTest
         StreamPartition.of(topic, 1)
     );
 
-    PravegaEventSupplier recordSupplier = new PravegaEventSupplier(
+    KafkaRecordSupplier recordSupplier = new KafkaRecordSupplier(
         kafkaServer.consumerProperties(), OBJECT_MAPPER, null);
 
     recordSupplier.assign(partitions);
@@ -616,7 +616,7 @@ public class KafkaRecordSupplierTest
   @Test
   public void getLatestSequenceNumberWhenPartitionIsEmptyAndUseEarliestOffsetShouldReturnsValidNonNull()
   {
-    PravegaEventSupplier recordSupplier = new PravegaEventSupplier(
+    KafkaRecordSupplier recordSupplier = new KafkaRecordSupplier(
         kafkaServer.consumerProperties(), OBJECT_MAPPER, null);
     StreamPartition<Integer> streamPartition = StreamPartition.of(topic, 0);
     Set<StreamPartition<Integer>> partitions = ImmutableSet.of(streamPartition);
@@ -628,7 +628,7 @@ public class KafkaRecordSupplierTest
   @Test
   public void getEarliestSequenceNumberWhenPartitionIsEmptyAndUseEarliestOffsetShouldReturnsValidNonNull()
   {
-    PravegaEventSupplier recordSupplier = new PravegaEventSupplier(
+    KafkaRecordSupplier recordSupplier = new KafkaRecordSupplier(
         kafkaServer.consumerProperties(), OBJECT_MAPPER, null);
     StreamPartition<Integer> streamPartition = StreamPartition.of(topic, 0);
     Set<StreamPartition<Integer>> partitions = ImmutableSet.of(streamPartition);
@@ -640,7 +640,7 @@ public class KafkaRecordSupplierTest
   @Test
   public void getLatestSequenceNumberWhenPartitionIsEmptyAndUseLatestOffsetShouldReturnsValidNonNull()
   {
-    PravegaEventSupplier recordSupplier = new PravegaEventSupplier(
+    KafkaRecordSupplier recordSupplier = new KafkaRecordSupplier(
         kafkaServer.consumerProperties(), OBJECT_MAPPER, null);
     StreamPartition<Integer> streamPartition = StreamPartition.of(topic, 0);
     Set<StreamPartition<Integer>> partitions = ImmutableSet.of(streamPartition);
@@ -652,7 +652,7 @@ public class KafkaRecordSupplierTest
   @Test
   public void getEarliestSequenceNumberWhenPartitionIsEmptyAndUseLatestOffsetShouldReturnsValidNonNull()
   {
-    PravegaEventSupplier recordSupplier = new PravegaEventSupplier(
+    KafkaRecordSupplier recordSupplier = new KafkaRecordSupplier(
         kafkaServer.consumerProperties(), OBJECT_MAPPER, null);
     StreamPartition<Integer> streamPartition = StreamPartition.of(topic, 0);
     Set<StreamPartition<Integer>> partitions = ImmutableSet.of(streamPartition);
@@ -665,18 +665,18 @@ public class KafkaRecordSupplierTest
   public void testAddConsumerPropertiesFromConfig()
   {
     DynamicConfigProvider dynamicConfigProvider = new MapStringDynamicConfigProvider(
-        ImmutableMap.of("kafka.prop.2", "value.2", PravegaSupervisorIOConfig.TRUST_STORE_PASSWORD_KEY, "pwd2")
+        ImmutableMap.of("kafka.prop.2", "value.2", KafkaSupervisorIOConfig.TRUST_STORE_PASSWORD_KEY, "pwd2")
     );
 
     Properties properties = new Properties();
 
     Map<String, Object> consumerProperties = ImmutableMap.of(
-        PravegaSupervisorIOConfig.TRUST_STORE_PASSWORD_KEY, "pwd1",
+        KafkaSupervisorIOConfig.TRUST_STORE_PASSWORD_KEY, "pwd1",
         "kafka.prop.1", "value.1",
         "druid.dynamic.config.provider", OBJECT_MAPPER.convertValue(dynamicConfigProvider, Map.class)
     );
 
-    PravegaEventSupplier.addConsumerPropertiesFromConfig(
+    KafkaRecordSupplier.addConsumerPropertiesFromConfig(
         properties,
         OBJECT_MAPPER,
         consumerProperties
@@ -685,13 +685,13 @@ public class KafkaRecordSupplierTest
     Assert.assertEquals(3, properties.size());
     Assert.assertEquals("value.1", properties.getProperty("kafka.prop.1"));
     Assert.assertEquals("value.2", properties.getProperty("kafka.prop.2"));
-    Assert.assertEquals("pwd2", properties.getProperty(PravegaSupervisorIOConfig.TRUST_STORE_PASSWORD_KEY));
+    Assert.assertEquals("pwd2", properties.getProperty(KafkaSupervisorIOConfig.TRUST_STORE_PASSWORD_KEY));
   }
 
   @Test
   public void testUseKafkaConsumerOverrides()
   {
-    KafkaConsumer<byte[], byte[]> kafkaConsumer = PravegaEventSupplier.getKafkaConsumer(
+    KafkaConsumer<byte[], byte[]> kafkaConsumer = KafkaRecordSupplier.getKafkaConsumer(
         OBJECT_MAPPER,
         kafkaServer.consumerProperties(),
         originalConsumerProperties -> {

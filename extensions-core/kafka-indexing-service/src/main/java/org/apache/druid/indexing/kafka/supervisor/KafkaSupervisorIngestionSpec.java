@@ -27,20 +27,20 @@ import org.apache.druid.segment.indexing.DataSchema;
 public class KafkaSupervisorIngestionSpec extends SeekableStreamSupervisorIngestionSpec
 {
   private final DataSchema dataSchema;
-  private final PravegaSupervisorIOConfig ioConfig;
-  private final PravegaSupervisorTuningConfig tuningConfig;
+  private final KafkaSupervisorIOConfig ioConfig;
+  private final KafkaSupervisorTuningConfig tuningConfig;
 
   @JsonCreator
   public KafkaSupervisorIngestionSpec(
       @JsonProperty("dataSchema") DataSchema dataSchema,
-      @JsonProperty("ioConfig") PravegaSupervisorIOConfig ioConfig,
-      @JsonProperty("tuningConfig") PravegaSupervisorTuningConfig tuningConfig
+      @JsonProperty("ioConfig") KafkaSupervisorIOConfig ioConfig,
+      @JsonProperty("tuningConfig") KafkaSupervisorTuningConfig tuningConfig
   )
   {
     super(dataSchema, ioConfig, tuningConfig);
     this.dataSchema = dataSchema;
     this.ioConfig = ioConfig;
-    this.tuningConfig = tuningConfig == null ? PravegaSupervisorTuningConfig.defaultConfig() : tuningConfig;
+    this.tuningConfig = tuningConfig == null ? KafkaSupervisorTuningConfig.defaultConfig() : tuningConfig;
   }
 
   @Override
@@ -52,14 +52,14 @@ public class KafkaSupervisorIngestionSpec extends SeekableStreamSupervisorIngest
 
   @Override
   @JsonProperty("ioConfig")
-  public PravegaSupervisorIOConfig getIOConfig()
+  public KafkaSupervisorIOConfig getIOConfig()
   {
     return ioConfig;
   }
 
   @Override
   @JsonProperty("tuningConfig")
-  public PravegaSupervisorTuningConfig getTuningConfig()
+  public KafkaSupervisorTuningConfig getTuningConfig()
   {
     return tuningConfig;
   }

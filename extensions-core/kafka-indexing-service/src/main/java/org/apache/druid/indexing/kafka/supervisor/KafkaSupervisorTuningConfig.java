@@ -21,7 +21,7 @@ package org.apache.druid.indexing.kafka.supervisor;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.druid.indexing.kafka.PravegaIndexTaskTuningConfig;
+import org.apache.druid.indexing.kafka.KafkaIndexTaskTuningConfig;
 import org.apache.druid.indexing.seekablestream.supervisor.SeekableStreamSupervisorTuningConfig;
 import org.apache.druid.segment.IndexSpec;
 import org.apache.druid.segment.incremental.AppendableIndexSpec;
@@ -31,7 +31,7 @@ import org.joda.time.Period;
 
 import javax.annotation.Nullable;
 
-public class KafkaSupervisorTuningConfig extends PravegaIndexTaskTuningConfig
+public class KafkaSupervisorTuningConfig extends KafkaIndexTaskTuningConfig
     implements SeekableStreamSupervisorTuningConfig
 {
   private final Integer workerThreads;
@@ -42,9 +42,9 @@ public class KafkaSupervisorTuningConfig extends PravegaIndexTaskTuningConfig
   private final Duration shutdownTimeout;
   private final Duration offsetFetchPeriod;
 
-  public static PravegaSupervisorTuningConfig defaultConfig()
+  public static KafkaSupervisorTuningConfig defaultConfig()
   {
-    return new PravegaSupervisorTuningConfig(
+    return new KafkaSupervisorTuningConfig(
         null,
         null,
         null,
@@ -237,9 +237,9 @@ public class KafkaSupervisorTuningConfig extends PravegaIndexTaskTuningConfig
   }
 
   @Override
-  public PravegaIndexTaskTuningConfig convertToTaskTuningConfig()
+  public KafkaIndexTaskTuningConfig convertToTaskTuningConfig()
   {
-    return new PravegaIndexTaskTuningConfig(
+    return new KafkaIndexTaskTuningConfig(
         getAppendableIndexSpec(),
         getMaxRowsInMemory(),
         getMaxBytesInMemory(),

@@ -166,7 +166,7 @@ public class KafkaRecordSupplier implements RecordSupplier<Integer, Long, KafkaR
   {
     final Long earliestOffset = getEarliestSequenceNumber(partition);
     return earliestOffset != null
-           && offset.isAvailableWithEarliest(PravegaSequenceNumber.of(earliestOffset));
+           && offset.isAvailableWithEarliest(KafkaSequenceNumber.of(earliestOffset));
   }
 
   @Override
@@ -275,7 +275,7 @@ public class KafkaRecordSupplier implements RecordSupplier<Integer, Long, KafkaR
       KafkaConfigOverrides configOverrides
   )
   {
-    final Map<String, Object> consumerConfigs = PravegaConsumerConfigs.getConsumerProperties();
+    final Map<String, Object> consumerConfigs = KafkaConsumerConfigs.getConsumerProperties();
     final Properties props = new Properties();
     Map<String, Object> effectiveConsumerProperties;
     if (configOverrides != null) {

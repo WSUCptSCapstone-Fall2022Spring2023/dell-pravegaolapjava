@@ -32,9 +32,9 @@ public class KafkaSequenceNumber extends OrderedSequenceNumber<Long>
     super(sequenceNumber, false);
   }
 
-  public static PravegaSequenceNumber of(Long sequenceNumber)
+  public static KafkaSequenceNumber of(Long sequenceNumber)
   {
-    return new PravegaSequenceNumber(sequenceNumber);
+    return new KafkaSequenceNumber(sequenceNumber);
   }
 
   @Override

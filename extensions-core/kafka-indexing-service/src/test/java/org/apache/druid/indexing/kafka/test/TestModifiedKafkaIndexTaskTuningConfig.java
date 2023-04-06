@@ -22,7 +22,7 @@ package org.apache.druid.indexing.kafka.test;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import org.apache.druid.indexing.kafka.PravegaIndexTaskTuningConfig;
+import org.apache.druid.indexing.kafka.KafkaIndexTaskTuningConfig;
 import org.apache.druid.segment.IndexSpec;
 import org.apache.druid.segment.incremental.AppendableIndexSpec;
 import org.apache.druid.segment.writeout.SegmentWriteOutMediumFactory;
@@ -31,7 +31,7 @@ import org.joda.time.Period;
 import javax.annotation.Nullable;
 
 @JsonTypeName("KafkaTuningConfig")
-public class TestModifiedKafkaIndexTaskTuningConfig extends PravegaIndexTaskTuningConfig
+public class TestModifiedKafkaIndexTaskTuningConfig extends KafkaIndexTaskTuningConfig
 {
   private final String extra;
 

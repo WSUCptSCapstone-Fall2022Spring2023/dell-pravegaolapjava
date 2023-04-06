@@ -24,9 +24,9 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
-import org.apache.druid.indexing.kafka.PravegaConsumerConfigs;
-import org.apache.druid.indexing.kafka.PravegaIndexTaskModule;
-import org.apache.druid.indexing.kafka.PravegaEventSupplier;
+import org.apache.druid.indexing.kafka.KafkaConsumerConfigs;
+import org.apache.druid.indexing.kafka.KafkaIndexTaskModule;
+import org.apache.druid.indexing.kafka.KafkaRecordSupplier;
 import org.apache.druid.indexing.seekablestream.supervisor.IdleConfig;
 import org.apache.druid.indexing.seekablestream.supervisor.autoscaler.LagBasedAutoScalerConfig;
 import org.apache.druid.jackson.DefaultObjectMapper;
@@ -50,7 +50,7 @@ public class KafkaSupervisorIOConfigTest
   public KafkaSupervisorIOConfigTest()
   {
     mapper = new DefaultObjectMapper();
-    mapper.registerModules((Iterable<Module>) new PravegaIndexTaskModule().getJacksonModules());
+    mapper.registerModules((Iterable<Module>) new KafkaIndexTaskModule().getJacksonModules());
   }
 
   @Rule
@@ -65,13 +65,13 @@ public class KafkaSupervisorIOConfigTest
                      + "  \"consumerProperties\": {\"bootstrap.servers\":\"localhost:9092\"}\n"
                      + "}";
 
-    PravegaSupervisorIOConfig config = mapper.readValue(
+    KafkaSupervisorIOConfig config = mapper.readValue(
         mapper.writeValueAsString(
             mapper.readValue(
                 jsonStr,
-                PravegaSupervisorIOConfig.class
+                KafkaSupervisorIOConfig.class
             )
-        ), PravegaSupervisorIOConfig.class
+        ), KafkaSupervisorIOConfig.class
     );
 
     Assert.assertEquals("my-topic", config.getTopic());
@@ -108,13 +108,13 @@ public class KafkaSupervisorIOConfigTest
         + "  \"earlyMessageRejectionPeriod\": \"PT1H\"\n"
         + "}";
 
-    PravegaSupervisorIOConfig config = mapper.readValue(
+    KafkaSupervisorIOConfig config = mapper.readValue(
         mapper.writeValueAsString(
             mapper.readValue(
                 jsonStr,
-                PravegaSupervisorIOConfig.class
+                KafkaSupervisorIOConfig.class
                 )
-            ), PravegaSupervisorIOConfig.class
+            ), KafkaSupervisorIOConfig.class
         );
 
     Assert.assertEquals("my-topic", config.getTopic());
@@ -150,13 +150,13 @@ public class KafkaSupervisorIOConfigTest
         + "  \"lateMessageRejectionStartDateTime\": \"2016-05-31T12:00Z\"\n"
         + "}";
 
-    PravegaSupervisorIOConfig config = mapper.readValue(
+    KafkaSupervisorIOConfig config = mapper.readValue(
         mapper.writeValueAsString(
             mapper.readValue(
                 jsonStr,
-                PravegaSupervisorIOConfig.class
+                KafkaSupervisorIOConfig.class
                 )
-            ), PravegaSupervisorIOConfig.class
+            ), KafkaSupervisorIOConfig.class
         );
 
     Assert.assertEquals("my-topic", config.getTopic());
@@ -184,9 +184,9 @@ public class KafkaSupervisorIOConfigTest
                      + "   \"ssl.key.password\":\"mykeypassword\"}\n"
                      + "}";
 
-    PravegaSupervisorIOConfig config = mapper.readValue(jsonStr, PravegaSupervisorIOConfig.class);
+    KafkaSupervisorIOConfig config = mapper.readValue(jsonStr, KafkaSupervisorIOConfig.class);
     Properties props = new Properties();
-    PravegaEventSupplier.addConsumerPropertiesFromConfig(props, mapper, config.getConsumerProperties());
+    KafkaRecordSupplier.addConsumerPropertiesFromConfig(props, mapper, config.getConsumerProperties());
 
     Assert.assertEquals("my-topic", config.getTopic());
     Assert.assertEquals("localhost:9092", props.getProperty("bootstrap.servers"));
@@ -206,7 +206,7 @@ public class KafkaSupervisorIOConfigTest
     exception.expect(JsonMappingException.class);
     exception.expectCause(CoreMatchers.isA(NullPointerException.class));
     exception.expectMessage(CoreMatchers.containsString("topic"));
-    mapper.readValue(jsonStr, PravegaSupervisorIOConfig.class);
+    mapper.readValue(jsonStr, KafkaSupervisorIOConfig.class);
   }
 
   @Test
@@ -220,7 +220,7 @@ public class KafkaSupervisorIOConfigTest
     exception.expect(JsonMappingException.class);
     exception.expectCause(CoreMatchers.isA(NullPointerException.class));
     exception.expectMessage(CoreMatchers.containsString("consumerProperties"));
-    mapper.readValue(jsonStr, PravegaSupervisorIOConfig.class);
+    mapper.readValue(jsonStr, KafkaSupervisorIOConfig.class);
   }
 
   @Test
@@ -235,7 +235,7 @@ public class KafkaSupervisorIOConfigTest
     exception.expect(JsonMappingException.class);
     exception.expectCause(CoreMatchers.isA(NullPointerException.class));
     exception.expectMessage(CoreMatchers.containsString("bootstrap.servers"));
-    mapper.readValue(jsonStr, PravegaSupervisorIOConfig.class);
+    mapper.readValue(jsonStr, KafkaSupervisorIOConfig.class);
   }
 
   @Test
@@ -258,13 +258,13 @@ public class KafkaSupervisorIOConfigTest
         + "  \"lateMessageRejectionStartDateTime\": \"2016-05-31T12:00Z\"\n"
         + "}";
     exception.expect(JsonMappingException.class);
-    PravegaSupervisorIOConfig config = mapper.readValue(
+    KafkaSupervisorIOConfig config = mapper.readValue(
         mapper.writeValueAsString(
             mapper.readValue(
                 jsonStr,
-                PravegaSupervisorIOConfig.class
+                KafkaSupervisorIOConfig.class
                 )
-            ), PravegaSupervisorIOConfig.class
+            ), KafkaSupervisorIOConfig.class
         );
   }
 
@@ -287,10 +287,10 @@ public class KafkaSupervisorIOConfigTest
     autoScalerConfig.put("scaleOutStep", 2);
     autoScalerConfig.put("minTriggerScaleActionFrequencyMillis", 1200000);
 
-    final Map<String, Object> consumerProperties = PravegaConsumerConfigs.getConsumerProperties();
+    final Map<String, Object> consumerProperties = KafkaConsumerConfigs.getConsumerProperties();
     consumerProperties.put("bootstrap.servers", "localhost:8082");
 
-    PravegaSupervisorIOConfig kafkaSupervisorIOConfig = new PravegaSupervisorIOConfig(
+    KafkaSupervisorIOConfig kafkaSupervisorIOConfig = new KafkaSupervisorIOConfig(
         "test",
         null,
         1,
@@ -298,7 +298,7 @@ public class KafkaSupervisorIOConfigTest
         new Period("PT1H"),
         consumerProperties,
         mapper.convertValue(autoScalerConfig, LagBasedAutoScalerConfig.class),
-        PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+        KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
         new Period("P1D"),
         new Period("PT30S"),
         true,
@@ -310,7 +310,7 @@ public class KafkaSupervisorIOConfigTest
         null
     );
     String ioConfig = mapper.writeValueAsString(kafkaSupervisorIOConfig);
-    PravegaSupervisorIOConfig kafkaSupervisorIOConfig1 = mapper.readValue(ioConfig, PravegaSupervisorIOConfig.class);
+    KafkaSupervisorIOConfig kafkaSupervisorIOConfig1 = mapper.readValue(ioConfig, KafkaSupervisorIOConfig.class);
     Assert.assertNotNull(kafkaSupervisorIOConfig1.getAutoScalerConfig());
     Assert.assertTrue(kafkaSupervisorIOConfig1.getAutoScalerConfig().getEnableTaskAutoScaler());
     Assert.assertEquals(1, kafkaSupervisorIOConfig1.getAutoScalerConfig().getTaskCountMin());
@@ -328,10 +328,10 @@ public class KafkaSupervisorIOConfigTest
     idleConfig.put("enabled", true);
     idleConfig.put("inactiveAfterMillis", 600000L);
 
-    final Map<String, Object> consumerProperties = PravegaConsumerConfigs.getConsumerProperties();
+    final Map<String, Object> consumerProperties = KafkaConsumerConfigs.getConsumerProperties();
     consumerProperties.put("bootstrap.servers", "localhost:8082");
 
-    PravegaSupervisorIOConfig kafkaSupervisorIOConfig = new PravegaSupervisorIOConfig(
+    KafkaSupervisorIOConfig kafkaSupervisorIOConfig = new KafkaSupervisorIOConfig(
         "test",
         null,
         1,
@@ -339,7 +339,7 @@ public class KafkaSupervisorIOConfigTest
         new Period("PT1H"),
         consumerProperties,
         null,
-        PravegaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
+        KafkaSupervisorIOConfig.DEFAULT_POLL_TIMEOUT_MILLIS,
         new Period("P1D"),
         new Period("PT30S"),
         true,
@@ -351,7 +351,7 @@ public class KafkaSupervisorIOConfigTest
         mapper.convertValue(idleConfig, IdleConfig.class)
     );
     String ioConfig = mapper.writeValueAsString(kafkaSupervisorIOConfig);
-    PravegaSupervisorIOConfig kafkaSupervisorIOConfig1 = mapper.readValue(ioConfig, PravegaSupervisorIOConfig.class);
+    KafkaSupervisorIOConfig kafkaSupervisorIOConfig1 = mapper.readValue(ioConfig, KafkaSupervisorIOConfig.class);
 
     Assert.assertNotNull(kafkaSupervisorIOConfig1.getIdleConfig());
     Assert.assertTrue(kafkaSupervisorIOConfig1.getIdleConfig().isEnabled());
