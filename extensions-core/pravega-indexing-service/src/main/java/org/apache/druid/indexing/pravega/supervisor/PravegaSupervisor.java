@@ -87,43 +87,42 @@ import java.util.stream.Collectors;
 public class PravegaSupervisor extends SeekableStreamSupervisor<String, StreamCut, ByteEntity>
 {
   public static final TypeReference<TreeMap<Integer, Map<String, StreamCut>>> CHECKPOINTS_TYPE_REF =
-      new TypeReference<TreeMap<Integer, Map<String, StreamCut>>>()
-      {
-      };
+          new TypeReference<TreeMap<Integer, Map<String, StreamCut>>>()
+          {
+          };
 
   private static final EmittingLogger log = new EmittingLogger(PravegaSupervisor.class);
   private static final StreamCut NOT_SET = StreamCut.UNBOUNDED; // mark this and come back to it, what does kafka do
-                                                                // with the -1 it sets for NOT_SET?
-                                                                // is not_set ever passed into a seek()?
+  // with the -1 it sets for NOT_SET?
+  // is not_set ever passed into a seek()?
   private static final StreamCut END_OF_PARTITION = StreamCut.UNBOUNDED;
 
   private final ServiceEmitter emitter;
   private final DruidMonitorSchedulerConfig monitorSchedulerConfig;
   private volatile Map<String, StreamCut> latestSequenceFromStream;
 
-
   private final PravegaSupervisorSpec spec;
 
   public PravegaSupervisor(
-      final TaskStorage taskStorage,
-      final TaskMaster taskMaster,
-      final IndexerMetadataStorageCoordinator indexerMetadataStorageCoordinator,
-      final PravegaIndexTaskClientFactory taskClientFactory,
-      final ObjectMapper mapper,
-      final PravegaSupervisorSpec spec,
-      final RowIngestionMetersFactory rowIngestionMetersFactory
+          final TaskStorage taskStorage,
+          final TaskMaster taskMaster,
+          final IndexerMetadataStorageCoordinator indexerMetadataStorageCoordinator,
+          final PravegaIndexTaskClientFactory taskClientFactory,
+          final ObjectMapper mapper,
+          final PravegaSupervisorSpec spec,
+          final RowIngestionMetersFactory rowIngestionMetersFactory
   )
   {
     super(
-        StringUtils.format("PravegaSupervisor-%s", spec.getDataSchema().getDataSource()),
-        taskStorage,
-        taskMaster,
-        indexerMetadataStorageCoordinator,
-        taskClientFactory,
-        mapper,
-        spec,
-        rowIngestionMetersFactory,
-        false
+            StringUtils.format("PravegaSupervisor-%s", spec.getDataSchema().getDataSource()),
+            taskStorage,
+            taskMaster,
+            indexerMetadataStorageCoordinator,
+            taskClientFactory,
+            mapper,
+            spec,
+            rowIngestionMetersFactory,
+            false
     );
 
     this.spec = spec;
@@ -136,16 +135,25 @@ public class PravegaSupervisor extends SeekableStreamSupervisor<String, StreamCu
   protected RecordSupplier<String, StreamCut, ByteEntity> setupRecordSupplier()
   {
     return new PravegaEventSupplier(
-        spec.getIoConfig().getConsumerProperties(),
-        sortingMapper,
-        spec.getIoConfig().getConfigOverrides()
+            spec.getIoConfig().getConsumerProperties(),
+            sortingMapper,
+            spec.getIoConfig().getConfigOverrides()
     );
   }
 
   @Override
   protected int getTaskGroupIdForPartition(String partitionId)
   {
-    return partitionId % spec.getIoConfig().getTaskCount();
+    return getTaskGroupIdForPartitionWithProvidedList(partitionId, partitionIds);
+  }
+
+  private int getTaskGroupIdForPartitionWithProvidedList(String partitionId, List<String> availablePartitions)
+  {
+    int index = availablePartitions.indexOf(partitionId);
+    if (index < 0) {
+      return index;
+    }
+    return availablePartitions.indexOf(partitionId) % spec.getIoConfig().getTaskCount();
   }
 
   @Override
@@ -162,68 +170,68 @@ public class PravegaSupervisor extends SeekableStreamSupervisor<String, StreamCu
 
   @Override
   protected SeekableStreamSupervisorReportPayload<String, StreamCut> createReportPayload(
-      int numPartitions,
-      boolean includeOffsets
+          int numPartitions,
+          boolean includeOffsets
   )
   {
     PravegaSupervisorIOConfig ioConfig = spec.getIoConfig();
     Map<String, Long> partitionLag = getRecordLagPerPartitionInLatestSequences(getHighestCurrentOffsets());
     return new PravegaSupervisorReportPayload(
-        spec.getDataSchema().getDataSource(),
-        ioConfig.getTopic(),
-        numPartitions,
-        ioConfig.getReplicas(),
-        ioConfig.getTaskDuration().getMillis() / 1000,
-        includeOffsets ? latestSequenceFromStream : null,
-        includeOffsets ? partitionLag : null,
-        includeOffsets ? partitionLag.values().stream().mapToLong(x -> Math.max(x, 0)).sum() : null,
-        includeOffsets ? sequenceLastUpdated : null,
-        spec.isSuspended(),
-        stateManager.isHealthy(),
-        stateManager.getSupervisorState().getBasicState(),
-        stateManager.getSupervisorState(),
-        stateManager.getExceptionEvents()
+            spec.getDataSchema().getDataSource(),
+            ioConfig.getTopic(),
+            numPartitions,
+            ioConfig.getReplicas(),
+            ioConfig.getTaskDuration().getMillis() / 1000,
+            includeOffsets ? latestSequenceFromStream : null,
+            includeOffsets ? partitionLag : null,
+            includeOffsets ? partitionLag.values().stream().mapToLong(x -> Math.max(x, 0)).sum() : null,
+            includeOffsets ? sequenceLastUpdated : null,
+            spec.isSuspended(),
+            stateManager.isHealthy(),
+            stateManager.getSupervisorState().getBasicState(),
+            stateManager.getSupervisorState(),
+            stateManager.getExceptionEvents()
     );
   }
 
 
   @Override
   protected SeekableStreamIndexTaskIOConfig createTaskIoConfig(
-      int groupId,
-      Map<String, StreamCut> startPartitions,
-      Map<String, StreamCut> endPartitions,
-      String baseSequenceName,
-      DateTime minimumMessageTime,
-      DateTime maximumMessageTime,
-      Set<String> exclusiveStartSequenceNumberPartitions,
-      SeekableStreamSupervisorIOConfig ioConfig
+          int groupId,
+          Map<String, StreamCut> startPartitions,
+          Map<String, StreamCut> endPartitions,
+          String baseSequenceName,
+          DateTime minimumMessageTime,
+          DateTime maximumMessageTime,
+          Set<String> exclusiveStartSequenceNumberPartitions,
+          SeekableStreamSupervisorIOConfig ioConfig
   )
   {
     PravegaSupervisorIOConfig pravegaIoConfig = (PravegaSupervisorIOConfig) ioConfig;
     return new PravegaIndexTaskIOConfig(
-        groupId,
-        baseSequenceName,
-        new SeekableStreamStartSequenceNumbers<>(pravegaIoConfig.getTopic(), startPartitions, Collections.emptySet()),
-        new SeekableStreamEndSequenceNumbers<>(pravegaIoConfig.getTopic(), endPartitions),
+            groupId,
+            baseSequenceName,
+            new SeekableStreamStartSequenceNumbers<>(pravegaIoConfig.getTopic(), startPartitions, Collections.emptySet()),
+            new SeekableStreamEndSequenceNumbers<>(pravegaIoConfig.getTopic(), endPartitions),
             pravegaIoConfig.getConsumerProperties(),
             pravegaIoConfig.getPollTimeout(),
-        true,
-        minimumMessageTime,
-        maximumMessageTime,
-        ioConfig.getInputFormat(),
-        pravegaIoConfig.getConfigOverrides()
+            true,
+            minimumMessageTime,
+            maximumMessageTime,
+            ioConfig.getInputFormat(),
+            pravegaIoConfig.getConfigOverrides()
     );
   }
 
   @Override
   protected List<SeekableStreamIndexTask<String, StreamCut, ByteEntity>> createIndexTasks(
-      int replicas,
-      String baseSequenceName,
-      ObjectMapper sortingMapper,
-      TreeMap<Integer, Map<String, StreamCut>> sequenceOffsets,
-      SeekableStreamIndexTaskIOConfig taskIoConfig,
-      SeekableStreamIndexTaskTuningConfig taskTuningConfig,
-      RowIngestionMetersFactory rowIngestionMetersFactory
+          int replicas,
+          String baseSequenceName,
+          ObjectMapper sortingMapper,
+          TreeMap<Integer, Map<String, StreamCut>> sequenceOffsets,
+          SeekableStreamIndexTaskIOConfig taskIoConfig,
+          SeekableStreamIndexTaskTuningConfig taskTuningConfig,
+          RowIngestionMetersFactory rowIngestionMetersFactory
   ) throws JsonProcessingException
   {
     final String checkpoints = sortingMapper.writerFor(CHECKPOINTS_TYPE_REF).writeValueAsString(sequenceOffsets);
@@ -238,13 +246,13 @@ public class PravegaSupervisor extends SeekableStreamSupervisor<String, StreamCu
     for (int i = 0; i < replicas; i++) {
       String taskId = IdUtils.getRandomIdWithPrefix(baseSequenceName);
       taskList.add(new PravegaIndexTask(
-          taskId,
-          new TaskResource(baseSequenceName, 1),
-          spec.getDataSchema(),
-          (PravegaIndexTaskTuningConfig) taskTuningConfig,
-          (PravegaIndexTaskIOConfig) taskIoConfig,
-          context,
-          sortingMapper
+              taskId,
+              new TaskResource(baseSequenceName, 1),
+              spec.getDataSchema(),
+              (PravegaIndexTaskTuningConfig) taskTuningConfig,
+              (PravegaIndexTaskIOConfig) taskIoConfig,
+              context,
+              sortingMapper
       ));
     }
     return taskList;
@@ -261,9 +269,9 @@ public class PravegaSupervisor extends SeekableStreamSupervisor<String, StreamCu
 
     if (!latestSequenceFromStream.keySet().equals(highestCurrentOffsets.keySet())) {
       log.warn(
-          "Lag metric: Pravega partitions %s do not match task partitions %s",
-          latestSequenceFromStream.keySet(),
-          highestCurrentOffsets.keySet()
+              "Lag metric: Pravega partitions %s do not match task partitions %s",
+              latestSequenceFromStream.keySet(),
+              highestCurrentOffsets.keySet()
       );
     }
 
@@ -288,18 +296,19 @@ public class PravegaSupervisor extends SeekableStreamSupervisor<String, StreamCu
     }
 
     return latestSequenceFromStream
-        .entrySet()
-        .stream()
-        .collect(
-            Collectors.toMap(
-                Entry::getKey,
-                e -> e.getValue() != null
-                     ? e.getValue() - Optional.ofNullable(currentOffsets.get(e.getKey())).orElse(0L)
-                     : 0
-            )
-        );
+            .entrySet()
+            .stream()
+            .collect(
+                    Collectors.toMap(
+                            Entry::getKey,
+                            e -> e.getValue() != null
+                                    ? e.getValue() - Optional.ofNullable(currentOffsets.get(e.getKey())).orElse(0L)
+                                    : 0
+                    )
+            );
   }
 
+  // Record lag per partition is the gap between the current consumer's position and the latest event in a stream
   @Override
   // suppress use of CollectionUtils.mapValues() since the valueMapper function is dependent on map key here
   @SuppressWarnings("SSBasedInspection")
@@ -311,17 +320,17 @@ public class PravegaSupervisor extends SeekableStreamSupervisor<String, StreamCu
     }
 
     return currentOffsets
-        .entrySet()
-        .stream()
-        .filter(e -> latestSequenceFromStream.get(e.getKey()) != null)
-        .collect(
-            Collectors.toMap(
-                Entry::getKey,
-                e -> e.getValue() != null
-                     ? latestSequenceFromStream.get(e.getKey()) - e.getValue()
-                     : 0
-            )
-        );
+            .entrySet()
+            .stream()
+            .filter(e -> latestSequenceFromStream.get(e.getKey()) != null)
+            .collect(
+                    Collectors.toMap(
+                            Entry::getKey,
+                            e -> e.getValue() != null
+                                    ? latestSequenceFromStream.get(e.getKey()) - e.getValue()
+                                    : 0
+                    )
+            );
   }
 
   @Override
@@ -395,9 +404,9 @@ public class PravegaSupervisor extends SeekableStreamSupervisor<String, StreamCu
       }
 
       Set<StreamPartition<String>> partitions = partitionIds
-          .stream()
-          .map(e -> new StreamPartition<>(getIoConfig().getStream(), e))
-          .collect(Collectors.toSet());
+              .stream()
+              .map(e -> new StreamPartition<>(getIoConfig().getStream(), e))
+              .collect(Collectors.toSet());
 
       recordSupplier.seekToLatest(partitions);
 
@@ -405,7 +414,7 @@ public class PravegaSupervisor extends SeekableStreamSupervisor<String, StreamCu
       // because we currently only have record lag for kafka, which can be lazily computed by subtracting the highest
       // task offsets from the latest offsets from the stream when it is needed
       latestSequenceFromStream =
-          partitions.stream().collect(Collectors.toMap(StreamPartition::getPartitionId, recordSupplier::getPosition));
+              partitions.stream().collect(Collectors.toMap(StreamPartition::getPartitionId, recordSupplier::getPosition));
     }
     catch (InterruptedException e) {
       throw new StreamException(e);
@@ -413,6 +422,11 @@ public class PravegaSupervisor extends SeekableStreamSupervisor<String, StreamCu
     finally {
       getRecordSupplierLock().unlock();
     }
+  }
+
+  protected void updatePartitionLagFromStream2() {
+    PravegaEventSupplier supplier = (PravegaEventSupplier) recordSupplier;
+    latestSequenceFromStream = supplier.getPartitionsTimeLag(getIoConfig().getStream(), getHighestCurrentOffsets());
   }
 
   @Override

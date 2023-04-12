@@ -39,9 +39,14 @@ public class PravegaSequenceNumber extends OrderedSequenceNumber<StreamCut>
     return new PravegaSequenceNumber(streamCut);
   }
 
+  // Modeled after kinesis, called in record supplier
+  public static boolean isValidPravegaSequence(StreamCut streamCut) {
+    return !(streamCut.equals(StreamCut.UNBOUNDED));
+  }
+
   @Override
   public int compareTo(
-      @NotNull OrderedSequenceNumber<StreamCut> o
+          @NotNull OrderedSequenceNumber<StreamCut> o
   )
   {
     return this.get().compareTo(o.get());

@@ -22,6 +22,7 @@ package org.apache.druid.indexing.pravega;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 import io.pravega.client.ClientConfig;
 import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.admin.ReaderGroupManager;
@@ -61,19 +62,20 @@ public class PravegaEventSupplier implements RecordSupplier<String, StreamCut, B
   private boolean closed;
   private ClientConfig config;
   private String readerGroupName;
-
   private StreamCut streamCut;
 
+  private final Map<StreamPartition<String>, Long> partitionTimes = new HashMap<>();
+
   public PravegaEventSupplier(
-      Map<String, Object> consumerProperties,
-      ObjectMapper sortingMapper,
-      PravegaConfigOverrides configOverrides
+          Map<String, Object> consumerProperties,
+          ObjectMapper sortingMapper,
+          PravegaConfigOverrides configOverrides
   )
   {
     // NOTE: we may want to delay the instantiation of the consumer
-      // we know that we need a readergroup to inst. the consumer, but we don't know where to start yet,
-        // we find out where to start once seek() is called [seekablestreamsupervisor]
-        // maybe we can have a dummy supervisor right here for now?
+    // we know that we need a readergroup to inst. the consumer, but we don't know where to start yet,
+    // we find out where to start once seek() is called [seekablestreamsupervisor]
+    // maybe we can have a dummy supervisor right here for now?
     // consumer = getPravegaReader(sortingMapper, consumerProperties, configOverrides);
   }
 
@@ -85,7 +87,7 @@ public class PravegaEventSupplier implements RecordSupplier<String, StreamCut, B
 
   // assign a set of stream partitions to the consumer, contains the partition IDs
   // also called from seekablestreamindextaskrunner.java and seeakablestreamsupervisor -> assignRecordSupplierToPartitionIDs()
-    // supervisor can grab latest and earliest offsets to be stored in druid metadata (as well as partitions)
+  // supervisor can grab latest and earliest offsets to be stored in druid metadata (as well as partitions)
   @Override
   public void assign(Set<StreamPartition<String>> streamPartitions)
   {
@@ -100,7 +102,7 @@ public class PravegaEventSupplier implements RecordSupplier<String, StreamCut, B
   public void seek(StreamPartition<String> partition, StreamCut sequenceNumber)
   {
     // Close reader at a pos. then set offline - invokes readerOffline() automatically, do we need to use readeroffline() instead of closeat?
-      // "move away from closeAt(), reconfigure the reader group to start from a streamcut?  closeAt() resets readergroups to the begininning (of a stream?)
+    // "move away from closeAt(), reconfigure the reader group to start from a streamcut?  closeAt() resets readergroups to the begininning (of a stream?)
     // NOTE: we may need to recreate the reader group [this is after the streamCut option was decided]
     consumer.closeAt(Position.fromBytes(sequenceNumber.toBytes()));
 
@@ -137,9 +139,9 @@ public class PravegaEventSupplier implements RecordSupplier<String, StreamCut, B
     try {
       streamCut = streamManager.fetchStreamInfo(stream.getScope(), stream.getStreamName()).get().getTailStreamCut();
 
-    readerGroup.resetReaderGroup(ReaderGroupConfig.builder()
-            .startFromStreamCuts(Collections.singletonMap(stream, streamCut)) // create a map of Stream,StreamCut
-            .build());
+      readerGroup.resetReaderGroup(ReaderGroupConfig.builder()
+              .startFromStreamCuts(Collections.singletonMap(stream, streamCut)) // create a map of Stream,StreamCut
+              .build());
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     } catch (ExecutionException e) {
@@ -168,6 +170,7 @@ public class PravegaEventSupplier implements RecordSupplier<String, StreamCut, B
       // Initial loop to grab the first batch of events since the first batch can be null
       while ((event = consumer.readNextEvent(timeout)) == null)
       {
+        // set up time stamp for this event, where is the timestamp?
         ;        // Log the timeout/communication failure
       }
       do {
@@ -186,6 +189,14 @@ public class PravegaEventSupplier implements RecordSupplier<String, StreamCut, B
         else if (event.isCheckpoint()){
           hasCheckpoint = true;
         }
+
+        // partition contains scopedStream name
+        // constructor takes in stream, partitionID
+        StreamPartition<String> streamPartition = new StreamPartition<>(stream.getStreamName(), event.getEventPointer().asImpl().getStream().getScope());
+
+        // insert the streampartition and the time that it was polled
+        partitionTimes.put(streamPartition, consumer.getCurrentTimeWindow(stream).getUpperTimeBound());
+
       } while ((event = consumer.readNextEvent(0)) != null) ;
     } catch (ReinitializationRequiredException e){
       //There are certain circumstances where the reader needs to be reinitialized, reinit the readergroup?
@@ -224,21 +235,15 @@ public class PravegaEventSupplier implements RecordSupplier<String, StreamCut, B
   {
     final StreamCut earliestOffset = getEarliestSequenceNumber(partition);
     return earliestOffset != null
-           && offset.isAvailableWithEarliest(PravegaSequenceNumber.of(earliestOffset));
+            && offset.isAvailableWithEarliest(PravegaSequenceNumber.of(earliestOffset));
   }
 
-  // not called anywhere else except in the kafka/pravega indexing service
   @Override
   public StreamCut getPosition(StreamPartition<String> partition)
   {
     throw new UnsupportedOperationException();
   }
 
-  // returns set of unique stream partition ids
-  // "how do we get all segment names from a single stream"
-  // "druid calls getPartitionIDs" to create stream and partitionId key pairs to assign them to the record supplier
-  // druid does this in prep. for multi threads
-  // called from Seekablestreamsupervisor
   @Override
   public Set<String> getPartitionIds(String stream)
   {
@@ -256,9 +261,9 @@ public class PravegaEventSupplier implements RecordSupplier<String, StreamCut, B
   }
 
   public static void addConsumerPropertiesFromConfig(
-      Properties properties,
-      ObjectMapper configMapper,
-      Map<String, Object> consumerProperties
+          Properties properties,
+          ObjectMapper configMapper,
+          Map<String, Object> consumerProperties
   )
   {
     // Extract passwords before SSL connection to Kafka
@@ -267,11 +272,11 @@ public class PravegaEventSupplier implements RecordSupplier<String, StreamCut, B
 
       if (!PravegaSupervisorIOConfig.DRUID_DYNAMIC_CONFIG_PROVIDER_KEY.equals(propertyKey)) {
         if (propertyKey.equals(PravegaSupervisorIOConfig.TRUST_STORE_PASSWORD_KEY)
-            || propertyKey.equals(PravegaSupervisorIOConfig.KEY_STORE_PASSWORD_KEY)
-            || propertyKey.equals(PravegaSupervisorIOConfig.KEY_PASSWORD_KEY)) {
+                || propertyKey.equals(PravegaSupervisorIOConfig.KEY_STORE_PASSWORD_KEY)
+                || propertyKey.equals(PravegaSupervisorIOConfig.KEY_PASSWORD_KEY)) {
           PasswordProvider configPasswordProvider = configMapper.convertValue(
-              entry.getValue(),
-              PasswordProvider.class
+                  entry.getValue(),
+                  PasswordProvider.class
           );
           properties.setProperty(propertyKey, configPasswordProvider.getPassword());
         } else {
@@ -289,6 +294,84 @@ public class PravegaEventSupplier implements RecordSupplier<String, StreamCut, B
         properties.setProperty(e.getKey(), e.getValue());
       }
     }
+  }
+
+  public EventStreamReader<ByteBuffer> getPravegaReader(
+          ObjectMapper sortingMapper,
+          Map<String, Object> consumerProperties,
+          PravegaConfigOverrides configOverrides
+  )
+  {
+    final Map<String, Object> consumerConfigs = PravegaConsumerConfigs.getConsumerProperties();
+    final Properties props = new Properties();
+    Map<String, Object> effectiveConsumerProperties;
+    if (configOverrides != null) {
+      effectiveConsumerProperties = configOverrides.overrideConfigs(consumerProperties);
+    } else {
+      effectiveConsumerProperties = consumerProperties;
+    }
+    addConsumerPropertiesFromConfig(
+            props,
+            sortingMapper,
+            effectiveConsumerProperties
+    );
+    props.putAll(consumerConfigs);
+
+    ClassLoader currCtxCl = Thread.currentThread().getContextClassLoader();
+
+    // start from earliest? -> check config to start with either a head or a tail
+    try {
+      Thread.currentThread().setContextClassLoader(PravegaEventSupplier.class.getClassLoader());
+
+      // Utilize props to fetch members for initializeation
+      URI controllerURI = URI.create(props.getProperty("controllerURI"));
+      String scopedStreamName = props.getProperty("scopedStreamName");
+      readerGroupName = props.getProperty("readerGroupName");
+
+      config = ClientConfig.builder().controllerURI(controllerURI).build();
+
+      stream = Stream.of(scopedStreamName);
+
+      ReaderGroupConfig readerGroupConfig = ReaderGroupConfig.builder().stream(stream).build();
+      ReaderGroupManager readerGroupManager = ReaderGroupManager.withScope(stream.getScope(), config);
+
+      streamManager = StreamManager.create(config);
+
+      readerGroupManager.createReaderGroup(readerGroupName, readerGroupConfig); // returns a bool
+      readerGroup = readerGroupManager.getReaderGroup(readerGroupName);
+
+      return EventStreamClientFactory.withScope(stream.getScope(), config)
+              .createReader(readerName, readerGroupName, new ByteBufferSerializer(), ReaderConfig.builder().build());
+    }
+    finally {
+      Thread.currentThread().setContextClassLoader(currCtxCl);
+    }
+  }
+
+  public Map<String, Long> getPartitionsTimeLag(String stream, Map<String, StreamCut> currentOffsets) {
+    Map<String, Long> partitionLag = Maps.newHashMapWithExpectedSize(currentOffsets.size());
+    for (Map.Entry<String, StreamCut> partitionOffset : currentOffsets.entrySet()) {
+      StreamPartition<String> partition = new StreamPartition<>(stream, partitionOffset.getKey());
+      long currentLag = 0L;
+      if (PravegaSequenceNumber.isValidPravegaSequence(partitionOffset.getValue())) {
+        currentLag = getPartitionTimeLag(partition, partitionOffset.getValue());
+      }
+      partitionLag.put(partitionOffset.getKey(), currentLag);
+    }
+    return partitionLag;
+  }
+
+  private Long getPartitionTimeLag(StreamPartition<String> partition, StreamCut offset) {
+    TimeWindow timeWindow = consumer.getCurrentTimeWindow(stream);
+    Long latestTime = timeWindow.getUpperTimeBound();
+    Long timeLag = 0L;
+    try {
+      timeLag = latestTime - partitionTimes.get(partition);
+    }
+    catch (Exception e) {
+      return -1L;
+    }
+    return timeLag;
   }
 
   // added for test
@@ -324,58 +407,6 @@ public class PravegaEventSupplier implements RecordSupplier<String, StreamCut, B
 
     deserializerObject.configure(configs, isKey);
     return deserializerObject;
-  }
-
-  public EventStreamReader<ByteBuffer> getPravegaReader(
-      ObjectMapper sortingMapper,
-      Map<String, Object> consumerProperties,
-      PravegaConfigOverrides configOverrides
-  )
-  {
-    final Map<String, Object> consumerConfigs = PravegaConsumerConfigs.getConsumerProperties();
-    final Properties props = new Properties();
-    Map<String, Object> effectiveConsumerProperties;
-    if (configOverrides != null) {
-      effectiveConsumerProperties = configOverrides.overrideConfigs(consumerProperties);
-    } else {
-      effectiveConsumerProperties = consumerProperties;
-    }
-    addConsumerPropertiesFromConfig(
-        props,
-        sortingMapper,
-        effectiveConsumerProperties
-    );
-    props.putAll(consumerConfigs);
-
-    ClassLoader currCtxCl = Thread.currentThread().getContextClassLoader();
-
-    // start from earliest? -> check config to start with either a head or a tail
-    try {
-      Thread.currentThread().setContextClassLoader(PravegaEventSupplier.class.getClassLoader());
-
-      // Utilize props to fetch members for initializeation
-      URI controllerURI = URI.create(props.getProperty("controllerURI"));
-      String scopedStreamName = props.getProperty("scopedStreamName");
-      readerGroupName = props.getProperty("readerGroupName");
-
-      config = ClientConfig.builder().controllerURI(controllerURI).build();
-
-      stream = Stream.of(scopedStreamName);
-
-      ReaderGroupConfig readerGroupConfig = ReaderGroupConfig.builder().stream(stream).build();
-      ReaderGroupManager readerGroupManager = ReaderGroupManager.withScope(stream.getScope(), config);
-
-      streamManager = StreamManager.create(config);
-
-      readerGroupManager.createReaderGroup(readerGroupName, readerGroupConfig); // returns a bool
-      readerGroup = readerGroupManager.getReaderGroup(readerGroupName);
-
-      return EventStreamClientFactory.withScope(stream.getScope(), config)
-              .createReader(readerName, readerGroupName, new ByteBufferSerializer(), ReaderConfig.builder().build());
-    }
-    finally {
-      Thread.currentThread().setContextClassLoader(currCtxCl);
-    }
   }
 
   private static <T> T wrapExceptions(Callable<T> callable)
