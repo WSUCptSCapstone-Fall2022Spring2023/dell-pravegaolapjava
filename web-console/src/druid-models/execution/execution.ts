@@ -26,9 +26,8 @@ import {
   oneOf,
   pluralIfNeeded,
 } from '../../utils';
-import type { DruidEngine } from '../druid-engine/druid-engine';
-import { validDruidEngine } from '../druid-engine/druid-engine';
-import type { QueryContext } from '../query-context/query-context';
+import { DruidEngine, validDruidEngine } from '../druid-engine/druid-engine';
+import { QueryContext } from '../query-context/query-context';
 import { Stages } from '../stages/stages';
 
 const IGNORE_CONTEXT_KEYS = [

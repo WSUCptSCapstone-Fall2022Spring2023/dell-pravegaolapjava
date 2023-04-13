@@ -20,14 +20,14 @@ import { IconNames } from '@blueprintjs/icons';
 import { sum } from 'd3-array';
 import React from 'react';
 
-import type { Capabilities } from '../../../helpers';
+import { Capabilities } from '../../../helpers';
 import { useQueryManager } from '../../../hooks';
 import { Api } from '../../../singletons';
 import { deepGet, pluralIfNeeded, queryDruidSql } from '../../../utils';
 import { HomeViewCard } from '../home-view-card/home-view-card';
 
 export interface SegmentCounts {
-  total: number;
+  available: number;
   unavailable: number;
 }
 
@@ -41,8 +41,8 @@ export const SegmentsCard = React.memo(function SegmentsCard(props: SegmentsCard
       if (capabilities.hasSql()) {
         const segments = await queryDruidSql({
           query: `SELECT
-  COUNT(*) as "total",
-  COUNT(*) FILTER (WHERE is_active = 1 AND is_available = 0) as "unavailable"
+  COUNT(*) as "available",
+  COUNT(*) FILTER (WHERE is_available = 0) as "unavailable"
 FROM sys.segments`,
         });
         return segments.length === 1 ? segments[0] : null;
@@ -60,7 +60,7 @@ FROM sys.segments`,
         );
 
         return {
-          total: availableSegmentNum + unavailableSegmentNum,
+          available: availableSegmentNum + unavailableSegmentNum,
           unavailable: unavailableSegmentNum,
         };
       } else {
@@ -70,7 +70,7 @@ FROM sys.segments`,
     initQuery: props.capabilities,
   });
 
-  const segmentCount = segmentCountState.data || { total: 0, unavailable: 0 };
+  const segmentCount = segmentCountState.data || { available: 0, unavailable: 0 };
   return (
     <HomeViewCard
       className="segments-card"
@@ -80,7 +80,7 @@ FROM sys.segments`,
       loading={segmentCountState.loading}
       error={segmentCountState.error}
     >
-      <p>{pluralIfNeeded(segmentCount.total, 'segment')}</p>
+      <p>{pluralIfNeeded(segmentCount.available, 'segment')}</p>
       {Boolean(segmentCount.unavailable) && (
         <p>{pluralIfNeeded(segmentCount.unavailable, 'unavailable segment')}</p>
       )}

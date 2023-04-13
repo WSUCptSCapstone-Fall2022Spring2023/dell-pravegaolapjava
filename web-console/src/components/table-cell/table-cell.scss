@@ -21,8 +21,7 @@
 .table-cell {
   padding: $table-cell-v-padding $table-cell-h-padding;
 
-  &.null,
-  &.empty {
+  &.null {
     font-style: italic;
   }
 

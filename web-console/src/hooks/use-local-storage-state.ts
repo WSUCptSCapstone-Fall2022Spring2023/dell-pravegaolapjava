@@ -16,11 +16,9 @@
  * limitations under the License.
  */
 
-import type { Dispatch, SetStateAction } from 'react';
-import { useState } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 
-import type { LocalStorageKeys } from '../utils';
-import { localStorageGetJson, localStorageSetJson } from '../utils';
+import { localStorageGetJson, LocalStorageKeys, localStorageSetJson } from '../utils';
 
 export function useLocalStorageState<T>(
   key: LocalStorageKeys,

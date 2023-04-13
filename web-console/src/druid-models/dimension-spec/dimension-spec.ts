@@ -16,18 +16,15 @@
  * limitations under the License.
  */
 
-import type { Field } from '../../components';
+import { Field } from '../../components';
 import { filterMap, typeIs } from '../../utils';
-import type { SampleResponse } from '../../utils/sampler';
-import { getHeaderNamesFromSampleResponse } from '../../utils/sampler';
-import { guessColumnTypeFromSampleResponse } from '../ingestion-spec/ingestion-spec';
+import { SampleHeaderAndRows } from '../../utils/sampler';
+import { guessColumnTypeFromHeaderAndRows } from '../ingestion-spec/ingestion-spec';
 
 export interface DimensionsSpec {
   readonly dimensions?: (string | DimensionSpec)[];
   readonly dimensionExclusions?: string[];
   readonly spatialDimensions?: any[];
-  readonly includeAllDimensions?: boolean;
-  readonly useSchemaDiscovery?: boolean;
 }
 
 export interface DimensionSpec {
@@ -80,19 +77,20 @@ export function inflateDimensionSpec(dimensionSpec: string | DimensionSpec): Dim
 }
 
 export function getDimensionSpecs(
-  sampleResponse: SampleResponse,
+  headerAndRows: SampleHeaderAndRows,
   typeHints: Record<string, string>,
   guessNumericStringsAsNumbers: boolean,
   hasRollup: boolean,
 ): (string | DimensionSpec)[] {
-  return filterMap(getHeaderNamesFromSampleResponse(sampleResponse, true), h => {
-    const dimensionType =
+  return filterMap(headerAndRows.header, h => {
+    if (h === '__time') return;
+    const type =
       typeHints[h] ||
-      guessColumnTypeFromSampleResponse(sampleResponse, h, guessNumericStringsAsNumbers);
-    if (dimensionType === 'string') return h;
+      guessColumnTypeFromHeaderAndRows(headerAndRows, h, guessNumericStringsAsNumbers);
+    if (type === 'string') return h;
     if (hasRollup) return;
     return {
-      type: dimensionType === 'COMPLEX<json>' ? 'json' : dimensionType,
+      type,
       name: h,
     };
   });

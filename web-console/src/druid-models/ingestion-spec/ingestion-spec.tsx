@@ -20,8 +20,7 @@ import { Code } from '@blueprintjs/core';
 import { range } from 'd3-array';
 import React from 'react';
 
-import type { Field } from '../../components';
-import { AutoForm, ExternalLink } from '../../components';
+import { AutoForm, ExternalLink, Field } from '../../components';
 import { IndexSpecDialog } from '../../dialogs/index-spec-dialog/index-spec-dialog';
 import { getLink } from '../../links';
 import {
@@ -34,33 +33,33 @@ import {
   EMPTY_ARRAY,
   EMPTY_OBJECT,
   filterMap,
-  findMap,
   isSimpleArray,
   oneOf,
   parseCsvLine,
   typeIs,
 } from '../../utils';
-import type { SampleResponse } from '../../utils/sampler';
-import type { DimensionsSpec } from '../dimension-spec/dimension-spec';
+import { SampleHeaderAndRows } from '../../utils/sampler';
 import {
+  DimensionsSpec,
   getDimensionSpecName,
   getDimensionSpecs,
   getDimensionSpecType,
 } from '../dimension-spec/dimension-spec';
-import type { IndexSpec } from '../index-spec/index-spec';
-import { summarizeIndexSpec } from '../index-spec/index-spec';
-import type { InputFormat } from '../input-format/input-format';
-import { issueWithInputFormat } from '../input-format/input-format';
-import type { InputSource } from '../input-source/input-source';
-import { FILTER_SUGGESTIONS, issueWithInputSource } from '../input-source/input-source';
-import type { MetricSpec } from '../metric-spec/metric-spec';
+import { IndexSpec, summarizeIndexSpec } from '../index-spec/index-spec';
+import { InputFormat, issueWithInputFormat } from '../input-format/input-format';
+import {
+  FILTER_SUGGESTIONS,
+  InputSource,
+  issueWithInputSource,
+} from '../input-source/input-source';
 import {
   getMetricSpecOutputType,
   getMetricSpecs,
   getMetricSpecSingleFieldName,
+  MetricSpec,
 } from '../metric-spec/metric-spec';
-import type { TimestampSpec } from '../timestamp-spec/timestamp-spec';
-import type { TransformSpec } from '../transform-spec/transform-spec';
+import { TimestampSpec } from '../timestamp-spec/timestamp-spec';
+import { TransformSpec } from '../transform-spec/transform-spec';
 
 export const MAX_INLINE_DATA_LENGTH = 65536;
 
@@ -81,12 +80,13 @@ export function isEmptyIngestionSpec(spec: Partial<IngestionSpec>) {
   return Object.keys(spec).length === 0;
 }
 
-export type IngestionType = 'kafka' | 'kinesis' | 'index_parallel';
+export type IngestionType = 'kafka' | 'kinesis' | 'pravega' | 'index_parallel';
 
 // A combination of IngestionType and inputSourceType
 export type IngestionComboType =
   | 'kafka'
   | 'kinesis'
+  | 'pravega'
   | 'index_parallel:http'
   | 'index_parallel:local'
   | 'index_parallel:druid'
@@ -108,6 +108,7 @@ function ingestionTypeToIoAndTuningConfigType(ingestionType: IngestionType): str
   switch (ingestionType) {
     case 'kafka':
     case 'kinesis':
+    case 'pravega':
     case 'index_parallel':
       return ingestionType;
 
@@ -124,6 +125,7 @@ export function getIngestionComboType(
   switch (ioConfig.type) {
     case 'kafka':
     case 'kinesis':
+    case 'pravega':
       return ioConfig.type;
 
     case 'index_parallel': {
@@ -177,6 +179,9 @@ export function getIngestionTitle(ingestionType: IngestionComboTypeWithExtra): s
     case 'kinesis':
       return 'Amazon Kinesis';
 
+    case 'pravega':
+      return 'Pravega';
+
     case 'hadoop':
       return 'HDFS';
 
@@ -210,6 +215,9 @@ export function getIngestionDocLink(spec: Partial<IngestionSpec>): string {
     case 'kinesis':
       return `${getLink('DOCS')}/development/extensions-core/kinesis-ingestion.html`;
 
+    // case 'pravega':
+      // return link to pravega ingestion docs
+
     default:
       return `${getLink('DOCS')}/ingestion/native-batch.html#input-sources`;
   }
@@ -234,6 +242,9 @@ export function getRequiredModule(ingestionType: IngestionComboTypeWithExtra): s
 
     case 'kinesis':
       return 'druid-kinesis-indexing-service';
+
+    case 'pravega':
+      return 'druid-pravega-indexing-service'
 
     default:
       return;
@@ -270,9 +281,6 @@ export interface DataSchema {
 export type DimensionMode = 'specific' | 'auto-detect';
 
 export function getDimensionMode(spec: Partial<IngestionSpec>): DimensionMode {
-  if (deepGet(spec, 'spec.dataSchema.dimensionsSpec.useSchemaDiscovery') === true) {
-    return 'auto-detect';
-  }
   const dimensions = deepGet(spec, 'spec.dataSchema.dimensionsSpec.dimensions') || EMPTY_ARRAY;
   return Array.isArray(dimensions) && dimensions.length === 0 ? 'auto-detect' : 'specific';
 }
@@ -292,7 +300,7 @@ export function getSpecType(spec: Partial<IngestionSpec>): IngestionType {
 }
 
 export function isStreamingSpec(spec: Partial<IngestionSpec>): boolean {
-  return oneOf(getSpecType(spec), 'kafka', 'kinesis');
+  return oneOf(getSpecType(spec), 'kafka', 'kinesis', 'pravega');
 }
 
 export function isDruidSource(spec: Partial<IngestionSpec>): boolean {
@@ -429,6 +437,7 @@ export interface IoConfig {
   period?: string;
   useEarliestOffset?: boolean;
   stream?: string;
+  scope?: string; // addition for pravega
   endpoint?: string;
   useEarliestSequenceNumber?: boolean;
 }
@@ -897,7 +906,6 @@ export function getIoConfigFormFields(ingestionComboType: IngestionComboType): F
           label: 'Bootstrap servers',
           type: 'string',
           required: true,
-          placeholder: 'kafka_broker_host:9092',
           info: (
             <>
               <ExternalLink
@@ -919,7 +927,6 @@ export function getIoConfigFormFields(ingestionComboType: IngestionComboType): F
           type: 'string',
           required: true,
           defined: typeIs('kafka'),
-          placeholder: 'topic_name',
         },
         {
           name: 'consumerProperties',
@@ -1002,6 +1009,60 @@ export function getIoConfigFormFields(ingestionComboType: IngestionComboType): F
           info: <>The AWS external id to use for additional permissions.</>,
         },
       ];
+
+      case 'pravega':
+        return [
+          {
+            name: 'consumerProperties.{controllerURI}',
+            label: 'Controller URIs',
+            type: 'string',
+            required: true,
+            info: (
+              <>
+                <ExternalLink
+                  href={`${getLink(
+                    'DOCS',
+                  )}/development/extensions-core/kafka-ingestion#kafkasupervisorioconfig`}
+                >
+                  consumerProperties
+                </ExternalLink>
+                <p>
+                  A list of Kafka brokers in the form:{' '}
+                  <Code>{`<BROKER_1>:<PORT_1>,<BROKER_2>:<PORT_2>,...`}</Code>
+                </p>
+              </>
+            ),
+          },
+          {
+            name: 'scope',
+            type: 'string',
+            required: true,
+            defined: typeIs('pravega'),
+          },
+          {
+            name: 'stream',
+            type: 'string',
+            required: true,
+            defined: typeIs('pravega'),
+          },
+          {
+            name: 'consumerProperties',
+            type: 'json',
+            defaultValue: {},
+            info: (
+              <>
+                <ExternalLink
+                  href={`${getLink(
+                    'DOCS',
+                  )}/development/extensions-core/kafka-ingestion#kafkasupervisorioconfig`}
+                >
+                  consumerProperties
+                </ExternalLink>
+                <p>A map of properties to be passed to the Kafka consumer.</p>
+              </>
+            ),
+          },
+        ];
   }
 
   throw new Error(`unknown input type ${ingestionComboType}`);
@@ -1027,6 +1088,10 @@ export function issueWithIoConfig(
 
     case 'kinesis':
       if (!ioConfig.stream) return 'must have a stream';
+      break;
+
+    case 'pravega':
+      if (!ioConfig.scope || !ioConfig.stream) return 'must have a scope and a stream';
       break;
   }
 
@@ -1095,6 +1160,7 @@ export function getIoConfigTuningFormFields(
 
     case 'kafka':
     case 'kinesis':
+    case 'pravega':
       return [
         {
           name: 'useEarliestOffset',
@@ -1124,6 +1190,22 @@ export function getIoConfigTuningFormFields(
               earliest or latest sequence numbers in Kinesis. Under normal circumstances, subsequent
               tasks will start from where the previous segments ended so this flag will only be used
               on first run.
+            </>
+          ),
+        },
+        {
+          name: 'useHeadStreamCut',
+          type: 'boolean',
+          defined: typeIs('pravega'),
+          required: true,
+          info: (
+            <>
+              <p>
+                If a supervisor is managing a dataSource for the first time, it will obtain a streamcut which is a set of
+                starting offsets across partitions from Pravega. This flag determines whether it retrieves the head or
+                tail streamcuts in Pravega. Under normal circumstances, subsequent tasks will start
+                from where the previous segments ended so this flag will only be used on first run.
+              </p>
             </>
           ),
         },
@@ -1198,6 +1280,19 @@ export function getIoConfigTuningFormFields(
             <>
               <p>
                 The length of time to wait for the kafka consumer to poll records, in milliseconds.
+              </p>
+            </>
+          ),
+        },
+        {
+          name: 'pollTimeout',
+          type: 'number',
+          defaultValue: 2000,
+          defined: typeIs('pravega'),
+          info: (
+            <>
+              <p>
+                The length of time to wait for the pravega reader to poll records, in milliseconds.
               </p>
             </>
           ),
@@ -1372,6 +1467,9 @@ export function guessDataSourceName(spec: Partial<IngestionSpec>): string | unde
 
     case 'kinesis':
       return ioConfig.stream;
+
+    case 'pravega':
+      return ioConfig.scope + "/" + ioConfig.stream;
 
     default:
       return;
@@ -1694,6 +1792,7 @@ export function getSecondaryPartitionRelatedFormFields(
 
     case 'kafka':
     case 'kinesis':
+    case 'pravega':
       return [
         {
           name: 'spec.tuningConfig.maxRowsPerSegment',
@@ -2140,32 +2239,33 @@ export function updateIngestionType(
 }
 
 export function issueWithSampleData(
-  sampleData: SampleResponse,
+  sampleData: string[],
   spec: Partial<IngestionSpec>,
 ): JSX.Element | undefined {
   if (isStreamingSpec(spec)) return;
 
-  const firstData: string = findMap(sampleData.data, l => l.input?.raw);
-  if (firstData) return;
+  if (sampleData.length) {
+    const firstData = sampleData[0];
 
-  if (firstData === '{') {
-    return (
-      <>
-        This data looks like regular JSON object. For Druid to parse a text file it must have one
-        row per event. Maybe look at{' '}
-        <ExternalLink href="http://ndjson.org/">newline delimited JSON</ExternalLink> instead.
-      </>
-    );
-  }
+    if (firstData === '{') {
+      return (
+        <>
+          This data looks like regular JSON object. For Druid to parse a text file it must have one
+          row per event. Maybe look at{' '}
+          <ExternalLink href="http://ndjson.org/">newline delimited JSON</ExternalLink> instead.
+        </>
+      );
+    }
 
-  if (oneOf(firstData, '[', '[]')) {
-    return (
-      <>
-        This data looks like a multi-line JSON array. For Druid to parse a text file it must have
-        one row per event. Maybe look at{' '}
-        <ExternalLink href="http://ndjson.org/">newline delimited JSON</ExternalLink> instead.
-      </>
-    );
+    if (oneOf(firstData, '[', '[]')) {
+      return (
+        <>
+          This data looks like a multi-line JSON array. For Druid to parse a text file it must have
+          one row per event. Maybe look at{' '}
+          <ExternalLink href="http://ndjson.org/">newline delimited JSON</ExternalLink> instead.
+        </>
+      );
+    }
   }
 
   return;
@@ -2173,19 +2273,13 @@ export function issueWithSampleData(
 
 export function fillInputFormatIfNeeded(
   spec: Partial<IngestionSpec>,
-  sampleResponse: SampleResponse,
+  sampleData: string[],
 ): Partial<IngestionSpec> {
   if (deepGet(spec, 'spec.ioConfig.inputFormat.type')) return spec;
-
   return deepSet(
     spec,
     'spec.ioConfig.inputFormat',
-    getSpecType(spec) === 'kafka'
-      ? guessKafkaInputFormat(filterMap(sampleResponse.data, l => l.input))
-      : guessSimpleInputFormat(
-          filterMap(sampleResponse.data, l => l.input?.raw),
-          isStreamingSpec(spec),
-        ),
+    guessInputFormat(sampleData, isStreamingSpec(spec)),
   );
 }
 
@@ -2193,23 +2287,8 @@ function noNumbers(xs: string[]): boolean {
   return xs.every(x => isNaN(Number(x)));
 }
 
-export function guessKafkaInputFormat(sampleRaw: Record<string, any>[]): InputFormat {
-  const hasHeader = sampleRaw.some(x => Object.keys(x).some(k => k.startsWith('kafka.header.')));
-  const keys = filterMap(sampleRaw, x => x['kafka.key']);
-  const payloads = filterMap(sampleRaw, x => x.raw);
-  return {
-    type: 'kafka',
-    headerFormat: hasHeader ? { type: 'string' } : undefined,
-    keyFormat: keys.length ? guessSimpleInputFormat(keys, true) : undefined,
-    valueFormat: guessSimpleInputFormat(payloads, true),
-  };
-}
-
-export function guessSimpleInputFormat(
-  sampleRaw: string[],
-  canBeMultiLineJson = false,
-): InputFormat {
-  let sampleDatum = sampleRaw[0];
+export function guessInputFormat(sampleData: string[], canBeMultiLineJson = false): InputFormat {
+  let sampleDatum = sampleData[0];
   if (sampleDatum) {
     sampleDatum = String(sampleDatum); // Really ensure it is a string
 
@@ -2345,11 +2424,11 @@ function inputFormatFromType(options: InputFormatFromTypeOptions): InputFormat {
 
 // ------------------------
 
-export function guessIsArrayFromSampleResponse(
-  sampleResponse: SampleResponse,
+export function guessIsArrayFromHeaderAndRows(
+  headerAndRows: SampleHeaderAndRows,
   column: string,
 ): boolean {
-  return sampleResponse.data.some(r => isSimpleArray(r.input?.[column]));
+  return headerAndRows.rows.some(r => isSimpleArray(r.input?.[column]));
 }
 
 export function guessColumnTypeFromInput(
@@ -2381,13 +2460,13 @@ export function guessColumnTypeFromInput(
   }
 }
 
-export function guessColumnTypeFromSampleResponse(
-  sampleResponse: SampleResponse,
+export function guessColumnTypeFromHeaderAndRows(
+  headerAndRows: SampleHeaderAndRows,
   column: string,
   guessNumericStringsAsNumbers: boolean,
 ): string {
   return guessColumnTypeFromInput(
-    filterMap(sampleResponse.data, r => r.input?.[column]),
+    filterMap(headerAndRows.rows, r => r.input?.[column]),
     guessNumericStringsAsNumbers,
   );
 }
@@ -2417,7 +2496,7 @@ function getTypeHintsFromSpec(spec: Partial<IngestionSpec>): Record<string, stri
 
 export function updateSchemaWithSample(
   spec: Partial<IngestionSpec>,
-  sampleResponse: SampleResponse,
+  headerAndRows: SampleHeaderAndRows,
   dimensionMode: DimensionMode,
   rollup: boolean,
   forcePartitionInitialization = false,
@@ -2430,25 +2509,26 @@ export function updateSchemaWithSample(
   let newSpec = spec;
 
   if (dimensionMode === 'auto-detect') {
-    newSpec = deepSet(newSpec, 'spec.dataSchema.dimensionsSpec.useSchemaDiscovery', true);
-    newSpec = deepSet(newSpec, 'spec.dataSchema.dimensionsSpec.includeAllDimensions', true);
-    newSpec = deepSet(newSpec, 'spec.dataSchema.dimensionsSpec.dimensionExclusions', []);
     newSpec = deepDelete(newSpec, 'spec.dataSchema.dimensionsSpec.dimensions');
+    newSpec = deepSet(newSpec, 'spec.dataSchema.dimensionsSpec.dimensionExclusions', []);
   } else {
-    newSpec = deepDelete(newSpec, 'spec.dataSchema.dimensionsSpec.useSchemaDiscovery');
-    newSpec = deepDelete(newSpec, 'spec.dataSchema.dimensionsSpec.includeAllDimensions');
     newSpec = deepDelete(newSpec, 'spec.dataSchema.dimensionsSpec.dimensionExclusions');
-    newSpec = deepSet(
-      newSpec,
-      'spec.dataSchema.dimensionsSpec.dimensions',
-      getDimensionSpecs(sampleResponse, typeHints, guessNumericStringsAsNumbers, rollup),
+
+    const dimensions = getDimensionSpecs(
+      headerAndRows,
+      typeHints,
+      guessNumericStringsAsNumbers,
+      rollup,
     );
+    if (dimensions) {
+      newSpec = deepSet(newSpec, 'spec.dataSchema.dimensionsSpec.dimensions', dimensions);
+    }
   }
 
   if (rollup) {
     newSpec = deepSet(newSpec, 'spec.dataSchema.granularitySpec.queryGranularity', 'hour');
 
-    const metrics = getMetricSpecs(sampleResponse, typeHints, guessNumericStringsAsNumbers);
+    const metrics = getMetricSpecs(headerAndRows, typeHints, guessNumericStringsAsNumbers);
     if (metrics) {
       newSpec = deepSet(newSpec, 'spec.dataSchema.metricsSpec', metrics);
     }

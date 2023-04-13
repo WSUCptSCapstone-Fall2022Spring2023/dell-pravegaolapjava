@@ -16,11 +16,11 @@
  * limitations under the License.
  */
 
-import type { AxisScale } from 'd3-axis';
+import { AxisScale } from 'd3-axis';
 import React from 'react';
 
 import { BarUnit } from './bar-unit';
-import type { BarUnitData, HoveredBarInfo } from './stacked-bar-chart';
+import { BarUnitData, HoveredBarInfo } from './stacked-bar-chart';
 
 interface BarGroupProps {
   dataToRender: BarUnitData[];

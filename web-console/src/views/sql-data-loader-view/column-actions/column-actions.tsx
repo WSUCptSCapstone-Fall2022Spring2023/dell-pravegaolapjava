@@ -19,13 +19,11 @@
 import { Button, FormGroup, Menu, MenuItem } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
 import { Popover2 } from '@blueprintjs/popover2';
-import type { QueryResult, SqlExpression } from 'druid-query-toolkit';
-import { F } from 'druid-query-toolkit';
+import { F, QueryResult, SqlExpression } from 'druid-query-toolkit';
 import React from 'react';
 
 import { possibleDruidFormatForValues, TIME_COLUMN } from '../../../druid-models';
-import type { QueryAction } from '../../../utils';
-import { convertToGroupByExpression, oneOf, timeFormatToSql } from '../../../utils';
+import { convertToGroupByExpression, oneOf, QueryAction, timeFormatToSql } from '../../../utils';
 import { TimeFloorMenuItem } from '../../workbench-view/time-floor-menu-item/time-floor-menu-item';
 
 import './column-actions.scss';

@@ -7,9 +7,9 @@ exports[`ServicesView renders data 1`] = `
   <Memo(ViewControlBar)
     label="Services"
   >
-    <Unknown>
+    <Component>
       Group by
-    </Unknown>
+    </Component>
     <Blueprint4.ButtonGroup>
       <Blueprint4.Button
         active={true}

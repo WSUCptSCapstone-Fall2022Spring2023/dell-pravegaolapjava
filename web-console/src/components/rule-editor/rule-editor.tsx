@@ -31,8 +31,7 @@ import { IconNames } from '@blueprintjs/icons';
 import React, { useState } from 'react';
 
 import { durationSanitizer } from '../../utils';
-import type { Rule } from '../../utils/load-rule';
-import { RuleUtil } from '../../utils/load-rule';
+import { Rule, RuleUtil } from '../../utils/load-rule';
 import { SuggestibleInput } from '../suggestible-input/suggestible-input';
 
 import './rule-editor.scss';

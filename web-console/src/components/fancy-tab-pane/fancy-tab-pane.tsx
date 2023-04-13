@@ -34,11 +34,9 @@
  * limitations under the License.
  */
 
-import type { IconName } from '@blueprintjs/core';
-import { Button, Icon, Intent } from '@blueprintjs/core';
+import { Button, Icon, IconName, Intent } from '@blueprintjs/core';
 import classNames from 'classnames';
-import type { ReactNode } from 'react';
-import React from 'react';
+import React, { ReactNode } from 'react';
 
 import { filterMap } from '../../utils';
 

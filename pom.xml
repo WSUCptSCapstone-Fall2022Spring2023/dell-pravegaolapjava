@@ -172,6 +172,7 @@
         <module>extensions-core/stats</module>
         <module>extensions-core/kafka-extraction-namespace</module>
         <module>extensions-core/kafka-indexing-service</module>
+        <module>extensions-core/pravega-indexing-service</module>
         <module>extensions-core/kinesis-indexing-service</module>
         <module>extensions-core/multi-stage-query</module>
         <module>extensions-core/mysql-metadata-storage</module>

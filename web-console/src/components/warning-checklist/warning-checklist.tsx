@@ -17,8 +17,7 @@
  */
 
 import { Switch } from '@blueprintjs/core';
-import type { ReactNode } from 'react';
-import React, { useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 
 export interface WarningChecklistProps {
   checks: ReactNode[];

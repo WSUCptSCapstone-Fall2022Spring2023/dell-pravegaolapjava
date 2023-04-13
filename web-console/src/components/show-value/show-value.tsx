@@ -32,7 +32,7 @@ export interface ShowValueProps {
 export const ShowValue = React.memo(function ShowValue(props: ShowValueProps) {
   const { jsonValue, onDiffWithPrevious, downloadFilename } = props;
   return (
-    <div className="show-value">
+    <div className="show-json">
       {(onDiffWithPrevious || downloadFilename) && (
         <div className="top-actions">
           <ButtonGroup className="right-buttons">

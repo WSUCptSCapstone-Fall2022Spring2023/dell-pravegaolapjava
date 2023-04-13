@@ -19,15 +19,23 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 
-import type { IngestionSpec } from '../../../druid-models';
-import { PLACEHOLDER_TIMESTAMP_SPEC } from '../../../druid-models';
+import { IngestionSpec, PLACEHOLDER_TIMESTAMP_SPEC } from '../../../druid-models';
 import { deepSet } from '../../../utils';
-import { JSON_SAMPLE } from '../../../utils/sampler.mock';
 
 import { ParseTimeTable } from './parse-time-table';
 
 describe('ParseTimeTable', () => {
   it('matches snapshot', () => {
+    const sampleData = {
+      header: ['c1'],
+      rows: [
+        {
+          input: { c1: 'hello' },
+          parsed: { c1: 'hello' },
+        },
+      ],
+    };
+
     const spec = deepSet(
       {} as IngestionSpec,
       'spec.dataSchema.timestampSpec',
@@ -37,7 +45,7 @@ describe('ParseTimeTable', () => {
     const parseTimeTable = (
       <ParseTimeTable
         sampleBundle={{
-          sampleResponse: JSON_SAMPLE,
+          headerAndRows: sampleData,
           spec,
         }}
         columnFilter=""

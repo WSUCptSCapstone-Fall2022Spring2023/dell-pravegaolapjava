@@ -40,6 +40,81 @@
         <option value="$PROJECT_DIR$/pom.xml" />
       </list>
     </option>
+    <option name="ignoredFiles">
+      <set>
+        <option value="$PROJECT_DIR$/benchmarks/pom.xml" />
+        <option value="$PROJECT_DIR$/cloud/aws-common/pom.xml" />
+        <option value="$PROJECT_DIR$/cloud/gcp-common/pom.xml" />
+        <option value="$PROJECT_DIR$/distribution/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-contrib/aliyun-oss-extensions/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-contrib/ambari-metrics-emitter/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-contrib/cassandra-storage/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-contrib/cloudfiles-extensions/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-contrib/compressed-bigdecimal/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-contrib/distinctcount/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-contrib/dropwizard-emitter/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-contrib/gce-extensions/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-contrib/graphite-emitter/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-contrib/influx-extensions/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-contrib/influxdb-emitter/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-contrib/kafka-emitter/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-contrib/kubernetes-overlord-extensions/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-contrib/materialized-view-maintenance/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-contrib/materialized-view-selection/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-contrib/momentsketch/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-contrib/moving-average-query/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-contrib/opentelemetry-emitter/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-contrib/opentsdb-emitter/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-contrib/prometheus-emitter/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-contrib/redis-cache/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-contrib/sqlserver-metadata-storage/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-contrib/statsd-emitter/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-contrib/tdigestsketch/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-contrib/thrift-extensions/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-contrib/time-min-max/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-contrib/virtual-columns/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-core/avro-extensions/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-core/azure-extensions/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-core/datasketches/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-core/druid-aws-rds-extensions/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-core/druid-basic-security/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-core/druid-bloom-filter/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-core/druid-kerberos/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-core/druid-pac4j/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-core/druid-ranger-security/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-core/ec2-extensions/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-core/google-extensions/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-core/hdfs-storage/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-core/histogram/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-core/kafka-extraction-namespace/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-core/kafka-indexing-service/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-core/kinesis-indexing-service/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-core/kubernetes-extensions/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-core/lookups-cached-global/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-core/lookups-cached-single/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-core/multi-stage-query/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-core/mysql-metadata-storage/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-core/orc-extensions/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-core/parquet-extensions/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-core/postgresql-metadata-storage/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-core/protobuf-extensions/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-core/s3-extensions/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-core/simple-client-sslcontext/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-core/stats/pom.xml" />
+        <option value="$PROJECT_DIR$/extensions-core/testing-tools/pom.xml" />
+        <option value="$PROJECT_DIR$/indexing-hadoop/pom.xml" />
+        <option value="$PROJECT_DIR$/indexing-service/pom.xml" />
+        <option value="$PROJECT_DIR$/integration-tests-ex/cases/pom.xml" />
+        <option value="$PROJECT_DIR$/integration-tests-ex/image/pom.xml" />
+        <option value="$PROJECT_DIR$/integration-tests-ex/tools/pom.xml" />
+        <option value="$PROJECT_DIR$/integration-tests/pom.xml" />
+        <option value="$PROJECT_DIR$/processing/pom.xml" />
+        <option value="$PROJECT_DIR$/server/pom.xml" />
+        <option value="$PROJECT_DIR$/services/pom.xml" />
+        <option value="$PROJECT_DIR$/sql/pom.xml" />
+        <option value="$PROJECT_DIR$/web-console/pom.xml" />
+      </set>
+    </option>
   </component>
   <component name="NullableNotNullManager">
     <option name="myDefaultNullable" value="javax.annotation.Nullable" />
@@ -84,7 +159,7 @@
     <resource url="http://maven.apache.org/ASSEMBLY/2.0.0" location="$PROJECT_DIR$/.idea/xml-schemas/assembly-2.0.0.xsd" />
     <resource url="http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" location="$PROJECT_DIR$/.idea/xml-schemas/svg11.dtd" />
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="false" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/classes" />
   </component>
 </project>

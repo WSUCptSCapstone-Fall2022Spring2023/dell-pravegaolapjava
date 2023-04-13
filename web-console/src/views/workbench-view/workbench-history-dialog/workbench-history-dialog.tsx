@@ -23,9 +23,11 @@ import React, { useState } from 'react';
 import AceEditor from 'react-ace';
 
 import { CenterMessage } from '../../../components';
-import type { WorkbenchQuery } from '../../../druid-models';
-import type { WorkbenchQueryHistoryEntry } from '../../../singletons/workbench-history';
-import { WorkbenchHistory } from '../../../singletons/workbench-history';
+import { WorkbenchQuery } from '../../../druid-models';
+import {
+  WorkbenchHistory,
+  WorkbenchQueryHistoryEntry,
+} from '../../../singletons/workbench-history';
 import { pluralIfNeeded } from '../../../utils';
 
 import './workbench-history-dialog.scss';

@@ -16,15 +16,12 @@
  * limitations under the License.
  */
 
-import type { IconName } from '@blueprintjs/core';
-import { Button, Classes, Dialog, Icon, Intent } from '@blueprintjs/core';
+import { Button, Classes, Dialog, Icon, IconName, Intent } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
 import { Popover2 } from '@blueprintjs/popover2';
-import type { ReactNode } from 'react';
-import React from 'react';
+import React, { ReactNode } from 'react';
 
-import type { BasicAction } from '../../utils/basic-action';
-import { basicActionsToMenu } from '../../utils/basic-action';
+import { BasicAction, basicActionsToMenu } from '../../utils/basic-action';
 
 import './table-action-dialog.scss';
 

@@ -16,13 +16,19 @@
  * limitations under the License.
  */
 
-import type { IResizeEntry } from '@blueprintjs/core';
-import { FormGroup, HTMLSelect, Radio, RadioGroup, ResizeSensor } from '@blueprintjs/core';
-import type { AxisScale } from 'd3-axis';
+import {
+  FormGroup,
+  HTMLSelect,
+  IResizeEntry,
+  Radio,
+  RadioGroup,
+  ResizeSensor,
+} from '@blueprintjs/core';
+import { AxisScale } from 'd3-axis';
 import { scaleLinear, scaleUtc } from 'd3-scale';
 import React from 'react';
 
-import type { Capabilities } from '../../helpers';
+import { Capabilities } from '../../helpers';
 import { Api } from '../../singletons';
 import {
   ceilToUtcDay,
@@ -35,8 +41,7 @@ import {
 import { DateRangeSelector } from '../date-range-selector/date-range-selector';
 import { Loader } from '../loader/loader';
 
-import type { BarUnitData } from './stacked-bar-chart';
-import { StackedBarChart } from './stacked-bar-chart';
+import { BarUnitData, StackedBarChart } from './stacked-bar-chart';
 
 import './segment-timeline.scss';
 

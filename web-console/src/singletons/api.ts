@@ -16,8 +16,7 @@
  * limitations under the License.
  */
 
-import type { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios';
-import axios from 'axios';
+import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios';
 import * as JSONBig from 'json-bigint-native';
 
 import { nonEmptyString } from '../utils';
@@ -39,7 +38,7 @@ export class Api {
           return Promise.reject(new Error(message));
         }
 
-        if (error.config?.method?.toLowerCase() === 'get' && nonEmptyString(responseData)) {
+        if (error.config.method?.toLowerCase() === 'get' && nonEmptyString(responseData)) {
           return Promise.reject(new Error(responseData));
         }
 

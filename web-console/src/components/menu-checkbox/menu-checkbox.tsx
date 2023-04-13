@@ -16,8 +16,7 @@
  * limitations under the License.
  */
 
-import type { MenuItemProps } from '@blueprintjs/core';
-import { MenuItem } from '@blueprintjs/core';
+import { MenuItem, MenuItemProps } from '@blueprintjs/core';
 import classNames from 'classnames';
 import React from 'react';
 

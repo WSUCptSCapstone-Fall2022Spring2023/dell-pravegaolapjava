@@ -25,8 +25,7 @@ import { useQueryManager } from '../../hooks';
 import { getLink } from '../../links';
 import { Api } from '../../singletons';
 import { swapElements } from '../../utils';
-import type { Rule } from '../../utils/load-rule';
-import { RuleUtil } from '../../utils/load-rule';
+import { Rule, RuleUtil } from '../../utils/load-rule';
 import { SnitchDialog } from '..';
 
 import './retention-dialog.scss';
@@ -38,7 +37,7 @@ export interface RetentionDialogProps {
   tiers: string[];
   onEditDefaults: () => void;
   onCancel: () => void;
-  onSave: (datasource: string, newRules: Rule[], comment: string) => void | Promise<void>;
+  onSave: (datasource: string, newRules: Rule[], comment: string) => void;
 }
 
 export const RetentionDialog = React.memo(function RetentionDialog(props: RetentionDialogProps) {
@@ -59,7 +58,7 @@ export const RetentionDialog = React.memo(function RetentionDialog(props: Retent
 
   function saveHandler(comment: string) {
     const { datasource, onSave } = props;
-    void onSave(datasource, currentRules, comment);
+    onSave(datasource, currentRules, comment);
   }
 
   function addRule() {

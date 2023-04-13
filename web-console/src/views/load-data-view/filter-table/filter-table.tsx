@@ -18,35 +18,32 @@
 
 import classNames from 'classnames';
 import React from 'react';
-import type { RowRenderProps } from 'react-table';
 import ReactTable from 'react-table';
 
 import { TableCell } from '../../../components';
-import type { DruidFilter } from '../../../druid-models';
-import { getFilterDimension } from '../../../druid-models';
+import { DruidFilter, getFilterDimension } from '../../../druid-models';
 import {
   DEFAULT_TABLE_CLASS_NAME,
   STANDARD_TABLE_PAGE_SIZE,
   STANDARD_TABLE_PAGE_SIZE_OPTIONS,
 } from '../../../react-table';
 import { caseInsensitiveContains, filterMap } from '../../../utils';
-import type { SampleEntry, SampleResponse } from '../../../utils/sampler';
-import { getHeaderNamesFromSampleResponse } from '../../../utils/sampler';
+import { SampleEntry, SampleHeaderAndRows } from '../../../utils/sampler';
 
 import './filter-table.scss';
 
 export function filterTableSelectedColumnName(
-  sampleResponse: SampleResponse,
+  sampleData: SampleHeaderAndRows,
   selectedFilter: Partial<DruidFilter> | undefined,
 ): string | undefined {
   if (!selectedFilter) return;
   const selectedFilterName = selectedFilter.dimension;
-  if (!getHeaderNamesFromSampleResponse(sampleResponse).includes(selectedFilterName)) return;
+  if (!sampleData.header.includes(selectedFilterName)) return;
   return selectedFilterName;
 }
 
 export interface FilterTableProps {
-  sampleResponse: SampleResponse;
+  sampleData: SampleHeaderAndRows;
   columnFilter: string;
   dimensionFilters: DruidFilter[];
   selectedFilterName: string | undefined;
@@ -54,18 +51,17 @@ export interface FilterTableProps {
 }
 
 export const FilterTable = React.memo(function FilterTable(props: FilterTableProps) {
-  const { sampleResponse, columnFilter, dimensionFilters, selectedFilterName, onFilterSelect } =
-    props;
+  const { sampleData, columnFilter, dimensionFilters, selectedFilterName, onFilterSelect } = props;
 
   return (
     <ReactTable
       className={classNames('filter-table', DEFAULT_TABLE_CLASS_NAME)}
-      data={sampleResponse.data}
+      data={sampleData.rows}
       sortable={false}
       defaultPageSize={STANDARD_TABLE_PAGE_SIZE}
       pageSizeOptions={STANDARD_TABLE_PAGE_SIZE_OPTIONS}
-      showPagination={sampleResponse.data.length > STANDARD_TABLE_PAGE_SIZE}
-      columns={filterMap(getHeaderNamesFromSampleResponse(sampleResponse), (columnName, i) => {
+      showPagination={sampleData.rows.length > STANDARD_TABLE_PAGE_SIZE}
+      columns={filterMap(sampleData.header, (columnName, i) => {
         if (!caseInsensitiveContains(columnName, columnFilter)) return;
         const timestamp = columnName === '__time';
         const filterIndex = dimensionFilters.findIndex(f => getFilterDimension(f) === columnName);
@@ -101,7 +97,7 @@ export const FilterTable = React.memo(function FilterTable(props: FilterTablePro
           id: String(i),
           accessor: (row: SampleEntry) => (row.parsed ? row.parsed[columnName] : null),
           width: 140,
-          Cell: function FilterTableCell(row: RowRenderProps) {
+          Cell: function FilterTableCell(row) {
             return <TableCell value={timestamp ? new Date(row.value) : row.value} />;
           },
         };

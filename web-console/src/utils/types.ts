@@ -16,13 +16,31 @@
  * limitations under the License.
  */
 
-import type { IconName } from '@blueprintjs/core';
+import { IconName } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
-import type { Column } from 'druid-query-toolkit';
+import { Column } from 'druid-query-toolkit';
 
 function getEffectiveColumnType(column: Column): string | undefined {
   if (column.sqlType === 'TIMESTAMP') return column.sqlType;
   return column.nativeType || column.sqlType;
+}
+
+export function sqlTypeFromDruid(druidType: string): string {
+  druidType = druidType.toLowerCase();
+  switch (druidType) {
+    case 'string':
+      return 'VARCHAR';
+
+    case 'long':
+      return 'BIGINT';
+
+    case 'float':
+    case 'double':
+      return druidType.toUpperCase();
+
+    default:
+      return 'COMPLEX';
+  }
 }
 
 export function columnToIcon(column: Column): IconName | undefined {
@@ -59,9 +77,6 @@ export function dataTypeToIcon(dataType: string): IconName {
 
     case 'COMPLEX<JSON>':
       return IconNames.DIAGRAM_TREE;
-
-    case 'NULL':
-      return IconNames.CIRCLE;
 
     default:
       if (typeUpper.startsWith('ARRAY')) return IconNames.ARRAY;

@@ -18,8 +18,7 @@
 
 import hasOwnProp from 'has-own-prop';
 
-import type { LocalStorageKeys } from './local-storage-keys';
-import { localStorageGetJson, localStorageSetJson } from './local-storage-keys';
+import { localStorageGetJson, LocalStorageKeys, localStorageSetJson } from './local-storage-keys';
 
 type Visibility = Record<string, boolean>;
 

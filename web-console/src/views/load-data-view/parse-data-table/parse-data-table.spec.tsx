@@ -19,15 +19,23 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 
-import { JSON_SAMPLE } from '../../../utils/sampler.mock';
-
 import { ParseDataTable } from './parse-data-table';
 
 describe('ParseDataTable', () => {
   it('matches snapshot', () => {
+    const sampleData = {
+      header: ['c1'],
+      rows: [
+        {
+          input: { c1: 'hello' },
+          parsed: { c1: 'hello' },
+        },
+      ],
+    };
+
     const parseDataTable = (
       <ParseDataTable
-        sampleResponse={JSON_SAMPLE}
+        sampleData={sampleData}
         columnFilter=""
         canFlatten={false}
         flattenedColumnsOnly={false}

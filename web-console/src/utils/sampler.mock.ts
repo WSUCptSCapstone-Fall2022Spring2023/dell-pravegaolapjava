@@ -17,66 +17,21 @@
  */
 
 // Just to make sure we are in a test context. This line will cause trouble if this file is ever compiled into the main build
-import type { SampleResponse } from './sampler';
+import { SampleHeaderAndRows } from './sampler';
 
-expect(1).toEqual(1); // Just to make sure this file does not get included in the build by accident
-
-export const EMPTY_SAMPLE: SampleResponse = {
-  numRowsRead: 0,
-  numRowsIndexed: 0,
-  logicalDimensions: [],
-  physicalDimensions: [],
-  logicalSegmentSchema: [{ name: '__time', type: 'LONG' }],
-  data: [],
-};
+expect(1).toEqual(1);
 
 /*
-This data is the returned sample when sampling (from the timestamp stage):
+This data is the returned sample when ingested with:
 
 {"timestamp":"2016-04-11T09:20:00Z","user":"Alice","followers":10,"spend":0,"id":"12232323","tags":null,"nums":[4]}
 {"timestamp":"2016-04-11T09:21:00Z","user":"Bob","followers":0,"spend":3,"id":"45345634","tags":["a"],"nums":[5,6]}
 {"timestamp":"2016-04-11T09:22:00Z","user":"Alice","followers":3,"spend":5.1,"id":"73534533","tags":["a","b"],"nums":[7,8]}
  */
 
-export const JSON_SAMPLE: SampleResponse = {
-  numRowsRead: 3,
-  numRowsIndexed: 3,
-  logicalDimensions: [
-    { type: 'string', name: 'user', multiValueHandling: 'SORTED_ARRAY', createBitmapIndex: true },
-    {
-      type: 'long',
-      name: 'followers',
-      multiValueHandling: 'SORTED_ARRAY',
-      createBitmapIndex: false,
-    },
-    { type: 'json', name: 'spend', multiValueHandling: 'SORTED_ARRAY', createBitmapIndex: true },
-    { type: 'string', name: 'id', multiValueHandling: 'SORTED_ARRAY', createBitmapIndex: true },
-    { type: 'json', name: 'tags', multiValueHandling: 'SORTED_ARRAY', createBitmapIndex: true },
-    { type: 'json', name: 'nums', multiValueHandling: 'SORTED_ARRAY', createBitmapIndex: true },
-  ],
-  physicalDimensions: [
-    { type: 'auto', name: 'user', multiValueHandling: 'SORTED_ARRAY', createBitmapIndex: true },
-    {
-      type: 'auto',
-      name: 'followers',
-      multiValueHandling: 'SORTED_ARRAY',
-      createBitmapIndex: true,
-    },
-    { type: 'auto', name: 'spend', multiValueHandling: 'SORTED_ARRAY', createBitmapIndex: true },
-    { type: 'auto', name: 'id', multiValueHandling: 'SORTED_ARRAY', createBitmapIndex: true },
-    { type: 'auto', name: 'tags', multiValueHandling: 'SORTED_ARRAY', createBitmapIndex: true },
-    { type: 'auto', name: 'nums', multiValueHandling: 'SORTED_ARRAY', createBitmapIndex: true },
-  ],
-  logicalSegmentSchema: [
-    { name: '__time', type: 'LONG' },
-    { name: 'user', type: 'STRING' },
-    { name: 'followers', type: 'LONG' },
-    { name: 'spend', type: 'COMPLEX<json>' },
-    { name: 'id', type: 'STRING' },
-    { name: 'tags', type: 'ARRAY<STRING>' },
-    { name: 'nums', type: 'ARRAY<LONG>' },
-  ],
-  data: [
+export const JSON_SAMPLE: SampleHeaderAndRows = {
+  header: ['timestamp', 'user', 'followers', 'spend', 'id', 'tags', 'nums'],
+  rows: [
     {
       input: {
         timestamp: '2016-04-11T09:20:00Z',
@@ -88,13 +43,14 @@ export const JSON_SAMPLE: SampleResponse = {
         nums: [4],
       },
       parsed: {
-        __time: 1460366400000,
+        __time: 0,
+        timestamp: '2016-04-11T09:20:00Z',
         user: 'Alice',
-        followers: 10,
-        spend: 0,
+        followers: '10',
+        spend: '0',
         id: '12232323',
         tags: null,
-        nums: [4],
+        nums: '4',
       },
     },
     {
@@ -108,13 +64,14 @@ export const JSON_SAMPLE: SampleResponse = {
         nums: [5, 6],
       },
       parsed: {
-        __time: 1460366460000,
+        __time: 0,
+        timestamp: '2016-04-11T09:21:00Z',
         user: 'Bob',
-        followers: 0,
-        spend: 3,
+        followers: '0',
+        spend: '3',
         id: '45345634',
-        tags: ['a'],
-        nums: [5, 6],
+        tags: 'a',
+        nums: ['5', '6'],
       },
     },
     {
@@ -128,13 +85,14 @@ export const JSON_SAMPLE: SampleResponse = {
         nums: [7, 8],
       },
       parsed: {
-        __time: 1460366520000,
+        __time: 0,
+        timestamp: '2016-04-11T09:22:00Z',
         user: 'Alice',
-        followers: 3,
-        spend: 5.1,
+        followers: '3',
+        spend: '5.1',
         id: '73534533',
         tags: ['a', 'b'],
-        nums: [7, 8],
+        nums: ['7', '8'],
       },
     },
   ],
@@ -161,45 +119,9 @@ SELECT
 FROM test_data
  */
 
-export const CSV_SAMPLE: SampleResponse = {
-  numRowsRead: 3,
-  numRowsIndexed: 3,
-  logicalDimensions: [
-    { type: 'string', name: 'user', multiValueHandling: 'SORTED_ARRAY', createBitmapIndex: true },
-    {
-      type: 'string',
-      name: 'followers',
-      multiValueHandling: 'SORTED_ARRAY',
-      createBitmapIndex: true,
-    },
-    { type: 'string', name: 'spend', multiValueHandling: 'SORTED_ARRAY', createBitmapIndex: true },
-    { type: 'string', name: 'id', multiValueHandling: 'SORTED_ARRAY', createBitmapIndex: true },
-    { type: 'json', name: 'tags', multiValueHandling: 'SORTED_ARRAY', createBitmapIndex: true },
-    { type: 'json', name: 'nums', multiValueHandling: 'SORTED_ARRAY', createBitmapIndex: true },
-  ],
-  physicalDimensions: [
-    { type: 'auto', name: 'user', multiValueHandling: 'SORTED_ARRAY', createBitmapIndex: true },
-    {
-      type: 'auto',
-      name: 'followers',
-      multiValueHandling: 'SORTED_ARRAY',
-      createBitmapIndex: true,
-    },
-    { type: 'auto', name: 'spend', multiValueHandling: 'SORTED_ARRAY', createBitmapIndex: true },
-    { type: 'auto', name: 'id', multiValueHandling: 'SORTED_ARRAY', createBitmapIndex: true },
-    { type: 'auto', name: 'tags', multiValueHandling: 'SORTED_ARRAY', createBitmapIndex: true },
-    { type: 'auto', name: 'nums', multiValueHandling: 'SORTED_ARRAY', createBitmapIndex: true },
-  ],
-  logicalSegmentSchema: [
-    { name: '__time', type: 'LONG' },
-    { name: 'user', type: 'STRING' },
-    { name: 'followers', type: 'STRING' },
-    { name: 'spend', type: 'STRING' },
-    { name: 'id', type: 'STRING' },
-    { name: 'tags', type: 'COMPLEX<json>' },
-    { name: 'nums', type: 'COMPLEX<json>' },
-  ],
-  data: [
+export const CSV_SAMPLE: SampleHeaderAndRows = {
+  header: ['timestamp', 'user', 'followers', 'spend', 'id', 'tags', 'nums'],
+  rows: [
     {
       input: {
         timestamp: '2016-04-11T09:20:00.000Z',
@@ -211,7 +133,8 @@ export const CSV_SAMPLE: SampleResponse = {
         nums: '4',
       },
       parsed: {
-        __time: 1460366400000,
+        __time: 0,
+        timestamp: '2016-04-11T09:20:00.000Z',
         user: 'Alice',
         followers: '10',
         spend: '0',
@@ -231,7 +154,8 @@ export const CSV_SAMPLE: SampleResponse = {
         nums: ['5', '6'],
       },
       parsed: {
-        __time: 1460366460000,
+        __time: 0,
+        timestamp: '2016-04-11T09:21:00.000Z',
         user: 'Bob',
         followers: '0',
         spend: '3',
@@ -251,7 +175,8 @@ export const CSV_SAMPLE: SampleResponse = {
         nums: ['7', '8'],
       },
       parsed: {
-        __time: 1460366520000,
+        __time: 0,
+        timestamp: '2016-04-11T09:22:00.000Z',
         user: 'Alice',
         followers: '3',
         spend: '5.1',

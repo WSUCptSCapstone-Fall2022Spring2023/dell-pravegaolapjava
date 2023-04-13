@@ -18,16 +18,16 @@
 
 import classNames from 'classnames';
 import React from 'react';
-import type { RowRenderProps } from 'react-table';
 import ReactTable from 'react-table';
 
 import { TableCell } from '../../../components';
-import type { DimensionSpec, MetricSpec } from '../../../druid-models';
 import {
+  DimensionSpec,
   getDimensionSpecName,
   getDimensionSpecType,
   getMetricSpecName,
   inflateDimensionSpec,
+  MetricSpec,
 } from '../../../druid-models';
 import {
   DEFAULT_TABLE_CLASS_NAME,
@@ -35,17 +35,15 @@ import {
   STANDARD_TABLE_PAGE_SIZE_OPTIONS,
 } from '../../../react-table';
 import { caseInsensitiveContains, filterMap } from '../../../utils';
-import type { SampleEntry, SampleResponse } from '../../../utils/sampler';
-import { getHeaderNamesFromSampleResponse } from '../../../utils/sampler';
+import { SampleEntry, SampleHeaderAndRows } from '../../../utils/sampler';
 
 import './schema-table.scss';
 
 export interface SchemaTableProps {
   sampleBundle: {
-    sampleResponse: SampleResponse;
+    headerAndRows: SampleHeaderAndRows;
     dimensions: (string | DimensionSpec)[] | undefined;
     metricsSpec: MetricSpec[] | undefined;
-    definedDimensions: boolean;
   };
   columnFilter: string;
   selectedAutoDimension: string | undefined;
@@ -67,17 +65,17 @@ export const SchemaTable = React.memo(function SchemaTable(props: SchemaTablePro
     onDimensionSelect,
     onMetricSelect,
   } = props;
-  const { sampleResponse, dimensions, metricsSpec, definedDimensions } = sampleBundle;
+  const { headerAndRows, dimensions, metricsSpec } = sampleBundle;
 
   return (
     <ReactTable
       className={classNames('schema-table', DEFAULT_TABLE_CLASS_NAME)}
-      data={sampleResponse.data}
+      data={headerAndRows.rows}
       sortable={false}
       defaultPageSize={STANDARD_TABLE_PAGE_SIZE}
       pageSizeOptions={STANDARD_TABLE_PAGE_SIZE_OPTIONS}
-      showPagination={sampleResponse.data.length > STANDARD_TABLE_PAGE_SIZE}
-      columns={filterMap(getHeaderNamesFromSampleResponse(sampleResponse), (columnName, i) => {
+      showPagination={headerAndRows.rows.length > STANDARD_TABLE_PAGE_SIZE}
+      columns={filterMap(headerAndRows.header, (columnName, i) => {
         if (!caseInsensitiveContains(columnName, columnFilter)) return;
 
         const metricSpecIndex = metricsSpec
@@ -104,7 +102,7 @@ export const SchemaTable = React.memo(function SchemaTable(props: SchemaTablePro
             id: String(i),
             accessor: (row: SampleEntry) => (row.parsed ? row.parsed[columnName] : null),
             width: 120,
-            Cell: function SchemaTableCell({ value }: RowRenderProps) {
+            Cell: function SchemaTableCell({ value }) {
               return <TableCell value={value} />;
             },
           };
@@ -132,7 +130,7 @@ export const SchemaTable = React.memo(function SchemaTable(props: SchemaTablePro
                 onClick={() => {
                   if (isTimestamp) return;
 
-                  if (definedDimensions && dimensionSpec) {
+                  if (dimensionSpec) {
                     onDimensionSelect(inflateDimensionSpec(dimensionSpec), dimensionSpecIndex);
                   } else {
                     onAutoDimensionSelect(columnName);
@@ -141,7 +139,7 @@ export const SchemaTable = React.memo(function SchemaTable(props: SchemaTablePro
               >
                 <div className="column-name">{columnName}</div>
                 <div className="column-detail">
-                  {isTimestamp ? 'long (time column)' : dimensionSpecType || '(auto)'}&nbsp;
+                  {isTimestamp ? 'long (time column)' : dimensionSpecType || 'string (auto)'}&nbsp;
                 </div>
               </div>
             ),
@@ -150,7 +148,7 @@ export const SchemaTable = React.memo(function SchemaTable(props: SchemaTablePro
             id: String(i),
             width: isTimestamp ? 200 : 140,
             accessor: (row: SampleEntry) => (row.parsed ? row.parsed[columnName] : null),
-            Cell: function SchemaTableCell(row: RowRenderProps) {
+            Cell: function SchemaTableCell(row) {
               return <TableCell value={isTimestamp ? new Date(row.value) : row.value} />;
             },
           };

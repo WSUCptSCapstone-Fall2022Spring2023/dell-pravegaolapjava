@@ -18,17 +18,16 @@
 
 import React from 'react';
 
-import type { Field } from '../../components';
-import { ExternalLink } from '../../components';
+import { ExternalLink, Field } from '../../components';
 import { deepGet, EMPTY_ARRAY, EMPTY_OBJECT } from '../../utils';
-import type { IngestionSpec } from '../ingestion-spec/ingestion-spec';
+import { IngestionSpec } from '../ingestion-spec/ingestion-spec';
 import {
   BASIC_TIME_FORMATS,
   DATE_ONLY_TIME_FORMATS,
   DATETIME_TIME_FORMATS,
   OTHER_TIME_FORMATS,
 } from '../time/time';
-import type { Transform } from '../transform-spec/transform-spec';
+import { Transform } from '../transform-spec/transform-spec';
 
 const NO_SUCH_COLUMN = '!!!_no_such_column_!!!';
 

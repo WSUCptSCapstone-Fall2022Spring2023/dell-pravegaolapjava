@@ -21,23 +21,22 @@ import { IconNames } from '@blueprintjs/icons';
 import { Tooltip2 } from '@blueprintjs/popover2';
 import classNames from 'classnames';
 import React from 'react';
-import type { Column } from 'react-table';
-import ReactTable from 'react-table';
+import ReactTable, { Column } from 'react-table';
 
 import { BracedText, TableClickableCell } from '../../../components';
-import type {
+import {
   ChannelCounterName,
   ChannelFields,
   ClusterBy,
   CounterName,
   Execution,
-  SegmentGenerationProgressFields,
+  formatClusterBy,
   SimpleWideCounter,
   StageDefinition,
+  Stages,
+  summarizeInputSource,
 } from '../../../druid-models';
-import { formatClusterBy, Stages, summarizeInputSource } from '../../../druid-models';
 import { DEFAULT_TABLE_CLASS_NAME } from '../../../react-table';
-import type { NumberLike } from '../../../utils';
 import {
   capitalizeFirst,
   clamp,
@@ -48,6 +47,7 @@ import {
   formatDurationWithMs,
   formatInteger,
   formatPercent,
+  NumberLike,
   oneOf,
   twoLines,
 } from '../../../utils';
@@ -126,8 +126,6 @@ export const ExecutionStagesPane = React.memo(function ExecutionStagesPane(
     ...stages.getInputCountersForStage(stage, 'rows').map(formatRows),
     formatRows(stages.getTotalCounterForStage(stage, 'output', 'rows')),
     formatRows(stages.getTotalCounterForStage(stage, 'shuffle', 'rows')),
-    formatRows(stages.getTotalSegmentGenerationProgressForStage(stage, 'rowsMerged')),
-    formatRows(stages.getTotalSegmentGenerationProgressForStage(stage, 'rowsPushed')),
   ]);
 
   const filesValues = filterMap(stages.stages, stage => {
@@ -165,18 +163,6 @@ export const ExecutionStagesPane = React.memo(function ExecutionStagesPane(
         if (!totalFiles) return;
         return formatFileOfTotalForBrace(totalFiles, totalFiles);
       });
-    }
-
-    const isSegmentGenerator = Stages.stageType(stage) === 'segmentGenerator';
-    let bracesSegmentRowsMerged: string[] = [];
-    let bracesSegmentRowsPushed: string[] = [];
-    if (isSegmentGenerator) {
-      bracesSegmentRowsMerged = wideCounters.map(wideCounter =>
-        formatRows(wideCounter.segmentGenerationProgress?.rowsMerged || 0),
-      );
-      bracesSegmentRowsPushed = wideCounters.map(wideCounter =>
-        formatRows(wideCounter.segmentGenerationProgress?.rowsPushed || 0),
-      );
     }
 
     return (
@@ -251,30 +237,6 @@ export const ExecutionStagesPane = React.memo(function ExecutionStagesPane(
               },
             };
           }),
-          Stages.stageType(stage) === 'segmentGenerator'
-            ? [
-                {
-                  Header: twoLines('Merged', <i>rows</i>),
-                  id: 'segmentGeneration_rowsMerged',
-                  accessor: d => d.segmentGenerationProgress?.rowsMerged || 0,
-                  className: 'padded',
-                  width: 180,
-                  Cell({ value }) {
-                    return <BracedText text={formatRows(value)} braces={bracesSegmentRowsMerged} />;
-                  },
-                },
-                {
-                  Header: twoLines('Pushed', <i>rows</i>),
-                  id: 'segmentGeneration_rowsPushed',
-                  accessor: d => d.segmentGenerationProgress?.rowsPushed || 0,
-                  className: 'padded',
-                  width: 180,
-                  Cell({ value }) {
-                    return <BracedText text={formatRows(value)} braces={bracesSegmentRowsPushed} />;
-                  },
-                },
-              ]
-            : [],
         )}
       />
     );
@@ -459,22 +421,6 @@ ${title} uncompressed size: ${formatBytesCompact(
     );
   }
 
-  function dataProcessedSegmentGeneration(
-    stage: StageDefinition,
-    field: SegmentGenerationProgressFields,
-  ) {
-    if (!stages.hasCounterForStage(stage, 'segmentGenerationProgress')) return;
-
-    return (
-      <div className="data-transfer">
-        <BracedText
-          text={formatRows(stages.getTotalSegmentGenerationProgressForStage(stage, field))}
-          braces={rowsValues}
-        />
-      </div>
-    );
-  }
-
   return (
     <ReactTable
       className={classNames('execution-stages-pane', DEFAULT_TABLE_CLASS_NAME)}
@@ -565,17 +511,10 @@ ${title} uncompressed size: ${formatBytesCompact(
                   <>
                     <div className="counter-spacer extend-right" />
                     <div>{stages.getStageCounterTitle(stage, 'output')}</div>
-                    {stages.hasCounterForStage(stage, 'shuffle') && (
-                      <div>{stages.getStageCounterTitle(stage, 'shuffle')}</div>
-                    )}
                   </>
                 )}
-                {stages.hasCounterForStage(stage, 'segmentGenerationProgress') && (
-                  <>
-                    <div className="counter-spacer extend-right" />
-                    <div>Merged</div>
-                    <div>Pushed</div>
-                  </>
+                {stages.hasCounterForStage(stage, 'shuffle') && (
+                  <div>{stages.getStageCounterTitle(stage, 'shuffle')}</div>
                 )}
               </>
             );
@@ -598,19 +537,10 @@ ${title} uncompressed size: ${formatBytesCompact(
                     : dataProcessedInput(stage, i),
                 )}
                 {stages.hasCounterForStage(stage, 'output') && (
-                  <>
-                    <div className="counter-spacer extend-left" />
-                    {dataProcessedOutput(stage)}
-                    {dataProcessedShuffle(stage)}
-                  </>
+                  <div className="counter-spacer extend-left" />
                 )}
-                {stages.hasCounterForStage(stage, 'segmentGenerationProgress') && (
-                  <>
-                    <div className="counter-spacer extend-left" />
-                    {dataProcessedSegmentGeneration(stage, 'rowsMerged')}
-                    {dataProcessedSegmentGeneration(stage, 'rowsPushed')}
-                  </>
-                )}
+                {dataProcessedOutput(stage)}
+                {dataProcessedShuffle(stage)}
               </>
             );
           },

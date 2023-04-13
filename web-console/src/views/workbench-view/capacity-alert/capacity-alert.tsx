@@ -20,7 +20,7 @@ import { Alert, Code, Intent } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
 import React from 'react';
 
-import type { CapacityInfo } from '../../../druid-models';
+import { CapacityInfo } from '../../../druid-models';
 import { formatInteger } from '../../../utils';
 
 export interface CapacityAlertProps {

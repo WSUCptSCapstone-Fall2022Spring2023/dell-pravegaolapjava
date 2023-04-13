@@ -16,8 +16,7 @@
  * limitations under the License.
  */
 
-import type { AxisScale } from 'd3-axis';
-import { axisBottom, axisLeft } from 'd3-axis';
+import { axisBottom, axisLeft, AxisScale } from 'd3-axis';
 import React, { useState } from 'react';
 
 import { BarGroup } from './bar-group';

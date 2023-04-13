@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import type * as playwright from 'playwright-chromium';
+import * as playwright from 'playwright-chromium';
 
 /**
  * Extracts an HTML table into a text representation.

@@ -17,8 +17,7 @@
  */
 
 import { Intent } from '@blueprintjs/core';
-import type { IconName } from '@blueprintjs/icons';
-import { IconNames } from '@blueprintjs/icons';
+import { IconName, IconNames } from '@blueprintjs/icons';
 import copy from 'copy-to-clipboard';
 import hasOwnProp from 'has-own-prop';
 import * as JSONBig from 'json-bigint-native';
@@ -31,7 +30,7 @@ import { AppToaster } from '../singletons';
 export const EMPTY_OBJECT: any = {};
 export const EMPTY_ARRAY: any[] = [];
 
-export type NumberLike = number | bigint;
+export type NumberLike = number | BigInt;
 
 export function isNumberLikeNaN(x: NumberLike): boolean {
   return isNaN(Number(x));
@@ -218,11 +217,11 @@ export function formatMillions(n: NumberLike): string {
 }
 
 function pad2(str: string | number): string {
-  return ('00' + str).slice(-2);
+  return ('00' + str).substr(-2);
 }
 
 function pad3(str: string | number): string {
-  return ('000' + str).slice(-3);
+  return ('000' + str).substr(-3);
 }
 
 export function formatDuration(ms: NumberLike): string {
@@ -252,7 +251,7 @@ export function formatDurationHybrid(ms: NumberLike): string {
     const timeInMs = Math.floor(n) % 1000;
     return `${timeInMin ? `${timeInMin}:` : ''}${timeInMin ? pad2(timeInSec) : timeInSec}.${pad3(
       timeInMs,
-    ).slice(0, 2)}s`;
+    ).substring(0, 2)}s`;
   } else {
     return formatDuration(n);
   }
@@ -276,13 +275,6 @@ export function validJson(json: string): boolean {
 
 export function filterMap<T, Q>(xs: readonly T[], f: (x: T, i: number) => Q | undefined): Q[] {
   return xs.map(f).filter((x: Q | undefined) => typeof x !== 'undefined') as Q[];
-}
-
-export function findMap<T, Q>(
-  xs: readonly T[],
-  f: (x: T, i: number) => Q | undefined,
-): Q | undefined {
-  return filterMap(xs, f)[0];
 }
 
 export function compact<T>(xs: (T | undefined | false | null | '')[]): T[] {
@@ -420,7 +412,7 @@ export function parseCsvLine(line: string): string[] {
   let m: RegExpExecArray | null;
   while ((m = /^,(?:"([^"]*(?:""[^"]*)*)"|([^,\r\n]*))/m.exec(line))) {
     parts.push(typeof m[1] === 'string' ? m[1].replace(/""/g, '"') : m[2]);
-    line = line.slice(m[0].length);
+    line = line.substr(m[0].length);
   }
   return parts;
 }
@@ -463,5 +455,5 @@ export function tickIcon(checked: boolean): IconName {
 }
 
 export function generate8HexId(): string {
-  return (Math.random() * 1e10).toString(16).replace('.', '').slice(0, 8);
+  return (Math.random() * 1e10).toString(16).replace('.', '').substr(0, 8);
 }

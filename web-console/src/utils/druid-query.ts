@@ -16,14 +16,13 @@
  * limitations under the License.
  */
 
-import type { AxiosResponse } from 'axios';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { C } from 'druid-query-toolkit';
 
 import { Api } from '../singletons';
 
 import { assemble } from './general';
-import type { RowColumn } from './query-cursor';
+import { RowColumn } from './query-cursor';
 
 const CANCELED_MESSAGE = 'Query canceled by user.';
 

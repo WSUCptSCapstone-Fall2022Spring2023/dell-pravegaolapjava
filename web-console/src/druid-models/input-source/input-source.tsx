@@ -18,8 +18,7 @@
 
 import React from 'react';
 
-import type { Field } from '../../components';
-import { ExternalLink } from '../../components';
+import { ExternalLink, Field } from '../../components';
 import { getLink } from '../../links';
 import { deepGet, deepSet, nonEmptyArray, typeIs } from '../../utils';
 

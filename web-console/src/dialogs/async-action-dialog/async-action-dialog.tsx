@@ -16,12 +16,19 @@
  * limitations under the License.
  */
 
-import type { IconName } from '@blueprintjs/core';
-import { Button, Classes, Dialog, FormGroup, Icon, Intent, ProgressBar } from '@blueprintjs/core';
+import {
+  Button,
+  Classes,
+  Dialog,
+  FormGroup,
+  Icon,
+  IconName,
+  Intent,
+  ProgressBar,
+} from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
 import classNames from 'classnames';
-import type { ReactNode } from 'react';
-import React, { useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 
 import { WarningChecklist } from '../../components';
 import { AppToaster } from '../../singletons';
@@ -125,7 +132,7 @@ export const AsyncActionDialog = React.memo(function AsyncActionDialog(
             <Button
               intent={intent}
               text={confirmButtonText}
-              onClick={() => void handleConfirm()}
+              onClick={handleConfirm}
               disabled={confirmButtonDisabled || needsMoreChecks}
             />
             <Button text={cancelButtonText || 'Cancel'} onClick={onClose} />

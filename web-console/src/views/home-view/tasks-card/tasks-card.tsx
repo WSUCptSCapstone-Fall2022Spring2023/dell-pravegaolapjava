@@ -20,9 +20,8 @@ import { IconNames } from '@blueprintjs/icons';
 import React from 'react';
 
 import { PluralPairIfNeeded } from '../../../components';
-import type { CapacityInfo } from '../../../druid-models';
-import type { Capabilities } from '../../../helpers';
-import { getClusterCapacity } from '../../../helpers';
+import { CapacityInfo } from '../../../druid-models';
+import { Capabilities, getClusterCapacity } from '../../../helpers';
 import { useQueryManager } from '../../../hooks';
 import { Api } from '../../../singletons';
 import { lookupBy, pluralIfNeeded, queryDruidSql } from '../../../utils';

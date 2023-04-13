@@ -18,7 +18,7 @@
 
 import React from 'react';
 
-import type { InputSource } from '../../../druid-models';
+import { InputSource } from '../../../druid-models';
 
 export interface InputSourceInfoProps {
   inputSource: Partial<InputSource>;

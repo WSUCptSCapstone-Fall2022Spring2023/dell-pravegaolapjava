@@ -16,7 +16,6 @@
  * limitations under the License.
  */
 
-import type { IconName } from '@blueprintjs/core';
 import {
   Alert,
   AnchorButton,
@@ -28,6 +27,7 @@ import {
   FormGroup,
   H5,
   Icon,
+  IconName,
   InputGroup,
   Intent,
   Menu,
@@ -55,35 +55,24 @@ import {
   PopoverText,
 } from '../../components';
 import { AsyncActionDialog } from '../../dialogs';
-import type {
-  DimensionMode,
-  DimensionSpec,
-  DruidFilter,
-  FlattenField,
-  IngestionComboTypeWithExtra,
-  IngestionSpec,
-  InputFormat,
-  IoConfig,
-  MetricSpec,
-  TimestampSpec,
-  Transform,
-  TuningConfig,
-} from '../../druid-models';
 import {
   addTimestampTransform,
   adjustForceGuaranteedRollup,
   adjustId,
-  BATCH_INPUT_FORMAT_FIELDS,
   cleanSpec,
   computeFlattenPathsForData,
   CONSTANT_TIMESTAMP_SPEC,
   CONSTANT_TIMESTAMP_SPEC_FIELDS,
   DIMENSION_SPEC_FIELDS,
+  DimensionMode,
+  DimensionSpec,
+  DruidFilter,
   fillDataSourceNameIfNeeded,
   fillInputFormatIfNeeded,
   FILTER_FIELDS,
   FILTERS_FIELDS,
   FLATTEN_FIELD_FIELDS,
+  FlattenField,
   getDimensionMode,
   getDimensionSpecName,
   getIngestionComboType,
@@ -96,23 +85,27 @@ import {
   getRequiredModule,
   getRollup,
   getSecondaryPartitionRelatedFormFields,
-  getSpecType,
   getTimestampExpressionFields,
   getTimestampSchema,
   getTuningFormFields,
+  IngestionComboTypeWithExtra,
+  IngestionSpec,
+  INPUT_FORMAT_FIELDS,
+  InputFormat,
   inputFormatCanProduceNestedData,
   invalidIoConfig,
   invalidPartitionConfig,
+  IoConfig,
   isDruidSource,
   isEmptyIngestionSpec,
   isStreamingSpec,
   issueWithIoConfig,
   issueWithSampleData,
   joinFilter,
-  KAFKA_METADATA_INPUT_FORMAT_FIELDS,
   KNOWN_FILTER_TYPES,
   MAX_INLINE_DATA_LENGTH,
   METRIC_SPEC_FIELDS,
+  MetricSpec,
   normalizeSpec,
   NUMERIC_TIME_FORMATS,
   possibleDruidFormatForValues,
@@ -122,7 +115,10 @@ import {
   STREAMING_INPUT_FORMAT_FIELDS,
   TIME_COLUMN,
   TIMESTAMP_SPEC_FIELDS,
+  TimestampSpec,
+  Transform,
   TRANSFORM_FIELDS,
+  TuningConfig,
   updateIngestionType,
   updateSchemaWithSample,
   upgradeSpec,
@@ -131,10 +127,8 @@ import { getLink } from '../../links';
 import { Api, AppToaster, UrlBaser } from '../../singletons';
 import {
   alphanumericCompare,
-  compact,
   deepDelete,
   deepGet,
-  deepMove,
   deepSet,
   deepSetMulti,
   EMPTY_ARRAY,
@@ -149,28 +143,27 @@ import {
   pluralIfNeeded,
   QueryState,
 } from '../../utils';
-import type {
-  CacheRows,
-  SampleEntry,
-  SampleResponse,
-  SampleResponseWithExtraInfo,
-  SampleStrategy,
-} from '../../utils/sampler';
 import {
+  CacheRows,
+  ExampleManifest,
   getCacheRowsFromSampleResponse,
-  getHeaderNamesFromSampleResponse,
   getProxyOverlordModules,
-  guessDimensionsFromSampleResponse,
+  headerAndRowsFromSampleResponse,
+  SampleEntry,
   sampleForConnect,
+  sampleForExampleManifests,
   sampleForFilter,
   sampleForParser,
   sampleForSchema,
   sampleForTimestamp,
   sampleForTransform,
+  SampleHeaderAndRows,
+  SampleResponse,
+  SampleResponseWithExtraInfo,
+  SampleStrategy,
 } from '../../utils/sampler';
 
 import { ExamplePicker } from './example-picker/example-picker';
-import { EXAMPLE_SPECS } from './example-specs';
 import { FilterTable, filterTableSelectedColumnName } from './filter-table/filter-table';
 import { FormEditor } from './form-editor/form-editor';
 import {
@@ -210,80 +203,52 @@ function showRawLine(line: SampleEntry): string {
     return `[Multi-line row, length: ${raw.length}]`;
   }
   if (raw.length > 1000) {
-    return raw.slice(0, 1000) + '...';
+    return raw.substr(0, 1000) + '...';
   }
   return raw;
 }
 
 function showDruidLine(line: SampleEntry): string {
-  if (!line.input) return 'Invalid druid row';
-  return `[Druid row: ${JSONBig.stringify(line.input)}]`;
-}
-
-function showKafkaLine(line: SampleEntry): string {
-  const { input } = line;
-  if (!input) return 'Invalid kafka row';
-  return compact([
-    `[ Kafka timestamp: ${input['kafka.timestamp']}`,
-    ...filterMap(Object.entries(input), ([k, v]) => {
-      if (!k.startsWith('kafka.header.')) return;
-      return `  Header: ${k.slice(13)}=${v}`;
-    }),
-    input['kafka.key'] ? `  Key: ${input['kafka.key']}` : undefined,
-    `  Payload: ${input.raw}`,
-    ']',
-  ]).join('\n');
+  if (!line.input) return 'Invalid row';
+  return `Druid row: ${JSONBig.stringify(line.input)}`;
 }
 
 function showBlankLine(line: SampleEntry): string {
   return line.parsed ? `[Row: ${JSONBig.stringify(line.parsed)}]` : '[Binary data]';
 }
 
-function formatSampleEntries(
-  sampleEntries: SampleEntry[],
-  druidSource: boolean,
-  kafkaSource: boolean,
-): string {
-  if (!sampleEntries.length) return 'No data returned from sampler';
+function formatSampleEntries(sampleEntries: SampleEntry[], isDruidSource: boolean): string {
+  if (sampleEntries.length) {
+    if (isDruidSource) {
+      return sampleEntries.map(showDruidLine).join('\n');
+    }
 
-  if (druidSource) {
-    return sampleEntries.map(showDruidLine).join('\n');
+    return (
+      sampleEntries.every(l => !l.parsed)
+        ? sampleEntries.map(showBlankLine)
+        : sampleEntries.map(showRawLine)
+    ).join('\n');
+  } else {
+    return 'No data returned from sampler';
   }
-
-  if (kafkaSource) {
-    return sampleEntries.map(showKafkaLine).join('\n');
-  }
-
-  return (
-    sampleEntries.every(l => !l.parsed)
-      ? sampleEntries.map(showBlankLine)
-      : sampleEntries.map(showRawLine)
-  ).join('\n');
 }
 
-function getTimestampSpec(sampleResponse: SampleResponse | null): TimestampSpec {
-  if (!sampleResponse) return CONSTANT_TIMESTAMP_SPEC;
+function getTimestampSpec(headerAndRows: SampleHeaderAndRows | null): TimestampSpec {
+  if (!headerAndRows) return CONSTANT_TIMESTAMP_SPEC;
 
-  const timestampSpecs = filterMap(
-    getHeaderNamesFromSampleResponse(sampleResponse),
-    sampleHeader => {
-      const possibleFormat = possibleDruidFormatForValues(
-        filterMap(sampleResponse.data, d => (d.parsed ? d.parsed[sampleHeader] : undefined)),
-      );
-      if (!possibleFormat) return;
-      return {
-        column: sampleHeader,
-        format: possibleFormat,
-      };
-    },
-  );
+  const timestampSpecs = filterMap(headerAndRows.header, sampleHeader => {
+    const possibleFormat = possibleDruidFormatForValues(
+      filterMap(headerAndRows.rows, d => (d.parsed ? d.parsed[sampleHeader] : undefined)),
+    );
+    if (!possibleFormat) return;
+    return {
+      column: sampleHeader,
+      format: possibleFormat,
+    };
+  });
 
   return (
-    // Prefer a suggestion that has "time" in the name and is not a numeric format
-    timestampSpecs.find(
-      ts => /time/i.test(ts.column) && !NUMERIC_TIME_FORMATS.includes(ts.format),
-    ) ||
-    timestampSpecs.find(ts => /time/i.test(ts.column)) || // Otherwise anything that has "time" in the name
+    timestampSpecs.find(ts => /time/i.test(ts.column)) || // Use a suggestion that has time in the name if possible
     timestampSpecs.find(ts => !NUMERIC_TIME_FORMATS.includes(ts.format)) || // Use a suggestion that is not numeric
     timestampSpecs[0] || // Fall back to the first one
     CONSTANT_TIMESTAMP_SPEC // Ok, empty it is...
@@ -350,6 +315,7 @@ export interface LoadDataViewProps {
   mode: LoadDataViewMode;
   initSupervisorId?: string;
   initTaskId?: string;
+  exampleManifestsUrl?: string;
   goToIngestion: (taskGroupId: string | undefined, openDialog?: string) => void;
 }
 
@@ -372,6 +338,7 @@ export interface LoadDataViewState {
   // welcome
   overlordModules?: string[];
   selectedComboType?: IngestionComboTypeWithExtra;
+  exampleManifests?: ExampleManifest[];
 
   // general
   sampleStrategy: SampleStrategy;
@@ -383,31 +350,30 @@ export interface LoadDataViewState {
   inputQueryState: QueryState<SampleResponseWithExtraInfo>;
 
   // for parser
-  parserQueryState: QueryState<SampleResponse>;
+  parserQueryState: QueryState<SampleHeaderAndRows>;
 
   // for flatten
   selectedFlattenField?: SelectedIndex<FlattenField>;
 
   // for timestamp
   timestampQueryState: QueryState<{
-    sampleResponse: SampleResponse;
+    headerAndRows: SampleHeaderAndRows;
     spec: Partial<IngestionSpec>;
   }>;
 
   // for transform
-  transformQueryState: QueryState<SampleResponse>;
+  transformQueryState: QueryState<SampleHeaderAndRows>;
   selectedTransform?: SelectedIndex<Transform>;
 
   // for filter
-  filterQueryState: QueryState<SampleResponse>;
+  filterQueryState: QueryState<SampleHeaderAndRows>;
   selectedFilter?: SelectedIndex<DruidFilter>;
 
   // for schema
   schemaQueryState: QueryState<{
-    sampleResponse: SampleResponse;
+    headerAndRows: SampleHeaderAndRows;
     dimensions: (string | DimensionSpec)[] | undefined;
     metricsSpec: MetricSpec[] | undefined;
-    definedDimensions: boolean;
   }>;
   selectedAutoDimension?: string;
   selectedDimensionSpec?: SelectedIndex<DimensionSpec>;
@@ -643,6 +609,9 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
     const { step } = this.state;
 
     switch (step) {
+      case 'welcome':
+        return this.queryForWelcome();
+
       case 'connect':
         return this.queryForConnect(initRun);
 
@@ -662,7 +631,6 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
         return this.queryForSchema(initRun);
 
       case 'loading':
-      case 'welcome':
       case 'partition':
       case 'publish':
       case 'tuning':
@@ -802,6 +770,25 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
 
   // ==================================================================
 
+  async queryForWelcome() {
+    const { exampleManifestsUrl } = this.props;
+    if (!exampleManifestsUrl) return;
+
+    let exampleManifests: ExampleManifest[] | undefined;
+    try {
+      exampleManifests = await sampleForExampleManifests(exampleManifestsUrl);
+    } catch (e) {
+      this.setState({
+        exampleManifests: undefined,
+      });
+      return;
+    }
+
+    this.setState({
+      exampleManifests,
+    });
+  }
+
   renderIngestionCard(
     comboType: IngestionComboTypeWithExtra,
     disabled?: boolean,
@@ -840,8 +827,9 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
   }
 
   renderWelcomeStep() {
-    const { mode } = this.props;
-    const { spec } = this.state;
+    const { mode, exampleManifestsUrl } = this.props;
+    const { spec, exampleManifests } = this.state;
+    const noExamples = Boolean(!exampleManifests || !exampleManifests.length);
 
     const welcomeMessage = this.renderWelcomeStepMessage();
     return (
@@ -852,6 +840,7 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
               <>
                 {this.renderIngestionCard('kafka')}
                 {this.renderIngestionCard('kinesis')}
+                {this.renderIngestionCard('pravega')}
                 {this.renderIngestionCard('azure-event-hubs')}
               </>
             )}
@@ -865,7 +854,7 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
                 {this.renderIngestionCard('index_parallel:http')}
                 {this.renderIngestionCard('index_parallel:local')}
                 {this.renderIngestionCard('index_parallel:inline')}
-                {this.renderIngestionCard('example')}
+                {exampleManifestsUrl && this.renderIngestionCard('example', noExamples)}
               </>
             )}
             {this.renderIngestionCard('other')}
@@ -887,7 +876,7 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
   }
 
   renderWelcomeStepMessage(): JSX.Element | undefined {
-    const { selectedComboType } = this.state;
+    const { selectedComboType, exampleManifests } = this.state;
 
     if (!selectedComboType) {
       return <p>Please specify where your raw data is located.</p>;
@@ -958,6 +947,9 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
       case 'kinesis':
         return <p>Load streaming data in real-time from Amazon Kinesis.</p>;
 
+      case 'pravega':
+        return <p>Load streaming data in real-time from Pravega.</p>;
+
       case 'azure-event-hubs':
         return (
           <>
@@ -977,7 +969,11 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
         );
 
       case 'example':
-        return; // Yield to example picker controls
+        if (exampleManifests && exampleManifests.length) {
+          return; // Yield to example picker controls
+        } else {
+          return <p>Could not load examples.</p>;
+        }
 
       case 'other':
         return (
@@ -997,7 +993,7 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
 
   renderWelcomeStepControls(): JSX.Element | undefined {
     const { goToIngestion } = this.props;
-    const { spec, selectedComboType } = this.state;
+    const { spec, selectedComboType, exampleManifests } = this.state;
 
     const issue = this.selectedIngestionTypeIssue();
     if (issue) return;
@@ -1013,6 +1009,7 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
       case 'index_parallel:hdfs':
       case 'kafka':
       case 'kinesis':
+      case 'pravega':
         return (
           <FormGroup>
             <Button
@@ -1067,11 +1064,12 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
         );
 
       case 'example':
+        if (!exampleManifests) return;
         return (
           <ExamplePicker
-            exampleSpecs={EXAMPLE_SPECS}
-            onSelectExample={exampleSpec => {
-              this.updateSpec(exampleSpec.spec);
+            exampleManifests={exampleManifests}
+            onSelectExample={exampleManifest => {
+              this.updateSpec(exampleManifest.spec);
               this.updateStep('connect');
             }}
           />
@@ -1214,7 +1212,6 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
     const ioConfig: IoConfig = deepGet(spec, 'spec.ioConfig') || EMPTY_OBJECT;
     const inlineMode = deepGet(spec, 'spec.ioConfig.inputSource.type') === 'inline';
     const druidSource = isDruidSource(spec);
-    const kafkaSource = getSpecType(spec) === 'kafka';
 
     let mainFill: JSX.Element | string;
     if (inlineMode) {
@@ -1224,7 +1221,7 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
           placeholder="Paste your data here"
           value={deepGet(spec, 'spec.ioConfig.inputSource.data')}
           onChange={(e: any) => {
-            const stringValue = e.target.value.slice(0, MAX_INLINE_DATA_LENGTH);
+            const stringValue = e.target.value.substr(0, MAX_INLINE_DATA_LENGTH);
             this.updateSpecPreview(deepSet(spec, 'spec.ioConfig.inputSource.data', stringValue));
           }}
         />
@@ -1246,7 +1243,7 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
             <TextArea
               className="raw-lines"
               readOnly
-              value={formatSampleEntries(inputData, druidSource, kafkaSource)}
+              value={formatSampleEntries(inputData, druidSource)}
             />
           )}
           {inputQueryState.isLoading() && <Loader />}
@@ -1368,7 +1365,11 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
 
               this.updateSpec(fillDataSourceNameIfNeeded(newSpec));
             } else {
-              const issue = issueWithSampleData(inputData, spec);
+              const sampleLines = filterMap(inputQueryState.data.data, l =>
+                l.input ? l.input.raw : undefined,
+              );
+
+              const issue = issueWithSampleData(sampleLines, spec);
               if (issue) {
                 AppToaster.show({
                   icon: IconNames.WARNING_SIGN,
@@ -1379,7 +1380,9 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
                 return false;
               }
 
-              this.updateSpec(fillDataSourceNameIfNeeded(fillInputFormatIfNeeded(spec, inputData)));
+              this.updateSpec(
+                fillDataSourceNameIfNeeded(fillInputFormatIfNeeded(spec, sampleLines)),
+              );
             }
             return true;
           },
@@ -1425,7 +1428,10 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
     this.setState(({ parserQueryState }) => ({
       cacheRows: getCacheRowsFromSampleResponse(sampleResponse),
       parserQueryState: new QueryState({
-        data: sampleResponse,
+        data: headerAndRowsFromSampleResponse({
+          sampleResponse,
+          ignoreTimeColumn: true,
+        }),
         lastData: parserQueryState.getSomeData(),
       }),
     }));
@@ -1468,7 +1474,7 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
           </div>
           {data && (
             <ParseDataTable
-              sampleResponse={data}
+              sampleData={data}
               columnFilter={columnFilter}
               canFlatten={canHaveNestedData}
               flattenedColumnsOnly={specialColumnsOnly}
@@ -1487,85 +1493,31 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
     let suggestedFlattenFields: FlattenField[] | undefined;
     if (canHaveNestedData && !flattenFields.length && parserQueryState.data) {
       suggestedFlattenFields = computeFlattenPathsForData(
-        filterMap(parserQueryState.data.data, r => r.input),
+        filterMap(parserQueryState.data.rows, r => r.input),
         'ignore-arrays',
       );
     }
 
-    const specType = getSpecType(spec);
     const inputFormatFields = isStreamingSpec(spec)
       ? STREAMING_INPUT_FORMAT_FIELDS
-      : BATCH_INPUT_FORMAT_FIELDS;
-
-    const normalInputAutoForm = (
-      <AutoForm
-        fields={inputFormatFields}
-        model={inputFormat}
-        onChange={p => this.updateSpecPreview(deepSet(spec, 'spec.ioConfig.inputFormat', p))}
-      />
-    );
-
+      : INPUT_FORMAT_FIELDS;
     return (
       <>
         <div className="main">{mainFill}</div>
         <div className="control">
-          <ParserMessage />
+          <ParserMessage canHaveNestedData={canHaveNestedData} />
           {!selectedFlattenField && (
             <>
-              {specType !== 'kafka' ? (
-                normalInputAutoForm
-              ) : (
-                <>
-                  {inputFormat?.type !== 'kafka' ? (
-                    normalInputAutoForm
-                  ) : (
-                    <AutoForm
-                      fields={inputFormatFields}
-                      model={inputFormat?.valueFormat}
-                      onChange={p =>
-                        this.updateSpecPreview(
-                          deepSet(spec, 'spec.ioConfig.inputFormat.valueFormat', p),
-                        )
-                      }
-                    />
-                  )}
-                  <FormGroup className="parse-metadata">
-                    <Switch
-                      label="Parse Kafka metadata (ts, headers, key)"
-                      checked={inputFormat?.type === 'kafka'}
-                      onChange={() => {
-                        this.updateSpecPreview(
-                          inputFormat?.type === 'kafka'
-                            ? deepMove(
-                                spec,
-                                'spec.ioConfig.inputFormat.valueFormat',
-                                'spec.ioConfig.inputFormat',
-                              )
-                            : deepSet(spec, 'spec.ioConfig.inputFormat', {
-                                type: 'kafka',
-                                valueFormat: inputFormat,
-                              }),
-                        );
-                      }}
-                    />
-                  </FormGroup>
-                  {inputFormat?.type === 'kafka' && (
-                    <AutoForm
-                      fields={KAFKA_METADATA_INPUT_FORMAT_FIELDS}
-                      model={inputFormat}
-                      onChange={p =>
-                        this.updateSpecPreview(deepSet(spec, 'spec.ioConfig.inputFormat', p))
-                      }
-                    />
-                  )}
-                </>
-              )}
+              <AutoForm
+                fields={inputFormatFields}
+                model={inputFormat}
+                onChange={p =>
+                  this.updateSpecPreview(deepSet(spec, 'spec.ioConfig.inputFormat', p))
+                }
+              />
               {this.renderApplyButtonBar(
                 parserQueryState,
-                AutoForm.issueWithModel(inputFormat, inputFormatFields) ||
-                  (inputFormat?.type === 'kafka'
-                    ? AutoForm.issueWithModel(inputFormat, KAFKA_METADATA_INPUT_FORMAT_FIELDS)
-                    : undefined),
+                AutoForm.issueWithModel(inputFormat, inputFormatFields),
               )}
             </>
           )}
@@ -1717,7 +1669,9 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
     this.setState(({ timestampQueryState }) => ({
       timestampQueryState: new QueryState({
         data: {
-          sampleResponse,
+          headerAndRows: headerAndRowsFromSampleResponse({
+            sampleResponse,
+          }),
           spec,
         },
         lastData: timestampQueryState.getSomeData(),
@@ -1764,7 +1718,7 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
               columnFilter={columnFilter}
               possibleTimestampColumnsOnly={specialColumnsOnly}
               selectedColumnName={parseTimeTableSelectedColumnName(
-                data.sampleResponse,
+                data.headerAndRows,
                 timestampSpec,
               )}
               onTimestampColumnSelect={this.onTimestampColumnSelect}
@@ -1905,7 +1859,9 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
 
     this.setState(({ transformQueryState }) => ({
       transformQueryState: new QueryState({
-        data: sampleResponse,
+        data: headerAndRowsFromSampleResponse({
+          sampleResponse,
+        }),
         lastData: transformQueryState.getSomeData(),
       }),
     }));
@@ -1921,8 +1877,7 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
     if (transformQueryState.isInit()) {
       mainFill = <CenterMessage>Please fill in the previous steps</CenterMessage>;
     } else {
-      const sampleResponse = transformQueryState.getSomeData();
-
+      const data = transformQueryState.getSomeData();
       mainFill = (
         <div className="table-with-control">
           <div className="table-control">
@@ -1938,16 +1893,13 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
               disabled={!transforms.length}
             />
           </div>
-          {sampleResponse && (
+          {data && (
             <TransformTable
-              sampleResponse={sampleResponse}
+              sampleData={data}
               columnFilter={columnFilter}
               transformedColumnsOnly={specialColumnsOnly}
               transforms={transforms}
-              selectedColumnName={transformTableSelectedColumnName(
-                sampleResponse,
-                selectedTransform?.value,
-              )}
+              selectedColumnName={transformTableSelectedColumnName(data, selectedTransform?.value)}
               onTransformSelect={this.onTransformSelect}
             />
           )}
@@ -2094,7 +2046,10 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
     if (sampleResponse.data.length) {
       this.setState(({ filterQueryState }) => ({
         filterQueryState: new QueryState({
-          data: sampleResponse,
+          data: headerAndRowsFromSampleResponse({
+            sampleResponse,
+            parsedOnly: true,
+          }),
           lastData: filterQueryState.getSomeData(),
         }),
       }));
@@ -2113,10 +2068,15 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
       return;
     }
 
+    const headerAndRowsNoFilter = headerAndRowsFromSampleResponse({
+      sampleResponse: sampleResponseNoFilter,
+      parsedOnly: true,
+    });
+
     this.setState(({ filterQueryState }) => ({
       // cacheRows: sampleResponseNoFilter.cacheKey,
       filterQueryState: new QueryState({
-        data: sampleResponseNoFilter,
+        data: deepSet(headerAndRowsNoFilter, 'rows', []),
         lastData: filterQueryState.getSomeData(),
       }),
     }));
@@ -2136,8 +2096,7 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
     if (filterQueryState.isInit()) {
       mainFill = <CenterMessage>Please enter more details for the previous steps</CenterMessage>;
     } else {
-      const filterQuery = filterQueryState.getSomeData();
-
+      const data = filterQueryState.getSomeData();
       mainFill = (
         <div className="table-with-control">
           <div className="table-control">
@@ -2147,12 +2106,12 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
               placeholder="Search columns"
             />
           </div>
-          {filterQuery && (
+          {data && (
             <FilterTable
-              sampleResponse={filterQuery}
+              sampleData={data}
               columnFilter={columnFilter}
               dimensionFilters={dimensionFilters}
-              selectedFilterName={filterTableSelectedColumnName(filterQuery, selectedFilter?.value)}
+              selectedFilterName={filterTableSelectedColumnName(data, selectedFilter?.value)}
               onFilterSelect={this.onFilterSelect}
             />
           )}
@@ -2285,10 +2244,15 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
     this.setState(({ schemaQueryState }) => ({
       schemaQueryState: new QueryState({
         data: {
-          sampleResponse,
-          dimensions: dimensions || guessDimensionsFromSampleResponse(sampleResponse),
+          headerAndRows: headerAndRowsFromSampleResponse({
+            sampleResponse,
+            columnOrder: [TIME_COLUMN].concat(
+              dimensions ? dimensions.map(getDimensionSpecName) : [],
+            ),
+            suffixColumnOrder: metricsSpec ? metricsSpec.map(getMetricSpecName) : undefined,
+          }),
+          dimensions,
           metricsSpec,
-          definedDimensions: Boolean(dimensions),
         },
         lastData: schemaQueryState.getSomeData(),
       }),
@@ -2606,7 +2570,13 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
         action={async () => {
           const sampleResponse = await sampleForTransform(spec, cacheRows);
           this.updateSpec(
-            updateSchemaWithSample(spec, sampleResponse, getDimensionMode(spec), newRollup, true),
+            updateSchemaWithSample(
+              spec,
+              headerAndRowsFromSampleResponse({ sampleResponse }),
+              getDimensionMode(spec),
+              newRollup,
+              true,
+            ),
           );
         }}
         confirmButtonText={`Yes - ${newRollup ? 'enable' : 'disable'} rollup`}
@@ -2631,7 +2601,12 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
         action={async () => {
           const sampleResponse = await sampleForTransform(spec, cacheRows);
           this.updateSpec(
-            updateSchemaWithSample(spec, sampleResponse, newDimensionMode, getRollup(spec)),
+            updateSchemaWithSample(
+              spec,
+              headerAndRowsFromSampleResponse({ sampleResponse }),
+              newDimensionMode,
+              getRollup(spec),
+            ),
           );
         }}
         confirmButtonText={`Yes - ${autoDetect ? 'auto detect' : 'explicitly set'} columns`}
@@ -3283,7 +3258,7 @@ export class LoadDataView extends React.PureComponent<LoadDataViewProps, LoadDat
             rightIcon={IconNames.CLOUD_UPLOAD}
             intent={Intent.PRIMARY}
             disabled={submitting || Boolean(issueWithSpec)}
-            onClick={() => void this.handleSubmit()}
+            onClick={this.handleSubmit}
           />
         </div>
       </>

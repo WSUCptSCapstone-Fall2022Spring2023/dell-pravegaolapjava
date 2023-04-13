@@ -16,10 +16,8 @@
  * limitations under the License.
  */
 
-import type { Intent } from '@blueprintjs/core';
-import { Button, InputGroup, Position } from '@blueprintjs/core';
-import type { DateRange } from '@blueprintjs/datetime';
-import { DateRangePicker, TimePrecision } from '@blueprintjs/datetime';
+import { Button, InputGroup, Intent, Position } from '@blueprintjs/core';
+import { DateRange, DateRangePicker, TimePrecision } from '@blueprintjs/datetime';
 import { IconNames } from '@blueprintjs/icons';
 import { Popover2 } from '@blueprintjs/popover2';
 import React from 'react';

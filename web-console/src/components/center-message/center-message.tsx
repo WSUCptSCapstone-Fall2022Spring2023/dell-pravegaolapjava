@@ -16,8 +16,7 @@
  * limitations under the License.
  */
 
-import type { ReactNode } from 'react';
-import React from 'react';
+import React, { ReactNode } from 'react';
 
 import './center-message.scss';
 

@@ -16,11 +16,10 @@
  * limitations under the License.
  */
 
+import { shallow } from 'enzyme';
 import React from 'react';
 
-import type { QueryExplanation } from '../../../utils';
-import { QueryState } from '../../../utils';
-import { shallow } from '../../../utils/shallow-renderer';
+import { QueryExplanation, QueryState } from '../../../utils';
 
 import { ExplainDialog } from './explain-dialog';
 

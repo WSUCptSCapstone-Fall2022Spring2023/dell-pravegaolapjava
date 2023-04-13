@@ -16,19 +16,18 @@
  * limitations under the License.
  */
 
-import type { ButtonProps } from '@blueprintjs/core';
-import { Button, Menu, MenuDivider, MenuItem, Position } from '@blueprintjs/core';
+import { Button, ButtonProps, Menu, MenuDivider, MenuItem, Position } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
 import { Popover2 } from '@blueprintjs/popover2';
 import React, { useState } from 'react';
 
 import { NumericInputDialog } from '../../../dialogs';
-import type { QueryContext } from '../../../druid-models';
 import {
   changeMaxNumTasks,
   changeTaskAssigment,
   getMaxNumTasks,
   getTaskAssigment,
+  QueryContext,
 } from '../../../druid-models';
 import { formatInteger, tickIcon } from '../../../utils';
 

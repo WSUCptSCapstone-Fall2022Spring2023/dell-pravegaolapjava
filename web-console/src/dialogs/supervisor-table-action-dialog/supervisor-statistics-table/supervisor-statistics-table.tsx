@@ -18,8 +18,7 @@
 
 import { Button, ButtonGroup } from '@blueprintjs/core';
 import React from 'react';
-import type { CellInfo, Column } from 'react-table';
-import ReactTable from 'react-table';
+import ReactTable, { CellInfo, Column } from 'react-table';
 
 import { Loader } from '../../../components/loader/loader';
 import { useQueryManager } from '../../../hooks';

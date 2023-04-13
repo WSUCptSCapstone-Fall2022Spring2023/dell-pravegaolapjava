@@ -86,7 +86,6 @@ export function timeFormatMatches(format: string, value: string | number | bigin
 }
 
 export function possibleDruidFormatForValues(values: any[]): string | undefined {
-  if (!values.length) return;
   return ALL_FORMAT_VALUES.find(format => {
     return values.every(value => timeFormatMatches(format, value));
   });

@@ -20,10 +20,15 @@ import { Intent } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
 import React, { useState } from 'react';
 
-import type { FormJsonTabs } from '../../components';
-import { AutoForm, ExternalLink, FormJsonSelector, JsonInput, Loader } from '../../components';
-import type { CoordinatorDynamicConfig } from '../../druid-models';
-import { COORDINATOR_DYNAMIC_CONFIG_FIELDS } from '../../druid-models';
+import {
+  AutoForm,
+  ExternalLink,
+  FormJsonSelector,
+  FormJsonTabs,
+  JsonInput,
+  Loader,
+} from '../../components';
+import { COORDINATOR_DYNAMIC_CONFIG_FIELDS, CoordinatorDynamicConfig } from '../../druid-models';
 import { useQueryManager } from '../../hooks';
 import { getLink } from '../../links';
 import { Api, AppToaster } from '../../singletons';
@@ -97,7 +102,7 @@ export const CoordinatorDynamicConfigDialog = React.memo(function CoordinatorDyn
     <SnitchDialog
       className="coordinator-dynamic-config-dialog"
       saveDisabled={Boolean(jsonError)}
-      onSave={comment => void saveConfig(comment)}
+      onSave={saveConfig}
       onClose={onClose}
       title="Coordinator dynamic config"
       historyRecords={historyRecordsState.data}

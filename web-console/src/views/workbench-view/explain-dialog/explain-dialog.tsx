@@ -32,17 +32,16 @@ import React from 'react';
 import AceEditor from 'react-ace';
 
 import { Loader } from '../../../components';
-import type { DruidEngine, QueryContext, QueryWithContext } from '../../../druid-models';
-import { isEmptyContext } from '../../../druid-models';
+import { DruidEngine, isEmptyContext, QueryContext, QueryWithContext } from '../../../druid-models';
 import { useQueryManager } from '../../../hooks';
 import { Api } from '../../../singletons';
-import type { QueryExplanation } from '../../../utils';
 import {
   deepGet,
   formatSignature,
   getDruidErrorMessage,
   nonEmptyArray,
   queryDruidSql,
+  QueryExplanation,
 } from '../../../utils';
 
 import './explain-dialog.scss';

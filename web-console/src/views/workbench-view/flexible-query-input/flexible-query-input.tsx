@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import type { ResizeEntry } from '@blueprintjs/core';
+import { ResizeEntry } from '@blueprintjs/core';
 import { ResizeSensor2 } from '@blueprintjs/popover2';
 import type { Ace } from 'ace-builds';
 import ace from 'ace-builds';
@@ -34,8 +34,7 @@ import {
 } from '../../../../lib/keywords';
 import { SQL_DATA_TYPES, SQL_FUNCTIONS } from '../../../../lib/sql-docs';
 import { AceEditorStateCache } from '../../../singletons/ace-editor-state-cache';
-import type { ColumnMetadata, RowColumn } from '../../../utils';
-import { uniq } from '../../../utils';
+import { ColumnMetadata, RowColumn, uniq } from '../../../utils';
 
 import './flexible-query-input.scss';
 
@@ -72,10 +71,9 @@ export interface FlexibleQueryInputProps {
 
 export interface FlexibleQueryInputState {
   // For reasons (https://github.com/securingsincity/react-ace/issues/415) react ace editor needs an explicit height
-  // Since this component will grow and shrink dynamically we will measure its height and then set it.
+  // Since this component will grown and shrink dynamically we will measure its height and then set it.
   editorHeight: number;
-  quotedCompletions: Ace.Completion[];
-  unquotedCompletions: Ace.Completion[];
+  completions: any[];
   prevColumnMetadata?: readonly ColumnMetadata[];
   prevCurrentTable?: string;
   prevCurrentSchema?: string;
@@ -90,7 +88,7 @@ export class FlexibleQueryInput extends React.PureComponent<
   static replaceDefaultAutoCompleter(): void {
     if (!langTools) return;
 
-    const keywordList = ([] as Ace.Completion[]).concat(
+    const keywordList = ([] as any[]).concat(
       SQL_KEYWORDS.map(v => ({ name: v, value: v, score: 0, meta: 'keyword' })),
       SQL_EXPRESSION_PARTS.map(v => ({ name: v, value: v, score: 0, meta: 'keyword' })),
       SQL_CONSTANTS.map(v => ({ name: v, value: v, score: 0, meta: 'constant' })),
@@ -109,13 +107,7 @@ export class FlexibleQueryInput extends React.PureComponent<
       langTools.snippetCompleter,
       langTools.textCompleter,
       {
-        getCompletions: (
-          _state: string,
-          _session: Ace.EditSession,
-          _pos: Ace.Point,
-          _prefix: string,
-          callback: any,
-        ) => {
+        getCompletions: (_editor: any, _session: any, _pos: any, _prefix: any, callback: any) => {
           return callback(null, keywordList);
         },
         getDocTooltip: (item: any) => {
@@ -130,19 +122,17 @@ export class FlexibleQueryInput extends React.PureComponent<
   static addFunctionAutoCompleter(): void {
     if (!langTools) return;
 
-    const functionList: Ace.Completion[] = Object.entries(SQL_FUNCTIONS).flatMap(
-      ([name, versions]) => {
-        return versions.map(([args, description]) => ({
-          name: name,
-          value: versions.length > 1 ? `${name}(${args})` : name,
-          score: 1100, // Use a high score to appear over the 'local' suggestions that have a score of 1000
-          meta: 'function',
-          syntax: `${name}(${args})`,
-          description,
-          completer: COMPLETER,
-        }));
-      },
-    );
+    const functionList: any[] = Object.entries(SQL_FUNCTIONS).flatMap(([name, versions]) => {
+      return versions.map(([args, description]) => ({
+        name: name,
+        value: versions.length > 1 ? `${name}(${args})` : name,
+        score: 1100, // Use a high score to appear over the 'local' suggestions that have a score of 1000
+        meta: 'function',
+        syntax: `${name}(${args})`,
+        description,
+        completer: COMPLETER,
+      }));
+    });
 
     langTools.addCompleter({
       getCompletions: (_editor: any, _session: any, _pos: any, _prefix: any, callback: any) => {
@@ -163,43 +153,6 @@ export class FlexibleQueryInput extends React.PureComponent<
 <div class="doc-description">${item.description}</div>`;
   }
 
-  static getCompletions(
-    columnMetadata: readonly ColumnMetadata[],
-    currentSchema: string | undefined,
-    currentTable: string | undefined,
-    quote: boolean,
-  ): Ace.Completion[] {
-    return ([] as Ace.Completion[]).concat(
-      uniq(columnMetadata.map(d => d.TABLE_SCHEMA)).map(v => ({
-        value: quote ? String(T(v)) : v,
-        score: 10,
-        meta: 'schema',
-      })),
-      uniq(
-        columnMetadata
-          .filter(d => (currentSchema ? d.TABLE_SCHEMA === currentSchema : true))
-          .map(d => d.TABLE_NAME),
-      ).map(v => ({
-        value: quote ? String(T(v)) : v,
-        score: 49,
-        meta: 'datasource',
-      })),
-      uniq(
-        columnMetadata
-          .filter(d =>
-            currentTable && currentSchema
-              ? d.TABLE_NAME === currentTable && d.TABLE_SCHEMA === currentSchema
-              : true,
-          )
-          .map(d => d.COLUMN_NAME),
-      ).map(v => ({
-        value: quote ? String(C(v)) : v,
-        score: 50,
-        meta: 'column',
-      })),
-    );
-  }
-
   static getDerivedStateFromProps(props: FlexibleQueryInputProps, state: FlexibleQueryInputState) {
     const { columnMetadata, currentSchema, currentTable } = props;
 
@@ -209,19 +162,38 @@ export class FlexibleQueryInput extends React.PureComponent<
         currentSchema !== state.prevCurrentSchema ||
         currentTable !== state.prevCurrentTable)
     ) {
+      const completions = ([] as any[]).concat(
+        uniq(columnMetadata.map(d => d.TABLE_SCHEMA)).map(v => ({
+          value: String(T(v)),
+          score: 10,
+          meta: 'schema',
+        })),
+        uniq(
+          columnMetadata
+            .filter(d => (currentSchema ? d.TABLE_SCHEMA === currentSchema : true))
+            .map(d => d.TABLE_NAME),
+        ).map(v => ({
+          value: String(T(v)),
+          score: 49,
+          meta: 'datasource',
+        })),
+        uniq(
+          columnMetadata
+            .filter(d =>
+              currentTable && currentSchema
+                ? d.TABLE_NAME === currentTable && d.TABLE_SCHEMA === currentSchema
+                : true,
+            )
+            .map(d => d.COLUMN_NAME),
+        ).map(v => ({
+          value: String(C(v)),
+          score: 50,
+          meta: 'column',
+        })),
+      );
+
       return {
-        quotedCompletions: FlexibleQueryInput.getCompletions(
-          columnMetadata,
-          currentSchema,
-          currentTable,
-          true,
-        ),
-        unquotedCompletions: FlexibleQueryInput.getCompletions(
-          columnMetadata,
-          currentSchema,
-          currentTable,
-          false,
-        ),
+        completions,
         prevColumnMetadata: columnMetadata,
         prevCurrentSchema: currentSchema,
         prevCurrentTable: currentTable,
@@ -234,8 +206,7 @@ export class FlexibleQueryInput extends React.PureComponent<
     super(props, context);
     this.state = {
       editorHeight: 200,
-      quotedCompletions: [],
-      unquotedCompletions: [],
+      completions: [],
     };
   }
 
@@ -244,20 +215,8 @@ export class FlexibleQueryInput extends React.PureComponent<
     FlexibleQueryInput.addFunctionAutoCompleter();
     if (langTools) {
       langTools.addCompleter({
-        getCompletions: (
-          _state: string,
-          session: Ace.EditSession,
-          pos: Ace.Point,
-          prefix: string,
-          callback: any,
-        ) => {
-          const charBeforePrefix = session.getLine(pos.row)[pos.column - prefix.length - 1];
-          callback(
-            null,
-            charBeforePrefix === '"'
-              ? this.state.unquotedCompletions
-              : this.state.quotedCompletions,
-          );
+        getCompletions: (_editor: any, _session: any, _pos: any, _prefix: any, callback: any) => {
+          callback(null, this.state.completions);
         },
       });
     }

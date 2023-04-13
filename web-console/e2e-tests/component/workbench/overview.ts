@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import type * as playwright from 'playwright-chromium';
+import * as playwright from 'playwright-chromium';
 
 import { clickButton } from '../../util/playwright';
 import { extractTable } from '../../util/table';

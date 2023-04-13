@@ -16,9 +16,9 @@
  * limitations under the License.
  */
 
-import type { IngestionSpec } from '../druid-models';
+import { IngestionSpec } from '../druid-models';
 
-import { applyCache } from './sampler';
+import { applyCache, headerFromSampleResponse } from './sampler';
 
 describe('utils', () => {
   const ingestionSpec: IngestionSpec = {
@@ -51,6 +51,20 @@ describe('utils', () => {
       },
     },
   };
+
+  // const cacheRows: CacheRows = [{ make: 'Honda', model: 'Civic' }, { make: 'BMW', model: 'M3' }];
+
+  it('spec-utils headerFromSampleResponse', () => {
+    expect(
+      headerFromSampleResponse({
+        sampleResponse: { data: [{ input: { a: 1 }, parsed: { a: 1 } }] },
+      }),
+    ).toMatchInlineSnapshot(`
+      Array [
+        "a",
+      ]
+    `);
+  });
 
   it('spec-utils applyCache', () => {
     expect(

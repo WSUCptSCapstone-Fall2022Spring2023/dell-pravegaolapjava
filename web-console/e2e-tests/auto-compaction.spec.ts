@@ -17,10 +17,10 @@
  */
 
 import path from 'path';
-import type * as playwright from 'playwright-chromium';
+import * as playwright from 'playwright-chromium';
 
 import { CompactionConfig } from './component/datasources/compaction';
-import type { Datasource } from './component/datasources/datasource';
+import { Datasource } from './component/datasources/datasource';
 import { DatasourcesOverview } from './component/datasources/overview';
 import { HashedPartitionsSpec } from './component/load-data/config/partition';
 import { saveScreenshotIfError } from './util/debug';

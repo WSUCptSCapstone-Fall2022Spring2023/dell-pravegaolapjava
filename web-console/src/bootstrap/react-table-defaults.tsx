@@ -17,8 +17,7 @@
  */
 
 import React from 'react';
-import type { Filter } from 'react-table';
-import { ReactTableDefaults } from 'react-table';
+import { Filter, ReactTableDefaults } from 'react-table';
 
 import { Loader } from '../components';
 import {

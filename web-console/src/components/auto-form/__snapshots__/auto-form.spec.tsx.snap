@@ -5,6 +5,7 @@ exports[`AutoForm matches snapshot 1`] = `
   className="auto-form"
 >
   <Memo(FormGroupWithInfo)
+    key="testNumber"
     label="Test number"
   >
     <Memo(NumericInputWithDefault)
@@ -17,6 +18,7 @@ exports[`AutoForm matches snapshot 1`] = `
     />
   </Memo(FormGroupWithInfo)>
   <Memo(FormGroupWithInfo)
+    key="testSizeBytes"
     label="Test size bytes"
   >
     <Blueprint4.NumericInput
@@ -38,6 +40,7 @@ exports[`AutoForm matches snapshot 1`] = `
     />
   </Memo(FormGroupWithInfo)>
   <Memo(FormGroupWithInfo)
+    key="testString"
     label="Test string"
   >
     <Memo(SuggestibleInput)
@@ -50,6 +53,7 @@ exports[`AutoForm matches snapshot 1`] = `
     />
   </Memo(FormGroupWithInfo)>
   <Memo(FormGroupWithInfo)
+    key="testStringWithDefault"
     label="Test string with default"
   >
     <Memo(SuggestibleInput)
@@ -62,6 +66,7 @@ exports[`AutoForm matches snapshot 1`] = `
     />
   </Memo(FormGroupWithInfo)>
   <Memo(FormGroupWithInfo)
+    key="testStringWithMultiline"
     label="Test string with multiline"
   >
     <Memo(SuggestibleInput)
@@ -74,6 +79,7 @@ exports[`AutoForm matches snapshot 1`] = `
     />
   </Memo(FormGroupWithInfo)>
   <Memo(FormGroupWithInfo)
+    key="testBoolean"
     label="Test boolean"
   >
     <Blueprint4.ButtonGroup>
@@ -94,6 +100,7 @@ exports[`AutoForm matches snapshot 1`] = `
     </Blueprint4.ButtonGroup>
   </Memo(FormGroupWithInfo)>
   <Memo(FormGroupWithInfo)
+    key="testBooleanWithDefault"
     label="Test boolean with default"
   >
     <Blueprint4.ButtonGroup>
@@ -114,6 +121,7 @@ exports[`AutoForm matches snapshot 1`] = `
     </Blueprint4.ButtonGroup>
   </Memo(FormGroupWithInfo)>
   <Memo(FormGroupWithInfo)
+    key="testStringArray"
     label="Test string array"
   >
     <Memo(ArrayInput)
@@ -124,6 +132,7 @@ exports[`AutoForm matches snapshot 1`] = `
     />
   </Memo(FormGroupWithInfo)>
   <Memo(FormGroupWithInfo)
+    key="testStringArrayWithDefault"
     label="Test string array with default"
   >
     <Memo(ArrayInput)
@@ -139,6 +148,7 @@ exports[`AutoForm matches snapshot 1`] = `
     />
   </Memo(FormGroupWithInfo)>
   <Memo(FormGroupWithInfo)
+    key="testJson"
     label="Test json"
   >
     <Memo(JsonInput)
@@ -147,6 +157,7 @@ exports[`AutoForm matches snapshot 1`] = `
     />
   </Memo(FormGroupWithInfo)>
   <Memo(FormGroupWithInfo)
+    key="testStringRequiredAndDefaultValue"
     label="Test string required and default value"
   >
     <Memo(SuggestibleInput)
@@ -159,7 +170,9 @@ exports[`AutoForm matches snapshot 1`] = `
       value=""
     />
   </Memo(FormGroupWithInfo)>
-  <Blueprint4.FormGroup>
+  <Blueprint4.FormGroup
+    key="more-or-less"
+  >
     <Blueprint4.Button
       fill={true}
       minimal={true}

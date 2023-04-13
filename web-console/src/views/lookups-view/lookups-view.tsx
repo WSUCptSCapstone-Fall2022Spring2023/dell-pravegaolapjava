@@ -19,8 +19,7 @@
 import { Button, Icon, Intent } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
 import React from 'react';
-import type { Filter } from 'react-table';
-import ReactTable from 'react-table';
+import ReactTable, { Filter } from 'react-table';
 
 import {
   ACTION_COLUMN_ID,
@@ -35,8 +34,7 @@ import {
 } from '../../components';
 import { AsyncActionDialog, LookupEditDialog } from '../../dialogs/';
 import { LookupTableActionDialog } from '../../dialogs/lookup-table-action-dialog/lookup-table-action-dialog';
-import type { LookupSpec } from '../../druid-models';
-import { lookupSpecSummary } from '../../druid-models';
+import { LookupSpec, lookupSpecSummary } from '../../druid-models';
 import { STANDARD_TABLE_PAGE_SIZE, STANDARD_TABLE_PAGE_SIZE_OPTIONS } from '../../react-table';
 import { Api, AppToaster } from '../../singletons';
 import {
@@ -49,7 +47,7 @@ import {
   QueryManager,
   QueryState,
 } from '../../utils';
-import type { BasicAction } from '../../utils/basic-action';
+import { BasicAction } from '../../utils/basic-action';
 
 import './lookups-view.scss';
 
@@ -345,7 +343,7 @@ export class LookupsView extends React.PureComponent<LookupsViewProps, LookupsVi
           <Button
             icon={IconNames.BUILD}
             text="Initialize lookups"
-            onClick={() => void this.initializeLookup()}
+            onClick={() => this.initializeLookup()}
           />
         </div>
       );
@@ -480,7 +478,7 @@ export class LookupsView extends React.PureComponent<LookupsViewProps, LookupsVi
     return (
       <LookupEditDialog
         onClose={() => this.setState({ lookupEdit: undefined })}
-        onSubmit={updateLookupVersion => void this.submitLookupEdit(updateLookupVersion)}
+        onSubmit={updateLookupVersion => this.submitLookupEdit(updateLookupVersion)}
         onChange={this.handleChangeLookup}
         lookupId={lookupEdit.id}
         lookupTier={lookupEdit.tier}

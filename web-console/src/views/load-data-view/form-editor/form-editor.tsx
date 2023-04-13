@@ -20,8 +20,7 @@ import { Button, Intent } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
 import React, { useState } from 'react';
 
-import type { Field } from '../../../components';
-import { AutoForm } from '../../../components';
+import { AutoForm, Field } from '../../../components';
 
 import './form-editor.scss';
 
@@ -38,7 +37,7 @@ export interface FormEditorProps<T> {
   children?: any;
 }
 
-export function FormEditor<T extends Record<string, any>>(props: FormEditorProps<T>) {
+export function FormEditor<T>(props: FormEditorProps<T>) {
   const {
     fields,
     initValue,

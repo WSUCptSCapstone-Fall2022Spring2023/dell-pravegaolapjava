@@ -16,8 +16,7 @@
  * limitations under the License.
  */
 
-import type { Canceler, CancelToken } from 'axios';
-import axios from 'axios';
+import axios, { Canceler, CancelToken } from 'axios';
 import debounce from 'lodash.debounce';
 
 import { wait } from './general';
@@ -72,8 +71,8 @@ export class QueryManager<Q, R, I = never, E extends Error = Error> {
   private state: QueryState<R, E, I>;
   private currentQueryId = 0;
 
-  private readonly runWhenIdle: () => void | Promise<void>;
-  private readonly runWhenLoading: () => void | Promise<void>;
+  private readonly runWhenIdle: () => void;
+  private readonly runWhenLoading: () => void;
 
   constructor(options: QueryManagerOptions<Q, R, I, E>) {
     this.processQuery = options.processQuery;
@@ -198,7 +197,7 @@ export class QueryManager<Q, R, I = never, E extends Error = Error> {
   private trigger() {
     if (this.currentRunCancelFn) {
       // Currently loading
-      void this.runWhenLoading();
+      this.runWhenLoading();
     } else {
       this.setState(
         new QueryState<R, E>({
@@ -207,7 +206,7 @@ export class QueryManager<Q, R, I = never, E extends Error = Error> {
         }),
       );
 
-      void this.runWhenIdle();
+      this.runWhenIdle();
     }
   }
 
@@ -221,7 +220,7 @@ export class QueryManager<Q, R, I = never, E extends Error = Error> {
     if (this.terminated) return;
     this.nextQuery = this.lastQuery;
     if (runInBackground) {
-      void this.runWhenIdle();
+      this.runWhenIdle();
     } else {
       this.trigger();
     }

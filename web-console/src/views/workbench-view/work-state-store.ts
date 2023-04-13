@@ -16,14 +16,14 @@
  * limitations under the License.
  */
 
-import { createStore } from 'zustand';
+import create, { State } from 'zustand';
 
-interface WorkState {
+interface WorkState extends State {
   version: number;
   increment(): void;
 }
 
-export const workStateStore = createStore<WorkState>(set => ({
+export const useWorkStateStore = create<WorkState>(set => ({
   version: 0,
   increment: () => set(state => ({ version: state.version + 1 })),
 }));

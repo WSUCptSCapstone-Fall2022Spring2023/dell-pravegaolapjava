@@ -16,31 +16,15 @@
  * limitations under the License.
  */
 
-import { possibleDruidFormatForValues, timeFormatMatches } from './time';
+import { timeFormatMatches } from './time';
 
-describe('time', () => {
-  describe('timeFormatMatches', () => {
-    it('works for auto', () => {
-      expect(timeFormatMatches('auto', '2019-05-22 22:42:51+0000')).toBeTruthy();
-    });
-
-    it('works for iso', () => {
-      expect(timeFormatMatches('iso', '2019-05-22T22:42:51+0000')).toBeTruthy();
-      expect(timeFormatMatches('iso', '2019-05-22 22:42:51+0000')).toBeFalsy();
-    });
+describe('timeFormatMatches', () => {
+  it('works for auto', () => {
+    expect(timeFormatMatches('auto', '2019-05-22 22:42:51+0000')).toBeTruthy();
   });
 
-  describe('possibleDruidFormatForValues', () => {
-    it('works in empty case', () => {
-      expect(possibleDruidFormatForValues([])).toBeUndefined();
-    });
-
-    it('does not react to small numbers', () => {
-      expect(possibleDruidFormatForValues([12, 234, 3432])).toBeUndefined();
-    });
-
-    it('works for auto', () => {
-      expect(possibleDruidFormatForValues(['2019-05-22 22:42:51'])).toEqual('auto');
-    });
+  it('works for iso', () => {
+    expect(timeFormatMatches('iso', '2019-05-22T22:42:51+0000')).toBeTruthy();
+    expect(timeFormatMatches('iso', '2019-05-22 22:42:51+0000')).toBeFalsy();
   });
 });

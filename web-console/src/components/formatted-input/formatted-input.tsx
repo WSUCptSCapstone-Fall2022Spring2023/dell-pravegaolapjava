@@ -16,13 +16,12 @@
  * limitations under the License.
  */
 
-import type { InputGroupProps2 } from '@blueprintjs/core';
-import { InputGroup, Intent, TextArea } from '@blueprintjs/core';
+import { InputGroup, InputGroupProps2, Intent, TextArea } from '@blueprintjs/core';
 import { Tooltip2 } from '@blueprintjs/popover2';
 import classNames from 'classnames';
 import React, { useState } from 'react';
 
-import type { Formatter } from '../../utils';
+import { Formatter } from '../../utils';
 
 import './formatted-input.scss';
 

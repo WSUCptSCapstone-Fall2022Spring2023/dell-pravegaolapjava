@@ -18,8 +18,7 @@
 
 import { useEffect, useState } from 'react';
 
-import type { QueryManagerOptions } from '../utils';
-import { QueryManager, QueryState } from '../utils';
+import { QueryManager, QueryManagerOptions, QueryState } from '../utils';
 
 import { usePermanentCallback } from './use-permanent-callback';
 

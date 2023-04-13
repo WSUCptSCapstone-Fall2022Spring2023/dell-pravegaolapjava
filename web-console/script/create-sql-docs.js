@@ -23,15 +23,8 @@ const snarkdown = require('snarkdown');
 
 const writefile = 'lib/sql-docs.js';
 
-const MINIMUM_EXPECTED_NUMBER_OF_FUNCTIONS = 167;
+const MINIMUM_EXPECTED_NUMBER_OF_FUNCTIONS = 162;
 const MINIMUM_EXPECTED_NUMBER_OF_DATA_TYPES = 14;
-
-const initialFunctionDocs = {
-  TABLE: [['external', convertMarkdownToHtml('Defines a logical table from an external.')]],
-  EXTERN: [
-    ['inputSource, inputFormat, rowSignature?', convertMarkdownToHtml('Reads external data')],
-  ],
-};
 
 function hasHtmlTags(str) {
   return /<(a|br|span|div|p|code)\/?>/.test(str);
@@ -74,7 +67,7 @@ const readDoc = async () => {
 
   const lines = data.split('\n');
 
-  const functionDocs = initialFunctionDocs;
+  const functionDocs = {};
   const dataTypeDocs = {};
   for (let line of lines) {
     const functionMatch = line.match(/^\|\s*`(\w+)\(([^|]*)\)`\s*\|([^|]+)\|(?:([^|]+)\|)?$/);

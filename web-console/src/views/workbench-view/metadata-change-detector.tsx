@@ -16,10 +16,9 @@
  * limitations under the License.
  */
 
-import { useCallback, useEffect } from 'react';
-import { useStore } from 'zustand';
+import { useEffect } from 'react';
 
-import { metadataStateStore } from './metadata-state-store';
+import { useMetadataStateStore } from './metadata-state-store';
 
 export interface MetadataChangeDetectorProps {
   onChange(): void;
@@ -30,10 +29,7 @@ export const MetadataChangeDetector = function MetadataChangeDetector(
 ) {
   const { onChange } = props;
 
-  const metadataStateVersion = useStore(
-    metadataStateStore,
-    useCallback(state => state.version, []),
-  );
+  const metadataStateVersion = useMetadataStateStore(state => state.version);
   useEffect(() => {
     onChange();
     // eslint-disable-next-line react-hooks/exhaustive-deps

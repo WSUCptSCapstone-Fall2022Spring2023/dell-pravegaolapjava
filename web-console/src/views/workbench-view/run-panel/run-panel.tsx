@@ -34,7 +34,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { MenuCheckbox, MenuTristate } from '../../../components';
 import { EditContextDialog, StringInputDialog } from '../../../dialogs';
 import { IndexSpecDialog } from '../../../dialogs/index-spec-dialog/index-spec-dialog';
-import type { DruidEngine, IndexSpec, QueryContext, WorkbenchQuery } from '../../../druid-models';
 import {
   changeDurableShuffleStorage,
   changeFinalizeAggregations,
@@ -44,6 +43,7 @@ import {
   changeUseApproximateCountDistinct,
   changeUseApproximateTopN,
   changeUseCache,
+  DruidEngine,
   getDurableShuffleStorage,
   getFinalizeAggregations,
   getGroupByEnableMultiValueUnnesting,
@@ -52,9 +52,12 @@ import {
   getUseApproximateCountDistinct,
   getUseApproximateTopN,
   getUseCache,
+  IndexSpec,
+  QueryContext,
   summarizeIndexSpec,
+  WorkbenchQuery,
 } from '../../../druid-models';
-import { deepGet, deepSet, pluralIfNeeded, tickIcon } from '../../../utils';
+import { deepGet, pluralIfNeeded, tickIcon } from '../../../utils';
 import { MaxTasksButton } from '../max-tasks-button/max-tasks-button';
 
 import './run-panel.scss';
@@ -86,7 +89,7 @@ export interface RunPanelProps {
   onQueryChange(query: WorkbenchQuery): void;
   loading: boolean;
   small?: boolean;
-  onRun(preview: boolean): void | Promise<void>;
+  onRun(preview: boolean): void;
   queryEngines: DruidEngine[];
   clusterCapacity: number | undefined;
   moreMenu?: JSX.Element;
@@ -107,7 +110,6 @@ export const RunPanel = React.memo(function RunPanel(props: RunPanelProps) {
   const maxParseExceptions = getMaxParseExceptions(queryContext);
   const finalizeAggregations = getFinalizeAggregations(queryContext);
   const groupByEnableMultiValueUnnesting = getGroupByEnableMultiValueUnnesting(queryContext);
-  const sqlJoinAlgorithm = queryContext.sqlJoinAlgorithm ?? 'broadcast';
   const durableShuffleStorage = getDurableShuffleStorage(queryContext);
   const indexSpec: IndexSpec | undefined = deepGet(queryContext, 'indexSpec');
   const useApproximateCountDistinct = getUseApproximateCountDistinct(queryContext);
@@ -117,12 +119,12 @@ export const RunPanel = React.memo(function RunPanel(props: RunPanelProps) {
 
   const handleRun = useCallback(() => {
     if (!onRun) return;
-    void onRun(false);
+    onRun(false);
   }, [onRun]);
 
   const handlePreview = useCallback(() => {
     if (!onRun) return;
-    void onRun(true);
+    onRun(true);
   }, [onRun]);
 
   const hotkeys = useMemo(() => {
@@ -195,7 +197,7 @@ export const RunPanel = React.memo(function RunPanel(props: RunPanelProps) {
         className={effectiveEngine === 'native' ? 'rune-button' : undefined}
         disabled={loading}
         icon={IconNames.CARET_RIGHT}
-        onClick={() => void onRun(false)}
+        onClick={() => onRun(false)}
         text="Run"
         intent={!emptyQuery && !small ? Intent.PRIMARY : undefined}
         small={small}
@@ -205,7 +207,7 @@ export const RunPanel = React.memo(function RunPanel(props: RunPanelProps) {
         <Button
           disabled={loading}
           icon={IconNames.EYE_OPEN}
-          onClick={() => void onRun(true)}
+          onClick={() => onRun(true)}
           text="Preview"
           small={small}
           minimal={small}
@@ -303,23 +305,6 @@ export const RunPanel = React.memo(function RunPanel(props: RunPanelProps) {
                         changeQueryContext(changeGroupByEnableMultiValueUnnesting(queryContext, v))
                       }
                     />
-                    <MenuItem
-                      icon={IconNames.INNER_JOIN}
-                      text="Join algorithm"
-                      label={sqlJoinAlgorithm}
-                    >
-                      {['broadcast', 'sortMerge'].map(o => (
-                        <MenuItem
-                          key={o}
-                          icon={tickIcon(sqlJoinAlgorithm === o)}
-                          text={o}
-                          shouldDismissPopover={false}
-                          onClick={() =>
-                            changeQueryContext(deepSet(queryContext, 'sqlJoinAlgorithm', o))
-                          }
-                        />
-                      ))}
-                    </MenuItem>
                     <MenuItem
                       icon={IconNames.TH_DERIVED}
                       text="Edit index spec"

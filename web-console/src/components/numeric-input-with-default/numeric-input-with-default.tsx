@@ -16,8 +16,7 @@
  * limitations under the License.
  */
 
-import type { HTMLInputProps, NumericInputProps } from '@blueprintjs/core';
-import { NumericInput } from '@blueprintjs/core';
+import { HTMLInputProps, NumericInput, NumericInputProps } from '@blueprintjs/core';
 import React, { useState } from 'react';
 
 export type NumericInputWithDefaultProps = HTMLInputProps & NumericInputProps;

@@ -22,7 +22,7 @@ import classNames from 'classnames';
 import { T } from 'druid-query-toolkit';
 import React, { useState } from 'react';
 
-import type { Execution, QueryWithContext } from '../../../druid-models';
+import { Execution, QueryWithContext } from '../../../druid-models';
 import { executionBackgroundStatusCheck, reattachTaskExecution } from '../../../helpers';
 import { useQueryManager } from '../../../hooks';
 import { ExecutionProgressBarPane } from '../../workbench-view/execution-progress-bar-pane/execution-progress-bar-pane';

@@ -20,8 +20,7 @@ import { Alert, Button, ButtonGroup, Intent, Label, MenuItem } from '@blueprintj
 import { IconNames } from '@blueprintjs/icons';
 import React from 'react';
 import SplitterLayout from 'react-splitter-layout';
-import type { Filter } from 'react-table';
-import ReactTable from 'react-table';
+import ReactTable, { Filter } from 'react-table';
 
 import {
   ACTION_COLUMN_ID,
@@ -41,8 +40,8 @@ import {
   SupervisorTableActionDialog,
   TaskTableActionDialog,
 } from '../../dialogs';
-import type { QueryWithContext } from '../../druid-models';
-import type { Capabilities } from '../../helpers';
+import { QueryWithContext } from '../../druid-models';
+import { Capabilities } from '../../helpers';
 import {
   SMALL_TABLE_PAGE_SIZE,
   SMALL_TABLE_PAGE_SIZE_OPTIONS,
@@ -63,7 +62,7 @@ import {
   QueryManager,
   QueryState,
 } from '../../utils';
-import type { BasicAction } from '../../utils/basic-action';
+import { BasicAction } from '../../utils/basic-action';
 
 import './ingestion-view.scss';
 

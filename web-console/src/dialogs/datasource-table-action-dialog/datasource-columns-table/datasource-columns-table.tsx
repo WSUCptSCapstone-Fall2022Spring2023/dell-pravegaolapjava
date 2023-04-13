@@ -23,8 +23,7 @@ import ReactTable from 'react-table';
 import { Loader } from '../../../components';
 import { useQueryManager } from '../../../hooks';
 import { SMALL_TABLE_PAGE_SIZE, SMALL_TABLE_PAGE_SIZE_OPTIONS } from '../../../react-table';
-import type { ColumnMetadata } from '../../../utils';
-import { queryDruidSql } from '../../../utils';
+import { ColumnMetadata, queryDruidSql } from '../../../utils';
 
 import './datasource-columns-table.scss';
 

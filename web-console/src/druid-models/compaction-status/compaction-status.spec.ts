@@ -16,10 +16,9 @@
  * limitations under the License.
  */
 
-import type { CompactionConfig } from '../compaction-config/compaction-config';
+import { CompactionConfig } from '../compaction-config/compaction-config';
 
-import type { CompactionStatus } from './compaction-status';
-import { formatCompactionInfo, zeroCompactionStatus } from './compaction-status';
+import { CompactionStatus, formatCompactionInfo, zeroCompactionStatus } from './compaction-status';
 
 describe('compaction status', () => {
   const BASIC_CONFIG: CompactionConfig = {

@@ -4,7 +4,6 @@ exports[`TimeMenuItems matches snapshot when menu is opened for column inside gr
 <div>
   <li
     class="bp4-submenu"
-    role="none"
   >
     <span
       class="bp4-popover-wrapper"
@@ -15,7 +14,6 @@ exports[`TimeMenuItems matches snapshot when menu is opened for column inside gr
       >
         <a
           class="bp4-menu-item"
-          role="menuitem"
           tabindex="0"
         >
           <span
@@ -30,7 +28,6 @@ exports[`TimeMenuItems matches snapshot when menu is opened for column inside gr
               <svg
                 data-icon="filter"
                 height="16"
-                role="img"
                 viewBox="0 0 16 16"
                 width="16"
               >
@@ -47,17 +44,18 @@ exports[`TimeMenuItems matches snapshot when menu is opened for column inside gr
             Filter
           </div>
           <span
-            aria-hidden="true"
             class="bp4-icon bp4-icon-caret-right bp4-submenu-icon"
             icon="caret-right"
           >
             <svg
               data-icon="caret-right"
               height="16"
-              role="img"
               viewBox="0 0 16 16"
               width="16"
             >
+              <desc>
+                Open sub menu
+              </desc>
               <path
                 d="M11 8c0-.15-.07-.28-.17-.37l-4-3.5A.495.495 0 006 4.5v7a.495.495 0 00.83.37l4-3.5c.1-.09.17-.22.17-.37z"
                 fill-rule="evenodd"
@@ -70,7 +68,6 @@ exports[`TimeMenuItems matches snapshot when menu is opened for column inside gr
   </li>
   <li
     class="bp4-submenu"
-    role="none"
   >
     <span
       class="bp4-popover-wrapper"
@@ -81,7 +78,6 @@ exports[`TimeMenuItems matches snapshot when menu is opened for column inside gr
       >
         <a
           class="bp4-menu-item"
-          role="menuitem"
           tabindex="0"
         >
           <span
@@ -96,7 +92,6 @@ exports[`TimeMenuItems matches snapshot when menu is opened for column inside gr
               <svg
                 data-icon="group-objects"
                 height="16"
-                role="img"
                 viewBox="0 0 16 16"
                 width="16"
               >
@@ -113,17 +108,18 @@ exports[`TimeMenuItems matches snapshot when menu is opened for column inside gr
             Group by
           </div>
           <span
-            aria-hidden="true"
             class="bp4-icon bp4-icon-caret-right bp4-submenu-icon"
             icon="caret-right"
           >
             <svg
               data-icon="caret-right"
               height="16"
-              role="img"
               viewBox="0 0 16 16"
               width="16"
             >
+              <desc>
+                Open sub menu
+              </desc>
               <path
                 d="M11 8c0-.15-.07-.28-.17-.37l-4-3.5A.495.495 0 006 4.5v7a.495.495 0 00.83.37l4-3.5c.1-.09.17-.22.17-.37z"
                 fill-rule="evenodd"
@@ -136,11 +132,9 @@ exports[`TimeMenuItems matches snapshot when menu is opened for column inside gr
   </li>
   <li
     class=""
-    role="none"
   >
     <a
       class="bp4-menu-item bp4-popover-dismiss"
-      role="menuitem"
       tabindex="0"
     >
       <span
@@ -155,7 +149,6 @@ exports[`TimeMenuItems matches snapshot when menu is opened for column inside gr
           <svg
             data-icon="ungroup-objects"
             height="16"
-            role="img"
             viewBox="0 0 16 16"
             width="16"
           >
@@ -175,7 +168,6 @@ exports[`TimeMenuItems matches snapshot when menu is opened for column inside gr
   </li>
   <li
     class="bp4-submenu"
-    role="none"
   >
     <span
       class="bp4-popover-wrapper"
@@ -186,7 +178,6 @@ exports[`TimeMenuItems matches snapshot when menu is opened for column inside gr
       >
         <a
           class="bp4-menu-item"
-          role="menuitem"
           tabindex="0"
         >
           <span
@@ -201,7 +192,6 @@ exports[`TimeMenuItems matches snapshot when menu is opened for column inside gr
               <svg
                 data-icon="function"
                 height="16"
-                role="img"
                 viewBox="0 0 16 16"
                 width="16"
               >
@@ -218,17 +208,18 @@ exports[`TimeMenuItems matches snapshot when menu is opened for column inside gr
             Aggregate
           </div>
           <span
-            aria-hidden="true"
             class="bp4-icon bp4-icon-caret-right bp4-submenu-icon"
             icon="caret-right"
           >
             <svg
               data-icon="caret-right"
               height="16"
-              role="img"
               viewBox="0 0 16 16"
               width="16"
             >
+              <desc>
+                Open sub menu
+              </desc>
               <path
                 d="M11 8c0-.15-.07-.28-.17-.37l-4-3.5A.495.495 0 006 4.5v7a.495.495 0 00.83.37l4-3.5c.1-.09.17-.22.17-.37z"
                 fill-rule="evenodd"
@@ -246,7 +237,6 @@ exports[`TimeMenuItems matches snapshot when menu is opened for column not insid
 <div>
   <li
     class="bp4-submenu"
-    role="none"
   >
     <span
       class="bp4-popover-wrapper"
@@ -257,7 +247,6 @@ exports[`TimeMenuItems matches snapshot when menu is opened for column not insid
       >
         <a
           class="bp4-menu-item"
-          role="menuitem"
           tabindex="0"
         >
           <span
@@ -272,7 +261,6 @@ exports[`TimeMenuItems matches snapshot when menu is opened for column not insid
               <svg
                 data-icon="filter"
                 height="16"
-                role="img"
                 viewBox="0 0 16 16"
                 width="16"
               >
@@ -289,17 +277,18 @@ exports[`TimeMenuItems matches snapshot when menu is opened for column not insid
             Filter
           </div>
           <span
-            aria-hidden="true"
             class="bp4-icon bp4-icon-caret-right bp4-submenu-icon"
             icon="caret-right"
           >
             <svg
               data-icon="caret-right"
               height="16"
-              role="img"
               viewBox="0 0 16 16"
               width="16"
             >
+              <desc>
+                Open sub menu
+              </desc>
               <path
                 d="M11 8c0-.15-.07-.28-.17-.37l-4-3.5A.495.495 0 006 4.5v7a.495.495 0 00.83.37l4-3.5c.1-.09.17-.22.17-.37z"
                 fill-rule="evenodd"
@@ -312,7 +301,6 @@ exports[`TimeMenuItems matches snapshot when menu is opened for column not insid
   </li>
   <li
     class="bp4-submenu"
-    role="none"
   >
     <span
       class="bp4-popover-wrapper"
@@ -323,7 +311,6 @@ exports[`TimeMenuItems matches snapshot when menu is opened for column not insid
       >
         <a
           class="bp4-menu-item"
-          role="menuitem"
           tabindex="0"
         >
           <span
@@ -338,7 +325,6 @@ exports[`TimeMenuItems matches snapshot when menu is opened for column not insid
               <svg
                 data-icon="group-objects"
                 height="16"
-                role="img"
                 viewBox="0 0 16 16"
                 width="16"
               >
@@ -355,17 +341,18 @@ exports[`TimeMenuItems matches snapshot when menu is opened for column not insid
             Group by
           </div>
           <span
-            aria-hidden="true"
             class="bp4-icon bp4-icon-caret-right bp4-submenu-icon"
             icon="caret-right"
           >
             <svg
               data-icon="caret-right"
               height="16"
-              role="img"
               viewBox="0 0 16 16"
               width="16"
             >
+              <desc>
+                Open sub menu
+              </desc>
               <path
                 d="M11 8c0-.15-.07-.28-.17-.37l-4-3.5A.495.495 0 006 4.5v7a.495.495 0 00.83.37l4-3.5c.1-.09.17-.22.17-.37z"
                 fill-rule="evenodd"
@@ -378,7 +365,6 @@ exports[`TimeMenuItems matches snapshot when menu is opened for column not insid
   </li>
   <li
     class="bp4-submenu"
-    role="none"
   >
     <span
       class="bp4-popover-wrapper"
@@ -389,7 +375,6 @@ exports[`TimeMenuItems matches snapshot when menu is opened for column not insid
       >
         <a
           class="bp4-menu-item"
-          role="menuitem"
           tabindex="0"
         >
           <span
@@ -404,7 +389,6 @@ exports[`TimeMenuItems matches snapshot when menu is opened for column not insid
               <svg
                 data-icon="function"
                 height="16"
-                role="img"
                 viewBox="0 0 16 16"
                 width="16"
               >
@@ -421,17 +405,18 @@ exports[`TimeMenuItems matches snapshot when menu is opened for column not insid
             Aggregate
           </div>
           <span
-            aria-hidden="true"
             class="bp4-icon bp4-icon-caret-right bp4-submenu-icon"
             icon="caret-right"
           >
             <svg
               data-icon="caret-right"
               height="16"
-              role="img"
               viewBox="0 0 16 16"
               width="16"
             >
+              <desc>
+                Open sub menu
+              </desc>
               <path
                 d="M11 8c0-.15-.07-.28-.17-.37l-4-3.5A.495.495 0 006 4.5v7a.495.495 0 00.83.37l4-3.5c.1-.09.17-.22.17-.37z"
                 fill-rule="evenodd"

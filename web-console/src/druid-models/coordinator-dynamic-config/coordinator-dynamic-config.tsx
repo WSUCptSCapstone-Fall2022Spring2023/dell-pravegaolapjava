@@ -19,7 +19,7 @@
 import { Code } from '@blueprintjs/core';
 import React from 'react';
 
-import type { Field } from '../../components';
+import { Field } from '../../components';
 
 export interface CoordinatorDynamicConfig {
   maxSegmentsToMove?: number;

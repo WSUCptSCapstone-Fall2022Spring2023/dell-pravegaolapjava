@@ -28,7 +28,7 @@ import './snitch-dialog.scss';
 export interface SnitchDialogProps {
   title: string;
   className?: string;
-  onSave: (comment: string) => void | Promise<void>;
+  onSave: (comment: string) => void;
   saveDisabled?: boolean;
   onReset?: () => void;
   onClose: () => void;
@@ -56,7 +56,7 @@ export class SnitchDialog extends React.PureComponent<SnitchDialogProps, SnitchD
     const { onSave, onClose } = this.props;
     const { comment } = this.state;
 
-    void onSave(comment);
+    onSave(comment);
     if (onClose) onClose();
   };
 

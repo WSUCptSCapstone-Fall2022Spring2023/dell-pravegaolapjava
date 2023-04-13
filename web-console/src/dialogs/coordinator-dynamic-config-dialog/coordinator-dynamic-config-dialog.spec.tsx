@@ -16,9 +16,8 @@
  * limitations under the License.
  */
 
+import { shallow } from 'enzyme';
 import React from 'react';
-
-import { shallow } from '../../utils/shallow-renderer';
 
 import { CoordinatorDynamicConfigDialog } from './coordinator-dynamic-config-dialog';
 

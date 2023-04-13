@@ -16,15 +16,15 @@
  * limitations under the License.
  */
 
-import { CSV_SAMPLE, JSON_SAMPLE } from '../../utils/sampler.mock';
+import { CSV_SAMPLE } from '../../utils/sampler.mock';
 
-import type { IngestionSpec } from './ingestion-spec';
 import {
   adjustId,
   cleanSpec,
+  guessColumnTypeFromHeaderAndRows,
   guessColumnTypeFromInput,
-  guessColumnTypeFromSampleResponse,
-  guessSimpleInputFormat,
+  guessInputFormat,
+  IngestionSpec,
   updateSchemaWithSample,
   upgradeSpec,
 } from './ingestion-spec';
@@ -565,26 +565,26 @@ describe('ingestion-spec', () => {
     });
   });
 
-  describe('guessSimpleInputFormat', () => {
+  describe('guessInputFormat', () => {
     it('works for parquet', () => {
-      expect(guessSimpleInputFormat(['PAR1lol']).type).toEqual('parquet');
+      expect(guessInputFormat(['PAR1lol']).type).toEqual('parquet');
     });
 
     it('works for orc', () => {
-      expect(guessSimpleInputFormat(['ORClol']).type).toEqual('orc');
+      expect(guessInputFormat(['ORClol']).type).toEqual('orc');
     });
 
     it('works for AVRO', () => {
-      expect(guessSimpleInputFormat(['Obj\x01lol']).type).toEqual('avro_ocf');
-      expect(guessSimpleInputFormat(['Obj1lol']).type).toEqual('regex');
+      expect(guessInputFormat(['Obj\x01lol']).type).toEqual('avro_ocf');
+      expect(guessInputFormat(['Obj1lol']).type).toEqual('regex');
     });
 
     it('works for JSON (strict)', () => {
-      expect(guessSimpleInputFormat(['{"a":1}'])).toEqual({ type: 'json' });
+      expect(guessInputFormat(['{"a":1}'])).toEqual({ type: 'json' });
     });
 
     it('works for JSON (lax)', () => {
-      expect(guessSimpleInputFormat([`{hello:'world'}`])).toEqual({
+      expect(guessInputFormat([`{hello:'world'}`])).toEqual({
         type: 'json',
         featureSpec: {
           ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER: true,
@@ -602,14 +602,14 @@ describe('ingestion-spec', () => {
     });
 
     it('works for CSV (with header)', () => {
-      expect(guessSimpleInputFormat(['A,B,"X,1",Y'])).toEqual({
+      expect(guessInputFormat(['A,B,"X,1",Y'])).toEqual({
         type: 'csv',
         findColumnsFromHeader: true,
       });
     });
 
     it('works for CSV (no header)', () => {
-      expect(guessSimpleInputFormat(['"A,1","B,2",1,2'])).toEqual({
+      expect(guessInputFormat(['"A,1","B,2",1,2'])).toEqual({
         type: 'csv',
         findColumnsFromHeader: false,
         columns: ['column1', 'column2', 'column3', 'column4'],
@@ -617,14 +617,14 @@ describe('ingestion-spec', () => {
     });
 
     it('works for TSV (with header)', () => {
-      expect(guessSimpleInputFormat(['A\tB\tX\tY'])).toEqual({
+      expect(guessInputFormat(['A\tB\tX\tY'])).toEqual({
         type: 'tsv',
         findColumnsFromHeader: true,
       });
     });
 
     it('works for TSV (no header)', () => {
-      expect(guessSimpleInputFormat(['A\tB\t1\t2\t3\t4\t5\t6\t7\t8\t9'])).toEqual({
+      expect(guessInputFormat(['A\tB\t1\t2\t3\t4\t5\t6\t7\t8\t9'])).toEqual({
         type: 'tsv',
         findColumnsFromHeader: false,
         columns: [
@@ -644,7 +644,7 @@ describe('ingestion-spec', () => {
     });
 
     it('works for TSV with ;', () => {
-      const inputFormat = guessSimpleInputFormat(['A;B;X;Y']);
+      const inputFormat = guessInputFormat(['A;B;X;Y']);
       expect(inputFormat).toEqual({
         type: 'tsv',
         delimiter: ';',
@@ -653,7 +653,7 @@ describe('ingestion-spec', () => {
     });
 
     it('works for TSV with |', () => {
-      const inputFormat = guessSimpleInputFormat(['A|B|X|Y']);
+      const inputFormat = guessInputFormat(['A|B|X|Y']);
       expect(inputFormat).toEqual({
         type: 'tsv',
         delimiter: '|',
@@ -662,7 +662,7 @@ describe('ingestion-spec', () => {
     });
 
     it('works for regex', () => {
-      expect(guessSimpleInputFormat(['A/B/X/Y'])).toEqual({
+      expect(guessInputFormat(['A/B/X/Y'])).toEqual({
         type: 'regex',
         pattern: '([\\s\\S]*)',
         columns: ['line'],
@@ -745,19 +745,30 @@ describe('spec utils', () => {
     });
   });
 
-  describe('guessColumnTypeFromSampleResponse', () => {
+  describe('guessColumnTypeFromHeaderAndRows', () => {
+    it('works in empty dataset', () => {
+      expect(guessColumnTypeFromHeaderAndRows({ header: ['c0'], rows: [] }, 'c0', false)).toEqual(
+        'string',
+      );
+    });
+
     it('works for generic dataset', () => {
-      expect(guessColumnTypeFromSampleResponse(CSV_SAMPLE, 'user', false)).toEqual('string');
-      expect(guessColumnTypeFromSampleResponse(CSV_SAMPLE, 'followers', false)).toEqual('string');
-      expect(guessColumnTypeFromSampleResponse(CSV_SAMPLE, 'followers', true)).toEqual('long');
-      expect(guessColumnTypeFromSampleResponse(CSV_SAMPLE, 'spend', true)).toEqual('double');
-      expect(guessColumnTypeFromSampleResponse(CSV_SAMPLE, 'nums', false)).toEqual('string');
-      expect(guessColumnTypeFromSampleResponse(CSV_SAMPLE, 'nums', true)).toEqual('string');
+      expect(guessColumnTypeFromHeaderAndRows(CSV_SAMPLE, 'user', false)).toEqual('string');
+      expect(guessColumnTypeFromHeaderAndRows(CSV_SAMPLE, 'followers', false)).toEqual('string');
+      expect(guessColumnTypeFromHeaderAndRows(CSV_SAMPLE, 'followers', true)).toEqual('long');
+      expect(guessColumnTypeFromHeaderAndRows(CSV_SAMPLE, 'spend', true)).toEqual('double');
+      expect(guessColumnTypeFromHeaderAndRows(CSV_SAMPLE, 'nums', false)).toEqual('string');
+      expect(guessColumnTypeFromHeaderAndRows(CSV_SAMPLE, 'nums', true)).toEqual('string');
     });
   });
 
   it('updateSchemaWithSample', () => {
-    const withRollup = updateSchemaWithSample(ingestionSpec, JSON_SAMPLE, 'specific', true);
+    const withRollup = updateSchemaWithSample(
+      ingestionSpec,
+      { header: ['header'], rows: [] },
+      'specific',
+      true,
+    );
 
     expect(withRollup).toMatchInlineSnapshot(`
       Object {
@@ -766,10 +777,7 @@ describe('spec utils', () => {
             "dataSource": "wikipedia",
             "dimensionsSpec": Object {
               "dimensions": Array [
-                "user",
-                "id",
-                "tags",
-                "nums",
+                "header",
               ],
             },
             "granularitySpec": Object {
@@ -781,16 +789,6 @@ describe('spec utils', () => {
               Object {
                 "name": "count",
                 "type": "count",
-              },
-              Object {
-                "fieldName": "followers",
-                "name": "sum_followers",
-                "type": "longSum",
-              },
-              Object {
-                "fieldName": "spend",
-                "name": "sum_spend",
-                "type": "doubleSum",
               },
             ],
             "timestampSpec": Object {
@@ -822,7 +820,12 @@ describe('spec utils', () => {
       }
     `);
 
-    const noRollup = updateSchemaWithSample(ingestionSpec, JSON_SAMPLE, 'specific', false);
+    const noRollup = updateSchemaWithSample(
+      ingestionSpec,
+      { header: ['header'], rows: [] },
+      'specific',
+      false,
+    );
 
     expect(noRollup).toMatchInlineSnapshot(`
       Object {
@@ -831,18 +834,7 @@ describe('spec utils', () => {
             "dataSource": "wikipedia",
             "dimensionsSpec": Object {
               "dimensions": Array [
-                "user",
-                Object {
-                  "name": "followers",
-                  "type": "long",
-                },
-                Object {
-                  "name": "spend",
-                  "type": "double",
-                },
-                "id",
-                "tags",
-                "nums",
+                "header",
               ],
             },
             "granularitySpec": Object {
