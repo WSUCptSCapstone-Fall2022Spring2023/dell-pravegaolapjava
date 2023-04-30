@@ -10,6 +10,7 @@ Provide a one paragraph synposis of what your team accomplished this sprint. Don
 
 ## Unfinished Work
 - Continue modifying the pravega plugin dependencies in order to create a succesful release/build version of our project - we ran out of time and did not anticipate so many issues creating a build/release
+- Continue adding test cases - we ran out of time and did not anticipate as many dependency issues as we experienced
 - Create a multi threaded plugin via the utilization of multiple pravega readers - future work
 - Add druid command line interface support - future work
 - Incorporate the Pravega Schema Registry to support the reading of streams containing data types defined by the schema registry - future work
