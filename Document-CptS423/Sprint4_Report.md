@@ -75,17 +75,10 @@ Here are links to the issues that we completed in this sprint:
 - [PravegaSequenceNumber.java](https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/blob/pravega-connector/extensions-core/pravega-indexing-service/src/main/java/org/apache/druid/indexing/pravega/PravegaSequenceNumber.java)
  
 ## Retrospective Summary
-Here's what went well:
-  * Item 1
-  * Item 2
-  * Item x
+Here's what went well: Having multiple team meetings where we practiced presentations and worked on powerpoints together. This was beneficial for us because we all got good practice presenting the powerpoints we created which allowed us to give a good poster and client mvp presentation. Asking questions via slack to dell and druid community to get help when trying to create a build release of our project.
  
 Here's what we'd like to improve:
-   * Item 1
-   * Item 2
-   * Item x
+   * N/A
   
 Here are changes we plan to implement in the next sprint:
-   * Item 1
-   * Item 2
-   * Item x
+   * N/A
