@@ -4,7 +4,9 @@
  * Build a druid release version.
 
 ## Work Summary (Developer Facing)
-Provide a one paragraph synposis of what your team accomplished this sprint. Don't repeat the "What's New" list of features. Instead, help the instructor understand how you went about the work described there, any barriers you overcame, and any significant learnings for your team.
+Following the successful implementation of the StreamCut system, we have devised and executed numerous test cases to ascertain the efficacy of the implementation. The primary objective of these test cases is to evaluate the accuracy with which the present StreamCut instance can be compared to alternative StreamCut instances, and to verify the seamless integration of the function within the overarching system. Subsequently, we have incorporated these advancements into our final Driud release. 
+
+We confronted a series of errors while attempting to build the system, primarily stemming from version incompatibilities. To address the issue the team has tried several druid version in an attempt to achieve a successful biuld.
 
 ## Unfinished Work
 - Continue modifying the pravega plugin dependencies in order to create a succesful release/build version of our project - we ran out of time and did not anticipate so many issues creating a build/release
