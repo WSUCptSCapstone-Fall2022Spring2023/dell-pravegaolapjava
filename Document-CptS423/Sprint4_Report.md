@@ -16,19 +16,7 @@ Provide a one paragraph synposis of what your team accomplished this sprint. Don
 
 
 ## Completed Issues/User Stories
-[Here are links to the issues that we completed in this sprint:
-
- * URL of issue 1
- * URL of issue 2
- * URL of issue n
-
- Reminders (Remove this section when you save the file):
-  * Each issue should be assigned to a milestone
-  * Each completed issue should be assigned to a pull request
-  * Each completed pull request should include a link to a "Before and After" video
-  * All team members who contributed to the issue should be assigned to it on GitHub
-  * Each issue should be assigned story points using a label
-  * Story points contribution of each team member should be indicated in a comment](https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/135
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/135
 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/184
 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/185
 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/186
@@ -59,7 +47,12 @@ https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issue
 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/211
 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/212
 https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/213
-
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/214
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/215
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/216
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/217
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/218
+https://github.com/WSUCptSCapstone-Fall2022Spring2023/dell-pravegaolapjava/issues/219
  
  ## Incomplete Issues/User Stories
  Here are links to issues we worked on but did not complete in this sprint:
